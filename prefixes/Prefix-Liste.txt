@@ -1,0 +1,443 @@
+0T Costa Rica TI
+1A Sov. Mil. Order of Malta I
+1B Cyprus (Turkish Part) 1B
+1C Republic of Chechenia UA
+1K Kashmir 1K
+1P Principat de Seborga
+1S Spratly Island 9M
+1X Republic of Chechenia UA
+1Z Myanmar (Burma) XZ
+2A-2Z Great Britain G
+3A Monaco 3A
+3B6-3B7 Agalega & St Brandon Is. 3B
+3B8 Mauritius 3B
+3B9 Rodrigues 3B
+3C Equatorial Guinea 3C
+3D0 Fiji (Rotuma/Conway) 3D0
+3D2 Fiji 3D0
+3D2C Conway Reef 3D0
+3D2R Rotuma 3D0
+3D6 Swaziland 3D6
+3DA Swaziland 3D6
+3E-3F Panama HP
+3G Chile CE
+3H-3U China BY
+3V Tunisia 3V
+3W Vietnam XV
+3X Republic Guinea 3C
+3Y Bouvet LA
+3Z Poland SP
+4A-4C Mexico XE
+4D-4I Philippines DU
+4J-4K Aserbaidschan
+4L Georgia 4L
+4M Venezuela YV
+4O Montenegro 4O
+4P-4S Sri Lanka 4S
+4T Peru OA
+4U United Nations <Geneva>
+4U1SCO UNESCO Headquarter <Paris>
+4U1U United Nations <New York>
+4U1VIC United Nations <Wien>
+4U1WB United States
+4U1YK Syria <Damascus
+4U48 United Nations <New York>
+4U49 United Nations <New York>
+4U5U United Nations <New York>
+4V Haiti HH
+4W East Timor 4W
+4X-4Z Israel 4X
+5A Libya 5A
+5B Cyprus 5B
+5C-5G Morocco CN
+5H-5I Tanzania 5H
+5J-5K Colombia HK
+5L-5M Liberia EL
+5N-5O Nigeria 5N
+5P-5Q Denmark OZ
+5R-5S Madagascar 5R
+5T Mauritania 5T
+5U Niger 5U
+5V Togo 5V
+5W Western Samoa 5W
+5X Uganda 5X
+5Y-5Z Kenya 5Z
+6A-6B Egypt SU
+6C Syria YK
+6D-6J Mexico XE
+6K-6N South Korea HL
+6O Somalia T5
+6P-6S Pakistan AP
+6T-6U Sudan ST
+6V-6W Senegal 6W
+6X Madagascar 5R
+6Y Jamaica 6Y
+6Z Liberia EL
+7A-7I Indonesia YB
+7J-7N Japan JA
+7O Yemen 7O
+7P Lesotho 7P
+7Q Malawi 7Q
+7R Algeria 7X
+7S Sweden SM
+7T-7Y Algeria 7X
+7Z Saudi Arabia HZ
+8A-8I Indonesia YB
+8J-8N Japan JA
+8O Botswana A2
+8P Barbados 8P
+8Q Maldives Islands 8Q
+8R Guyana 8R
+8S Sweden SM
+8T-8Y India VU
+8Z Saudi Arabia HZ
+9A Croatia 9A
+9B-9D Iran EP
+9E-9F Ethiopia ET
+9G Ghana 9G
+9H Malta 9H
+9I-9J Zambia 9J
+9K Kuwait 9K
+9L Sierra Leone 9L
+9M Malaysia 9M
+9N Nepal 9N
+9O-9T Zaire 9Q
+9U Burundi 9U
+9V Singapore 9V
+9W Malaysia 9M
+9X Rwanda 9X
+9Y-9Z Trinidad & Tobago 9Y
+A1 Abu Ail A1
+A2 Botswana A2
+A3 Tonga A3
+A4 Oman A4
+A5 Bhutan A5
+A6 United Arab Emirates A6
+A7 Qatar A7
+A8 Liberia EL
+A9 Bahrain A9
+AA-AL United States (USA)
+AH0 Mariana Islands W0
+AH1 Baker & Howland Island W1
+AH2 Guam KH2
+AH3 Johnston Island W3
+AH4 Midway Island WA4
+AH5 Palmyra Island W5
+AH6 Hawaii KH6
+AH7 Kure Island KH6
+AH8 American Samoa W8
+AH9 Wake Island W9
+AL7 Alaska KL7
+AM Spain EA
+AM6 Balearic Islands EA
+AM8 Canary Islands EA
+AM9 Ceuta & Melilla EA
+AN Spain EA
+AN6 Balearic Islands EA
+AN8 Canary Islands EA
+AN9 Ceuta & Melilla EA
+AO Spain EA
+AO6 Balearic Islands EA
+AO8 Canary Islands EA
+AO9 Ceuta & Melilla EA
+AP-AS Pakistan AP
+AT-AW India VU
+AX Australia VK
+AY-AZ Argentina LU
+BØ-B9 China BY
+BA-BL China BY
+BM-BQ Taiwan BV
+BR-BT China BY
+BU-BX Taiwan BV
+BY-BZ China BY
+C0-C1 Prefix nicht zugewiesen
+C2 Republic of Nauru C2
+C3 Principat of Andorra C3
+C4 Cyprus 5B
+C5 The Gambia C5
+C6 Bahamas C6
+C8-C9 Mozambique C9
+CA-CE Chile CE
+CF-CK Canada VE
+CL-CM Cuba CO
+CN Morocco CN
+CO Cuba CO
+CP Bolivia CP
+CQ-CT Portugal CT
+CU Azores CT
+CV-CX Uruguay CX
+CY-CZ Canada VE
+DØ-D1 Prefix nicht zugewiesen
+D2-D3 Angola D2
+D4 Cape Verde D4
+D5 Liberia EL
+D6 Comoros D6
+D7-D9 South Korea HL
+DA-DR Germany DL
+DS-DT South Korea HL
+DU-DZ Philippines DU
+E2 Thailand HS
+E3 Eritrea E3
+E4 Palestine E4
+E51 Cook Island E5
+E7 Bosnia-Hercegovina E7
+EA-EH Spain EA
+EI-EJ Ireland EI
+EK Armenia EK
+EL Liberia EL
+EM-EO Ukraine UR
+EP-EQ Iran EP
+ER Moldova ER
+ES Estonia ES
+ET Ethiopia ET
+EU-EW Belarus EU
+EX Kirgizstan EX
+EY Tadzhikistan EY
+EZ Turkmenistan EZ
+F-FJ France F
+FK New Caledonia FK
+FL-FN France F
+FO French Polynesia FO
+FP-FX France F
+FY French Guiana FY
+FZ France F
+G Great Britain G
+H2 Cyprus 5B
+H3 Panama HP
+H4 Solomon Islands H4
+H5 Bophuthatswana ZS
+H6-H7 Nicaragua YN
+H8-H9 Panama HP
+HA Hungary HA
+HB0 Liechtenstein HB0
+HB Switzerland HB9
+HC-HD Ecuador HC
+HE Switzerland HB9
+HE0 Liechtenstein HB0
+HF Poland SP
+HG Hungary HA
+HH Haiti HH
+HI Dominican Republic HI
+HJ-HK Colombia HK
+HL South Korea HL
+HM North Korea HM
+HN Iraq YI
+HO-HP Panama HP
+HQ-HR Honduras HR
+HS Thailand HS
+HT Nicaragua YN
+HU EL Salvador YS
+HV Vatican City HV
+HW-HY France F
+HZ Saudi Arabia HZ
+I Italy I
+IS Sardinia I
+IT Sicily I
+J2 Djibouti J2
+J3 Grenada J3
+J4 Greece SV
+J5 Guinea-Bissau 3C
+J6 Saint Lucia J6
+J7 Dominica J7
+J8 Saint Vincent J8
+JA-JS Japan JA
+JT-JV Mongolia JT
+JW Svalbard LA
+JX Jan Mayen LA
+JY Jordan JY
+JZ Indonesia YB
+K United States (USA)
+KC6 Belau W6
+KG4 Guantanamo Bay KG4
+KG6 Guam KH2
+KH0 Mariana Islands W0
+KH1 Baker & Howland Island W1
+KH2 Guam KH2
+KH3 Johnston Island W3
+KH4 Midway Island WA4
+KH5 Palmyra Island W5
+KH6 Hawaii KH6
+KH7 Kure Island KH6
+KH8 American Samoa W8
+KH9 Wake Island W9
+KL7-KL8 Alaska KL7
+KP1 Navassa Island W1
+KP2 Virgin Islands NP2
+KP3-KP4 Puerto Rico KP4
+KP5 Desecheo Island W5
+KV4 USA (Ex. Virgin Islands) WA4
+LA-LN Norway LA
+LO-LW Argentina LU
+LX Luxembourg LX
+LY Lithuania LY
+LZ Bulgaria LZ
+M Great Britain G
+N United States (USA)
+NH0 Mariana Islands W0
+NH1 Baker & Howland Island W1
+NH2 Guam KH2
+NH3 Johnston Island W3
+NH4 Midway Island WA4
+NH5 Palmyra Island W5
+NH6 Hawaii KH6
+NH7 Kure Island KH6
+NH8 American Samoa W8
+NH9 Wake Island W9
+NL7- NL8 Alaska KL7
+NP1 Navassa Island W1
+NP2 Virgin Islands NP2
+NP3-NP4 Puerto Rico KP4
+NP5 Desecheo Island W5
+OA-OC Peru OA
+OD Lebanon OD
+OE Austria OE
+OF-OJ Finland OH
+OK-OL Czech Republic OK
+OM Slovakia OM
+ON-OT Belgium ON
+OU-OW Denmark OZ
+OX Greenland OZ
+OY Faroe Islands OY
+OZ Denmark OZ
+P2 Papua New Guinea P2
+P3 Cyprus 5B
+P4 Aruba P4
+P5-P9 North Korea HM
+PA-PI Netherlands PA
+PJ Netherlands Antilles PJ
+PJ Sint Maarten PJ
+PK-PO Indonesia YB
+PP-PY Brazil PY
+PZ Surinam PZ
+R (1-9 & A-Z) Russia UA
+S0 Western Sahara
+S2-S3 Bangladesh S2
+S4 Ciskei ZS
+S5 Slovenia S5
+S6 Singapore 9V
+S7 Seychelles S7
+S8 Transkei ZS
+S9 Sao Tome & Principe S9
+SA-SM Sweden SM
+SN-SR Poland SP
+SS Egypt SU
+ST Sudan ST
+SU Egypt SU
+SV-SZ Greece SV
+T0 Principat de Seborga
+T2 Tuvalu T2
+T3 Kiribati T3
+T4 Cuba CO
+T5 Somalia T5
+T6 Afghanistan YA
+T7 San Marino T7
+T8 Belau W6
+T9 Bosnia-Hercegovina Jetzt E7
+TA-TC Turkey TA
+TD Guatemala TG
+TE Costa Rica TI
+TF Iceland TF
+TG Guatemala TG
+TH France F
+TI Costa Rica TI
+TJ Cameroon TJ
+TK Corsica F
+TL Central African Republic TL
+TM France F
+TN Congo TN
+TO-TQ France F
+TR Gabon TR
+TS Tunisia 3V
+TT Chad TT
+TU Ivory Coast TU
+TV-TX France F
+TY Benin TY
+TZ Mali TZ
+UA-UI Russia UA
+UJ-UM Uzbekistan UK
+UN-UQ Kasachstan UN
+UR-UZ Ukraine UR
+V2 Antigua V2
+V3 Belize V3
+V4 Saint Kitts V4
+V5 Namibia V5
+V6 Micronesia V6
+V7 Marshall Islands V7
+V8 Brunei V8
+VA-VG Canada VE
+VH-VN Australia VK
+VO Canada VE
+VP2E Anguilla VP2
+VP2M Montserrat VP2
+VP2V British Virgin Islands VP2
+VP3 Anguilla Leeward-Island VP3
+VP5 Turks & Caicos Islands VP5
+VP6D Ducie Island VP6
+VP8 Falkland VP8
+VP9 Bermuda VP9
+VQ9 Chagos VQ9
+VR2 Hong Kong VS6
+VR6 Pitcairn VR6
+VS6 Hong Kong VS6
+VT-VW India VU
+VX-VY Canada VE
+VZ Australia VK
+W United States (USA)
+WH0 Mariana Islands W0
+WH1 Baker & Howland Island W1
+WH2 Guam KH2
+WH3 Johnston Island W3
+WH4 Midway Island WA4
+WH5 Palmyra Island W5
+WH6 Hawaii KH6
+WH7 Kure Island KH6
+WH8 American Samoa W8
+WH9 Wake Island W9
+WL7-WL8 Alaska KL7
+WP1 Navassa Island W1
+WP2 Virgin Islands NP2
+WP3-WP4 Puerto Rico KP4
+WP5 Desecheo Island W5
+XA-XI Mexico XE
+XJ-XO Canada VE
+XP Denmark OZ
+XQ-XR Chile CE
+XT Burkina Faso XT
+XU Cambodia XU
+XV Vietnam XV
+XW Laos XW
+XX Portugal CT
+XX9 Macao XX9
+XY-XZ Myanmar (Burma) XZ
+YA Afghanistan YA
+YB-YH Indonesia YB
+YI Iraq YI
+YJ Vanuatu YJ
+YK Syria YK
+YL Latvia YL
+YM Turkey TA
+YN Nicaragua YN
+YO-YR Romania YO
+YS EL Salvador YS
+YT, YU, YZ Serbien YU
+YV-YY Venezuela YV
+YZ Yugoslavia YU
+Z2 Zimbabwe Z2
+Z3 Republic of Macedonia Z3
+(Z6) (Kosovo)
+Z8 Süd Sudan
+ZA Albania ZA
+ZB Gibraltar ZB
+ZC4 Cyprus ZC4
+ZD7 Saint Helena ZD7
+ZD8 Ascension Island ZD8
+ZD9 Tristan de Cunha ZD9
+ZF Cayman Islands ZF
+ZG Gibraltar ZB
+ZK1 Cook Island ZK1
+ZK2 Niue ZK2
+ZK3 Tokelau ZK3
+ZK-ZM New Zealand ZL
+ZP Paraguay ZP
+ZR-ZU South Africa ZS
+ZV-ZZ Brazil PY
