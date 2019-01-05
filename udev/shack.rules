@@ -1,0 +1,4 @@
+# 1a86:7523 QinHeng Electronics HL-340 USB-Serial adapter
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="ttyUSBICOM"
+# 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ttyUSBPTT"
