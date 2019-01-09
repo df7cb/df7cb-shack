@@ -1,0 +1,143 @@
+http://www.transmission1.net/viewtopic.php?t=16632
+
+Re: Icom 706 extended tx
+Post by Ashtec » 01 Jan 2011, 20:57
+
+ICOM-706 MODIFICATIONS
+
+SUMMARY
+-------
+
+MODIFICATION 1: Enables extended transmit from 1.6 to 54 MHz inclusive.
+MODIFICATION 2: Enables extended receive from .05 to about 165 MHz inclusive.
+
+CAUTION
+-------
+
+Improperly performed modifications can severely damage your radio.
+Use extreme caution. Proceed at your own risk.
+
+Transmitting on frequencies other than those assigned to the amateur
+radio service may be illegal.
+
+TOOLS RECOMMENDED
+-----------------
+
+1) Small philips-head screwdriver
+2) Magnifying glass
+3) Small wattage (15 watt) soldering iron with a small tip
+4) Long-nosed pliers
+5) Paper clip
+6) Tweezers
+
+
+MODIFICATION 1
+--------------
+
+Result of modification: The IC-706 transmits only on the ham bands.
+This modification allows for transmit on any frequency from 1.6 to
+54 MHz. The radio will also continue to transmit on 2 meters (144
+to 148 MHz in the United States) at 10 watts output. This modification
+will NOT allow for transmit on the AM or FM broadcast bands. The radio
+will appear to transmit on most frequencies above 54 MHz, but the power
+output will be a milliwatt or less. The highest power output will be
+100 watts from 1.6 to 54 MHz (SSB, FM, CW; 40 watts AM) and 10 watts
+on 2 meters. (SSB, FM, CW; 4 watts AM) Note: This modification
+requires that you reset the CPU. All memory information will be
+erased.
+
+1) Disconnect the power cable. Open the TOP cover of the radio.
+You will need to remove only 5 screws: three on the top of the
+radio and one screw on each side. Pull up the speaker carefully and
+set it aside. Look at the radio from the front; the speaker area
+should be in front.
+
+2) Locate the rectangular, silver 9 MHz SSB filter. This is clearly
+marked on the top of it. Now look to the right. Note the "D 108"
+marking. Below this marking, there are three tiny black diodes.
+There are two diodes, followed by two blank sockets, followed
+by another diode.
+
+3) The second diode from the left (the middle diode) is diode D-59.
+This diode needs to be removed. There are many ways to remove this
+diode. The easiest way is to crush it with long-nosed pliers. Another
+way is to use a low-wattage soldering iron and tweezers and carefully
+heat the diode, then pull with the tweezers. Be extremely careful not
+to apply too much heat.
+
+4) Re-assemble the radio. Press and hold the UP and DOWN buttons on the
+right side of the front panel, and while holding them down, turn on the
+power. This resets the CPU.
+
+
+MODIFICATION 2
+--------------
+
+Result of modification: The bandpass filters on the IC-706 are
+improperly wired. As a result, the radio does not receive any
+stations above 129 MHz, except in the 2-meter band. This modification
+allows for reception up to about 165 MHz.
+
+(Note: If your radio receives the FM broadcast band (88-108 MHz), the aircraft band
+(108-136 MHz), 2 meters, and stations above 148 MHz, it is possible that the modification
+has already been performed by Icom; you may have a later model.)
+
+1) Open the TOP cover of the radio. You will need to remove only
+5 screws: three on the back of the radio and one screw on each side.
+Pull up the speaker carefully and set it aside. Look at the radio
+from the front; the speaker area should be in front.
+
+2) Locate the rectangular, silver 9 MHz SSB filter. This is clearly
+marked on the top of it. Now move your eyes toward the back of the
+radio until you notice a long white connector with several colored
+wires on it.
+
+3) The 4th wire from the left, a yellow wire, needs to be removed
+from the connector. You can cut this wire carefully if you wish.
+Or, another alternaive is to remove it from the connector. Stick a paper clip or
+perhaps a pin into the side of the connector under the yellow wire.
+Pull the wire with tweezers and remove it. There are two yellow wires;
+be sure to remove the 4th wire from the left, not the other one.
+
+4) Open the BOTTOM of the radio, removing similar screws as you did
+when you removed the TOP.
+
+5) Look at the PC board just behind the MENU button. You will notice
+a jack marked "J8" with a grey cable coming out of it.
+
+6) To the left of jack J8, you will see five tiny transistors.
+Look at the middle transistor. Follow the light green circuit board
+trace from the middle transistor to a tiny hole just to the left of J9.
+
+7) The yellow wire from the top of the radio needs to be connected
+to this transistor. The easiest way is to solder a small insulated
+wire to the yellow wire you just removed, run this new wire underneath
+the radio to the hole you found in #6 above, put the wire into the hole, and
+solder the wire into the hole with a low-wattage soldering iron.
+Use caution not to damage the grey cable or to apply too much heat.
+This could damage the PCB and seriously affect the radio.
+
+If you perform only steps 1 through 3, you will be able to hear stations
+above 148 MHz, but you will not be able to hear FM broadcast stations
+on the 88-108 MHz band.
+
+RECEPTION SUGGESTIONS
+---------------------
+
+1) You need to use wide FM to receive FM broadcast signals on the
+88-108 MHz band, or TV sound signals between 59 and 87 MHz. To
+receive wide FM, press the MODE button until "FM" or "FM-T" appears
+on the display, then press and hold the MODE button for two seconds.
+"WFM" should now appear on the display, and you should be able to
+hear the FM broadcast stations. Reception quality is quite good
+if you use a decent external speaker.
+
+2) Aircraft (118-136 MHz) uses AM. You will need to set the radio
+to AM to receive aircraft.
+
+3) The sensitivity of the radio diminishes rapidly after about 165 MHz.
+NOAA weather stations (162.40 to 162.55) are clearly audible, however.
+
+4) If you find the FM broadcast signals overload the aircraft portion
+of the bands, disable the preampifier by pressing PREAMP (the green
+light should go out.)
