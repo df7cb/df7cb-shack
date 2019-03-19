@@ -1,0 +1,24 @@
+http://vss.pl/mods.dk/mods.php3-radio=icom&model=ic-706&selectid=1864.htm#1864
+
+The (+) side of C is connected to the 13.8VDC pin. The (-) side connected to
+TSTR and TKEY which are connected together. Resistor R is in parallel with C.
+Below is a diagram of the AH4 connector on the back of the IC706 where the <
+indicates the pointy end of the connector (Pin 1 = TKEY).
+
+	< TKEY  TSTR  13.8V  GND ]
+	   |_____|       |
+	      |    R     |
+	      +--\/\/\/--+
+	      |      +   |
+	      +----)(----+
+	           C
+The values I use are C=1000uF 16WV R=92K Ohms 1/8 Watt which result in 15
+seconds of tune time. As you can see, these are tied in parallel. If you want
+to use a physically smaller capacitor such as 440 uF, you can adjust the time
+by raising R.
+
+https://twitter.com/df7cb/status/1107750894098137093
+
+C = 470µF
+R = 180kΩ
+Connector from old hard disk
