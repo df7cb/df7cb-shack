@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="11.0.2" class="java.beans.XMLDecoder">
+ <object class="com.pktec.wasa.gui.WasaData" id="WasaData0">
+  <void id="WasaData$AntennaList0" property="antennaList">
+   <void property="antennas">
+    <void index="0">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna0">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>3.65</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>2.0300751879699246</double>
+      </void>
+      <void id="StringArray0" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray0"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object class="java.lang.Enum" id="Transmitter$TransmitScheme0" method="valueOf">
+         <class>com.pktec.wasa.gui.Transmitter$TransmitScheme</class>
+         <string>CW</string>
+        </object>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="1">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna1">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>7.05</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>2.8217536181732394</double>
+      </void>
+      <void id="StringArray1" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray1"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme0"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="2">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna2">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>14.175</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>3.175568912889862</double>
+      </void>
+      <void id="StringArray2" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray2"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme0"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="3">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna3">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>28.85</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>2.5939849624060147</double>
+      </void>
+      <void id="StringArray3" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray3"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme0"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="4">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna4">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>6C5CF218691255C67159181724E92AFD</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG213</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>144.0</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>3.2939360780445583</double>
+      </void>
+      <void id="StringArray4" property="makerModel">
+       <void index="0">
+        <string>DiaMond</string>
+       </void>
+       <void index="1">
+        <string>X-200</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray4"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>10.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>0.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>50.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object class="java.lang.Enum" id="Transmitter$TransmitScheme1" method="valueOf">
+         <class>com.pktec.wasa.gui.Transmitter$TransmitScheme</class>
+         <string>FM</string>
+        </object>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="5">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna5">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>6C5CF218691255C67159181724E92AFD</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG213</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>430.0</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>3.3674614948936674</double>
+      </void>
+      <void id="StringArray5" property="makerModel">
+       <void index="0">
+        <string>DiaMond</string>
+       </void>
+       <void index="1">
+        <string>X-200</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray5"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>10.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>0.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>50.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme1"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="6">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna6">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>10.125</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>3.3834586466165413</double>
+      </void>
+      <void id="StringArray6" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray6"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme0"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="7">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna7">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>18.118</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>2.819548872180451</double>
+      </void>
+      <void id="StringArray7" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray7"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme0"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+    <void index="8">
+     <object class="com.pktec.wasa.gui.Antenna" id="Antenna8">
+      <void property="active">
+       <boolean>true</boolean>
+      </void>
+      <void property="cable">
+       <void property="cableDigest">
+        <string>E648910F5D83C854F62587E010E4FD9D</string>
+       </void>
+       <void property="length">
+        <double>15.0</double>
+       </void>
+       <void property="modelName">
+        <string>RG58</string>
+       </void>
+      </void>
+      <void property="frequency">
+       <double>24.94</double>
+      </void>
+      <void property="guardDistancePers">
+       <double>2.481203007518797</double>
+      </void>
+      <void id="StringArray8" property="makerModel">
+       <void index="0">
+        <string>Fritzel</string>
+       </void>
+       <void index="1">
+        <string>FD4</string>
+       </void>
+      </void>
+      <void property="makerModel">
+       <object idref="StringArray8"/>
+      </void>
+      <void property="orientation">
+       <void property="height">
+        <double>6.0</double>
+       </void>
+       <void property="horizontalAngleMax">
+        <double>90.0</double>
+       </void>
+       <void property="horizontalAngleMin">
+        <double>90.0</double>
+       </void>
+       <void property="polarizationAngle">
+        <double>0.0</double>
+       </void>
+      </void>
+      <void property="transmitter">
+       <void property="power">
+        <double>100.0</double>
+       </void>
+       <void property="transmitScheme">
+        <object idref="Transmitter$TransmitScheme0"/>
+       </void>
+       <void property="txCycle">
+        <int>6</int>
+       </void>
+      </void>
+     </object>
+    </void>
+   </void>
+  </void>
+  <void property="formDigest">
+   <string>44DC7E8D9B671CBA9D17BF51FDBF9295</string>
+  </void>
+  <void property="userData">
+   <void property="cityAddress">
+    <string>Krefeld</string>
+   </void>
+   <void property="declarationNo">
+    <string>0</string>
+   </void>
+   <void property="email">
+    <string>cb@df7cb.de</string>
+   </void>
+   <void property="faxNo">
+    <string></string>
+   </void>
+   <void property="firstName">
+    <string>Christoph</string>
+   </void>
+   <void property="geoPosition">
+    <object class="com.pktec.wasa.gui.GeoPosition">
+     <void property="latitude">
+      <double>51.372531</double>
+     </void>
+     <void property="longitude">
+      <double>6.595524</double>
+     </void>
+    </object>
+   </void>
+   <void property="lastDeclarationDate">
+    <string></string>
+   </void>
+   <void property="lastName">
+    <string>Berg</string>
+   </void>
+   <void property="locCity">
+    <string>Krefeld</string>
+   </void>
+   <void property="locStreet">
+    <string>Rather Str. 76a</string>
+   </void>
+   <void property="locZip">
+    <string>47802</string>
+   </void>
+   <void property="phoneNo">
+    <string>0171 5531813</string>
+   </void>
+   <void property="stationCode">
+    <string>DF7CB</string>
+   </void>
+   <void property="streetAddress">
+    <string>Rather Str. 76a</string>
+   </void>
+   <void property="userCallCode">
+    <string>DF7CB</string>
+   </void>
+   <void property="userClass">
+    <string>A</string>
+   </void>
+   <void property="userDigest">
+    <string>8840FDA00FE5DE0A0EE128AF941A9E6B</string>
+   </void>
+   <void property="zipAddress">
+    <string>47802</string>
+   </void>
+  </void>
+ </object>
+</java>
