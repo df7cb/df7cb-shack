@@ -1,0 +1,10 @@
+[Unit]
+Description=Digispark keyer daemon
+
+[Service]
+ExecStart=/bin/sh -c "exec /home/myon/shack/cwdaemon/cwdaemon /dev/ttyACM*"
+Restart=on-failure
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=default.target

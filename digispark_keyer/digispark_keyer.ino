@@ -1,9 +1,38 @@
+/*
+ * CW keyer for Digispark
+ *
+ * Works as standalone CW keyer, speed is adjusted via a potentiometer.
+ * Listens on USB for raw dashes and dots ('-', '.', ' ').
+ * cwdaemon compatible frontend driver is
+ * https://github.com/df7cb/df7cb-shack/tree/master/cwdaemon
+ *
+ * Copyright (C) 2019 Christoph Berg DF7CB <cb@df7cb.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the “Software”), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include <DigiCDC.h>
 
-#define DIT 0
-#define DAH 2
-#define KEY 1 // P1 with on-board LED
-#define SPEED 0 // P5
+#define DIT 0 // P0 dit input from paddle
+#define DAH 2 // P2 dah input from paddle
+#define KEY 1 // P1 output to rig (also on-board LED)
+#define SPEED 0 // P5 analog input from 10k potentiometer as voltage divider; extra 27k series resistor to restrict input to >> 2.5V (otherwise digispark resets)
 
 #define DAH_WEIGHT 2.5
 #define PAUSE_WEIGHT 2.0
@@ -73,7 +102,7 @@ void loop() {
 
     switch (state) {
 
-      case 0: /* start */
+      case 0: /* start, clear send queue */
         digitalWrite(KEY, LOW);
         *send = '\0';
         send_ptr = send;

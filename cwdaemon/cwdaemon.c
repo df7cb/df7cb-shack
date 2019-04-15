@@ -1,4 +1,27 @@
 /*
+ * CW keyer frontend for https://github.com/df7cb/df7cb-shack/tree/master/digispark_keyer
+ * Compatible with cwdaemon
+ *
+ * Copyright (C) 2019 Christoph Berg DF7CB <cb@df7cb.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the “Software”), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  * Inspired from: https://gist.github.com/miekg/a61d55a8ec6560ad6c4a2747b21e6128
  * udpserver.c - A simple UDP echo server
  */
@@ -64,6 +87,7 @@ static char *morse_char(char c) {
     case '-': return "-....- ";
     case '.': return ".-.-.- ";
     case '+': return ".-.-. ";
+    case '?': return "..--.. ";
     case '*': return "*"; /* reset queue */
     default: return NULL;
   }
