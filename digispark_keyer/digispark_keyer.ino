@@ -3,6 +3,7 @@
  *
  * Works as standalone CW keyer, speed is adjusted via a potentiometer.
  * Listens on USB for raw dashes and dots ('-', '.', ' ').
+ * Board: "Digispark (Default - 16.5mhz)"
  * cwdaemon compatible frontend driver is
  * https://github.com/df7cb/df7cb-shack/tree/master/cwdaemon
  *
@@ -39,9 +40,8 @@
 #define STEP 2 // delay() granularity
 
 char send[100];
-char *send_ptr;
 int duration;
-volatile int state = 0;
+int state;
 
 void setup() {
   SerialUSB.begin();
@@ -49,7 +49,7 @@ void setup() {
   pinMode(DAH, INPUT_PULLUP);
   pinMode(KEY, OUTPUT);
   char *send = '\0';
-  send_ptr = send;
+  state = 0;
 }
 
 static inline bool dit_press() {
@@ -70,11 +70,12 @@ static void get_usb()
     char input = SerialUSB.read();
     if (input == '*') { /* reset queue */
       *send = '\0';
-      send_ptr = send;
-      break;
+    } else { /* add char to send queue */
+      int i;
+      for (i = 0; send[i]; i++); /* go to end of queue */
+      send[i] = input;
+      send[i+1] = '\0';
     }
-    *send_ptr = input;
-    send_ptr++;
   }
 }
 
@@ -105,7 +106,6 @@ void loop() {
       case 0: /* start, clear send queue */
         digitalWrite(KEY, LOW);
         *send = '\0';
-        send_ptr = send;
         state = 100; /* go to main loop */
         break;
 
@@ -152,8 +152,8 @@ void loop() {
         break;
 
       case 10: /* USB loop */
-        if (!*send) {
-          state = 11;
+        if (!*send) { /* send queue empty, go to start */
+          state = 0;
           break;
         }
 
@@ -174,16 +174,18 @@ void loop() {
           /* ignore all other symbols */
         }
 
-        for (int i = 0; send[i+1]; i++) {
+        int i;
+        for (i = 0; send[i+1]; i++) {
           send[i] = send[i+1]; /* shift array left */
         }
-        send_ptr--;
-        *send_ptr = '\0';
+        send[i] = '\0';
 
         break;
 
       case 11: /* cancel USB operation */
         digitalWrite(KEY, LOW);
+        /* flush USB input queue */
+        get_usb();
         while (dit_press() || dah_press()) {
           wait(STEP);
           get_usb();
