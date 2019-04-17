@@ -39,7 +39,9 @@
 #define PAUSE_WEIGHT 2.0
 #define STEP 2 // delay() granularity
 
-char send[100];
+#define BUFSIZE 100
+
+char send[BUFSIZE];
 int duration;
 int state;
 
@@ -48,7 +50,7 @@ void setup() {
   pinMode(DIT, INPUT_PULLUP);
   pinMode(DAH, INPUT_PULLUP);
   pinMode(KEY, OUTPUT);
-  char *send = '\0';
+  send[0] = '\0';
   state = 0;
 }
 
@@ -69,10 +71,10 @@ static void get_usb()
   while (SerialUSB.available()) {
     char input = SerialUSB.read();
     if (input == '*') { /* reset queue */
-      *send = '\0';
+      send[0] = '\0';
     } else { /* add char to send queue */
       int i;
-      for (i = 0; send[i]; i++); /* go to end of queue */
+      for (i = 0; send[i] && i < BUFSIZE; i++); /* go to end of queue */
       send[i] = input;
       send[i+1] = '\0';
     }
@@ -105,7 +107,7 @@ void loop() {
 
       case 0: /* start, clear send queue */
         digitalWrite(KEY, LOW);
-        *send = '\0';
+        send[0] = '\0';
         state = 100; /* go to main loop */
         break;
 
@@ -116,7 +118,7 @@ void loop() {
           state = 1;
         else if (dah_press())
           state = 2;
-        if (*send)
+        if (send[0] != '\0')
           state = 10;
 
         break;
@@ -152,12 +154,13 @@ void loop() {
         break;
 
       case 10: /* USB loop */
-        if (!*send) { /* send queue empty, go to start */
+        get_usb();
+        if (send[0] == '\0') { /* send queue empty, go to start */
           state = 0;
           break;
         }
 
-        switch (*send) {
+        switch (send[0]) {
           case '.':
             send_symbol(HIGH, duration, 11, 11);
             if (state != 11)
@@ -169,14 +172,16 @@ void loop() {
               send_symbol(LOW, duration, 11, 11);
             break;
           case ' ':
+          case '\n':
             send_symbol(LOW, PAUSE_WEIGHT * duration, 11, 11);
             break;
           /* ignore all other symbols */
         }
 
+        get_usb();
         int i;
-        for (i = 0; send[i+1]; i++) {
-          send[i] = send[i+1]; /* shift array left */
+        for (i = 0; send[0] && send[i+1]; i++) {
+          send[i] = send[i+1]; /* shift array left unless queue was reset */
         }
         send[i] = '\0';
 
