@@ -113,6 +113,8 @@ int main(int argc, char **argv)
 	int optval;		/* flag value for setsockopt */
 	int n;			/* message byte size */
 
+	setlinebuf(stdout);
+
 	if (argc != 2) {
 		printf("Syntax: cwdaemon /dev/ttyACM0\n");
 		exit(1);
