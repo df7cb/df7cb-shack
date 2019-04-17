@@ -39,12 +39,14 @@
 #include <fcntl.h>
 #include <ctype.h>
 
+#define DEBUG 0
 #define BUFSIZE 1024
 #define PORTNO 6789
-#define DELAY 100000 /* sleep 100ms between signals */
+#define DELAY 5000 /* sleep 5ms between signals. keep short so using the paddles to abort sending works */
 
 static char *morse_char(char c) {
   switch (toupper(c)) {
+    case '\n': /* fallthrough to space */
     case ' ': return " ";
     case 'A': return ".- ";
     case 'B': return "-... ";
@@ -157,16 +159,33 @@ int main(int argc, char **argv)
 		n = recv(sockfd, buf, BUFSIZE, 0);
 		if (n < 0)
 			error("ERROR in recvfrom");
+		if (n == 0) /* skip empty packets */
+			continue;
 
-		if (*buf == '\033') {
-			write(1, "ESC ", sizeof("ESC "));
-			write(1, buf + 1, n - 1);
-			write(1, "\n", sizeof("\n"));
+		if (buf[0] == '\033') {
+			switch (buf[1]) {
+				case '4': /* abort current message */
+					if (DEBUG) printf("Abort\n");
+					if (write(ttyfd, "*", 1) != 1)
+						error("write");
+					break;
+				default:
+					buf[n] = '\0';
+					printf("Unknown ESC message: %s\n", buf + 1);
+					break;
+			}
 			continue;
 		}
 
+		buf[n-1] = '\0';
+		if (n > 1 && buf[n-2] == '\n')
+			buf[n-2] = '\0';
+		if (DEBUG) printf("Sending '%s'\n", buf);
+
 		for (int i = 0; i < n; i++) {
-			write(1, buf + i, 1);
+			if (buf[i] == '\0')
+				continue;
+			//write(1, buf + i, 1);
 			char *code = morse_char(buf[i]);
 			if (code) {
 				for (int j = 0; code[j]; j++) {
@@ -175,9 +194,10 @@ int main(int argc, char **argv)
 						error("write");
 					usleep(DELAY);
 				}
-			} else
-				write(1, "?", 1);
+			} else {
+				printf("Unknown symbol, cannot send: '%c'\n", buf[i]);
+			}
 		}
-		write(1, "\n", 1);
+		if (DEBUG) printf("Done with '%s'\n", buf);
 	}
 }
