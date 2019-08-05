@@ -1,0 +1,2 @@
+# LimeSDR
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="6108", MODE="0660", GROUP="plugdev"
