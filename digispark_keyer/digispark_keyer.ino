@@ -3,6 +3,7 @@
  *
  * Works as standalone CW keyer, speed is adjusted via a potentiometer.
  * Listens on USB for raw dashes and dots ('-', '.', ' ').
+ * '*' clears send queue.
  * Board: "Digispark (Default - 16.5mhz)"
  * cwdaemon compatible frontend driver is
  * https://github.com/df7cb/df7cb-shack/tree/master/cwdaemon
@@ -92,7 +93,11 @@ static void get_usb()
 }
 
 static inline void wait(int duration) {
-  SerialUSB.delay(duration);
+  static int lastmillis = 0;
+  int sleepmillis = lastmillis + duration - millis();
+  if (sleepmillis > 0)
+    SerialUSB.delay(sleepmillis);
+  lastmillis = millis();
 }
 
 static void send_symbol(int level, int duration, int dit_state, int dah_state)
@@ -140,7 +145,7 @@ void loop() {
 
       case 2: /* dah */
         state = 4; /* go to pause after dah */
-        send_symbol(HIGH, 3*duration, 5, 0); /* go to pause before dit */
+        send_symbol(HIGH, DAH_WEIGHT * duration, 5, 0); /* go to pause before dit */
         break;
 
       case 3: /* pause after dit */
