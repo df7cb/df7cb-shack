@@ -62,8 +62,18 @@ static inline bool dah_press() {
   return !digitalRead(DAH);
 }
 
+/*
+ * P5 analog input range is 0..1023, but if input level is below 2.5V, the
+ * digispark reboots. To avoid that, I put a 27k resistor in series with the
+ * 10k potentiometer, so the actual range in practice is around 746..1023.
+ * max speed: 1023 -> 16
+ */
+
+#define MAX_DELAY 16
+#define FACTOR 12
+
 static inline int get_duration() {
-  return (1120 - analogRead(SPEED)) / 8;
+  return (1023 + FACTOR * MAX_DELAY - analogRead(SPEED)) / FACTOR;
 }
 
 static void get_usb()
