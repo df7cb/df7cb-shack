@@ -72,7 +72,7 @@ static char *morse_char(char c) {
     case 'V': return "...- ";
     case 'W': return ".-- ";
     case 'X': return "-..- ";
-    case 'Y': return "--.- ";
+    case 'Y': return "-.-- ";
     case 'Z': return "--.. ";
     case '0': return "----- ";
     case '1': return ".---- ";
