@@ -70,7 +70,7 @@ static inline bool dah_press() {
  * max speed: 1023 -> 16
  */
 
-#define MAX_DELAY 16
+#define MAX_DELAY 32
 #define FACTOR 12
 
 static inline int get_duration() {
