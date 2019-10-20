@@ -84,12 +84,15 @@ static char *morse_char(char c) {
     case '7': return "--... ";
     case '8': return "---.. ";
     case '9': return "----. ";
-    case '/': return "-..-. ";
-    case '=': return "-...- ";
+    case '+': return ".-.-. ";
+    case ',': return "--..-- ";
     case '-': return "-....- ";
     case '.': return ".-.-.- ";
-    case '+': return ".-.-. ";
+    case '/': return "-..-. ";
+    case ';': return "---... ";
+    case '=': return "-...- ";
     case '?': return "..--.. ";
+    case '@': return ".--.-. ";
     case '*': return "*"; /* reset queue */
     default: return NULL;
   }
