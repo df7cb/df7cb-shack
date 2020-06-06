@@ -8,7 +8,7 @@
  * cwdaemon compatible frontend driver is
  * https://github.com/df7cb/df7cb-shack/tree/master/cwdaemon
  *
- * Copyright (C) 2019 Christoph Berg DF7CB <cb@df7cb.de>
+ * Copyright (C) 2019-2020 Christoph Berg DF7CB <cb@df7cb.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the “Software”), to deal
@@ -72,10 +72,7 @@ static inline bool dah_press() {
 
 #define MAX_DELAY 32
 #define FACTOR 12
-
-static inline int get_duration() {
-  return (1023 + FACTOR * MAX_DELAY - analogRead(SPEED)) / FACTOR;
-}
+#define VALUE_THRESHOLD 5
 
 static void get_usb()
 {
@@ -104,6 +101,8 @@ static void send_symbol(int level, int duration, int dit_state, int dah_state)
 {
   int i;
   digitalWrite(KEY, level);
+  //SerialUSB.write(level);
+
   for (i = 0; i < duration; i += STEP) {
     wait(STEP);
     get_usb();
@@ -115,8 +114,11 @@ static void send_symbol(int level, int duration, int dit_state, int dah_state)
 }
 
 void loop() {
+  int old_value = 0;
+
   while(1) {
-    duration = get_duration();
+    int value = analogRead(SPEED); /* 756 .. 1020 */
+    duration = (1023 + FACTOR * MAX_DELAY - value) / FACTOR;
 
     switch (state) {
 
@@ -127,6 +129,14 @@ void loop() {
         break;
 
       case 100: /* main loop */
+        /* send speed change only when idle */
+        if (value < old_value - VALUE_THRESHOLD || value > old_value + VALUE_THRESHOLD) {
+          char *v = (char *)&value;
+          //SerialUSB.write(v[1]); /* always 2 or 3 */
+          //SerialUSB.write(v[0]);
+          old_value = value;
+        }
+
         wait(STEP);
         get_usb();
         if (dit_press())
