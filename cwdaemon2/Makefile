@@ -1,4 +1,4 @@
-CFLAGS = -g -Wall
+CFLAGS = -g -O2 -Wall
 LDLIBS = -lpulse-simple -lpulse -lm
 
 cwdaemon: cwdaemon.o

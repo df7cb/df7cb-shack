@@ -41,7 +41,7 @@ long samplerate=44100;
 static double edge=2.0;						/* rise/fall time in milliseconds */
 int fulldotlen, dotlen, dashlen, charspeed;
 int ed;							/* risetime, normalized to samplerate */
-static int sound_buf[882000];  /* 20 second max buffer */
+static short int sound_buf[882000];  /* 20 second max buffer */
 static int sound_bufpos = 0;
 pa_simple *dsp_fd;
 
@@ -102,7 +102,7 @@ static int tonegen (int freq, int len, int waveform) {
 
 		if (x < ed) { val *= pow(sin(M_PI*x/(2.0*ed)),2); }	/* rising edge */
 
-		if (x > (len-ed)) {								/* falling edge */
+		if (x > (len-ed)) {					/* falling edge */
 				val *= pow(sin(2*M_PI*(x-(len-ed)+ed)/(4*ed)),2); 
 		}
 		
@@ -111,41 +111,8 @@ static int tonegen (int freq, int len, int waveform) {
 	}
 	pa_simple_write(dsp_fd, sound_buf, sound_bufpos*sizeof(short int), &e);
 	sound_bufpos = 0;
+	pa_simple_drain(dsp_fd, &e);
 	return 0;
-}
-
-void close_audio (void *s) {
-	int e;
-	pa_simple_drain(s, &e);
-}
-
-
-void
-read_keyer(int keyerfd)
-{
-	char buf[BUFSIZE];
-	int n;
-	int waveform = SINE;
-
-	n = read(keyerfd, buf, 1);
-	if (n < 0)
-		error("read");
-	if (n == 0) {
-		printf("Keyer disconnected\n");
-		exit(0);
-	}
-
-	write(1, buf, 1);
-
-	if (buf[0] == '^') {
-		tonegen(freq, dotlen + ed, waveform);
-		tonegen(0, fulldotlen - ed, SILENCE);
-	} else if (buf[0] == '2') {
-		tonegen(freq, dashlen + ed, waveform);
-		tonegen(0, fulldotlen - ed, SILENCE);
-	}
-	//write_audio(dsp_fd, &full_buf[0], full_bufpos);
-	close_audio(dsp_fd);
 }
 
 int main(int argc, char **argv)
@@ -181,16 +148,12 @@ int main(int argc, char **argv)
 	tcgetattr(keyerfd, &settings);
 	cfsetspeed(&settings, baud);
 	cfmakeraw(&settings);
-	//settings.c_cflag &= ~PARENB; /* no parity */
-	//settings.c_cflag &= ~CSTOPB; /* 1 stop bit */
-	//settings.c_cflag &= ~CSIZE;
-	//settings.c_cflag |= CS8 | CLOCAL; /* 8 bits */
-	//settings.c_lflag = ~ICANON; /* canonical mode */
-	//settings.c_oflag &= ~OPOST; /* raw output */
 	tcsetattr(keyerfd, TCSANOW, &settings); /* apply the settings */
 	tcflush(keyerfd, TCOFLUSH);
 
 	printf("Connected to %s\n", argv[1]);
+
+	int state = 0;
 
 	/*
 	 * main loop: wait for a datagram, then send it to keyer
@@ -200,9 +163,36 @@ int main(int argc, char **argv)
 		FD_ZERO(&fds);
 		FD_SET(keyerfd, &fds);
 
-		if (select(keyerfd + 1, &fds, NULL, NULL, NULL) < 0)
+		if (select(keyerfd + 1, &fds, NULL, NULL, 0) < 0)
 			error("select");
-		if (FD_ISSET(keyerfd, &fds))
-			read_keyer(keyerfd);
+		if (FD_ISSET(keyerfd, &fds)) {
+			char buf[10];
+			int n = read(keyerfd, buf, sizeof(buf));
+			if (n < 0)
+				error("read");
+			if (n == 0) {
+				printf("Keyer disconnected\n");
+				exit(0);
+			}
+
+			for (int i = 0; i < n; i++) {
+				if (buf[i] == '^') {
+					state = 1;
+				} else if (buf[i] == '_') {
+					state = 0;
+				} else {
+					write(1, buf+i, 1);
+				}
+			}
+		}
+
+		switch (state) {
+			case 0:
+				tonegen(0, dotlen - ed, SILENCE);
+				break;
+			case 1:
+				tonegen(freq, dotlen + ed, SINE);
+				break;
+		}
 	}
 }
