@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# configure sdrangel and LimeSDR for QO-100
+
+set -eux
+
+API="http://127.0.0.1:8091/sdrangel"
+DEVICESET="$API/deviceset"
+
+# wait for sdrangel to start
+sdrangel &
+while ! curl -f $API; do
+  sleep 1
+done
+
+# add new sink device set
+curl -fX POST  --data direction=1 $DEVICESET
+
+# configure RX device set
+curl -fX PATCH --data @0.device.settings.json $DEVICESET/0/device/settings
+curl -fX PATCH --data @0.channel.0.settings.json $DEVICESET/0/channel/0/settings
+
+# configure TX device set
+curl -fX PUT   --data @1.device.json $DEVICESET/1/device
+curl -fX PATCH --data @1.device.settings.json $DEVICESET/1/device/settings
+curl -fX POST  --data @1.channel.0.settings.json $DEVICESET/1/channel
+curl -fX PATCH --data @1.channel.0.settings.json $DEVICESET/1/channel/0/settings
+
+# activate device set (in this order, or else the TX frequency gets messed up)
+curl -fX POST  $DEVICESET/1/device/run
+curl -fX POST  $DEVICESET/0/device/run

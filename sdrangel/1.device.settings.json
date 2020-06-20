@@ -1,0 +1,27 @@
+{
+    "deviceHwType": "LimeSDR",
+    "direction": 1,
+    "limeSdrOutputSettings": {
+        "antennaPath": 2,
+        "centerFrequency": 2400250000,
+        "devSampleRate": 7000000,
+        "extClock": 1,
+        "extClockFreq": 10000000,
+        "gain": 70,
+        "gpioDir": 0,
+        "gpioPins": 0,
+        "log2HardInterp": 3,
+        "log2SoftInterp": 3,
+        "lpfBW": 5001000,
+        "lpfFIRBW": 400000,
+        "lpfFIREnable": 0,
+        "ncoEnable": 0,
+        "ncoFrequency": 0,
+        "reverseAPIAddress": "127.0.0.1",
+        "reverseAPIDeviceIndex": 0,
+        "reverseAPIPort": 8888,
+        "transverterDeltaFrequency": 0,
+        "transverterMode": 0,
+        "useReverseAPI": 0
+    }
+}
