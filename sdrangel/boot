@@ -19,12 +19,14 @@ curl -fX POST  --data direction=1 $DEVICESET
 # configure RX device set
 curl -fX PATCH --data @0.device.settings.json $DEVICESET/0/device/settings
 curl -fX PATCH --data @0.channel.0.settings.json $DEVICESET/0/channel/0/settings
+curl -fX PATCH --data @0.spectrum.settings.json $DEVICESET/0/spectrum/settings
 
 # configure TX device set
 curl -fX PUT   --data @1.device.json $DEVICESET/1/device
 curl -fX PATCH --data @1.device.settings.json $DEVICESET/1/device/settings
 curl -fX POST  --data @1.channel.0.settings.json $DEVICESET/1/channel
 curl -fX PATCH --data @1.channel.0.settings.json $DEVICESET/1/channel/0/settings
+curl -fX PATCH --data @1.spectrum.settings.json $DEVICESET/1/spectrum/settings
 
 # activate device set (in this order, or else the TX frequency gets messed up)
 curl -fX POST  $DEVICESET/1/device/run

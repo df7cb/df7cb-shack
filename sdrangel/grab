@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# export sdrangel settings to files
+
+set -eux
+
+API="http://127.0.0.1:8091/sdrangel"
+DEVICESET="$API/deviceset"
+
+# RX device set
+curl -f > 0.device.settings.json $DEVICESET/0/device/settings
+curl -f > 0.channel.0.settings.json $DEVICESET/0/channel/0/settings
+curl -f > 0.spectrum.settings.json $DEVICESET/0/spectrum/settings
+
+# TX device set
+curl -f > 1.device.settings.json $DEVICESET/1/device/settings
+curl -f > 1.channel.0.settings.json $DEVICESET/1/channel/0/settings
+curl -f > 1.spectrum.settings.json $DEVICESET/1/spectrum/settings
