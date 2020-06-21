@@ -3,7 +3,7 @@
     "direction": 0,
     "limeSdrInputSettings": {
         "antennaPath": 2,
-        "centerFrequency": 739750000,
+        "centerFrequency": 489750000,
         "dcBlock": 0,
         "devSampleRate": 7000000,
         "extClock": 1,
@@ -26,8 +26,8 @@
         "reverseAPIDeviceIndex": 0,
         "reverseAPIPort": 8888,
         "tiaGain": 2,
-        "transverterDeltaFrequency": 0,
-        "transverterMode": 0,
+        "transverterDeltaFrequency": -250000000,
+        "transverterMode": 1,
         "useReverseAPI": 0
     }
 }
