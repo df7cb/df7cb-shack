@@ -7,6 +7,9 @@ set -eux
 API="http://127.0.0.1:8091/sdrangel"
 DEVICESET="$API/deviceset"
 
+# settings
+curl -f > config.json $API/config
+
 # RX device set
 curl -f > 0.device.settings.json $DEVICESET/0/device/settings
 curl -f > 0.channel.0.settings.json $DEVICESET/0/channel/0/settings

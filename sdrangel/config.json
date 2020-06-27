@@ -1,0 +1,373 @@
+{
+    "preferences": {
+        "consoleMinLogLevel": 0,
+        "fileMinLogLevel": 0,
+        "latitude": 51,
+        "logFileName": "sdrangel.log",
+        "longitude": 6,
+        "sourceDevice": "sdrangel.samplesource.limesdr",
+        "sourceIndex": 0,
+        "useLogFile": 0
+    },
+    "presets": [
+        {
+            "centerFrequency": 739750000,
+            "channelConfigs": [
+                {
+                    "channelIdURI": "sdrangel.channel.ssbdemod",
+                    "config": {
+                        "SSBDemodSettings": {
+                            "agc": 1,
+                            "agcClamping": 0,
+                            "agcPowerThreshold": -100,
+                            "agcThresholdGate": 4,
+                            "agcTimeLog2": 7,
+                            "audioBinaural": 0,
+                            "audioDeviceName": "alsa_output.pci-0000_00_1b.0.analog-stereo",
+                            "audioFlipChannels": 0,
+                            "audioMute": 0,
+                            "dsb": 0,
+                            "inputFrequencyOffset": -210000,
+                            "lowCutoff": 100,
+                            "reverseAPIAddress": "127.0.0.1",
+                            "reverseAPIChannelIndex": 0,
+                            "reverseAPIDeviceIndex": 0,
+                            "reverseAPIPort": 8888,
+                            "rfBandwidth": 2900,
+                            "rgbColor": -16711936,
+                            "spanLog2": 4,
+                            "streamIndex": 0,
+                            "title": "SSB Demodulator",
+                            "useReverseAPI": 0,
+                            "volume": 0.800000011920929
+                        }
+                    }
+                }
+            ],
+            "dcOffsetCorrection": 0,
+            "description": "QO100 RX",
+            "deviceConfigs": [
+                {
+                    "config": {
+                        "limeSdrInputSettings": {
+                            "antennaPath": 2,
+                            "centerFrequency": 435000000,
+                            "dcBlock": 0,
+                            "devSampleRate": 7000000,
+                            "extClock": 1,
+                            "extClockFreq": 10000000,
+                            "gain": 52,
+                            "gainMode": 0,
+                            "gpioDir": 0,
+                            "gpioPins": 0,
+                            "iqCorrection": 0,
+                            "lnaGain": 15,
+                            "log2HardDecim": 3,
+                            "log2SoftDecim": 0,
+                            "lpfBW": 11401000,
+                            "lpfFIRBW": 500000,
+                            "lpfFIREnable": 0,
+                            "ncoEnable": 0,
+                            "ncoFrequency": 0,
+                            "pgaGain": 16,
+                            "reverseAPIAddress": "127.0.0.1",
+                            "reverseAPIDeviceIndex": 0,
+                            "reverseAPIPort": 8888,
+                            "tiaGain": 2,
+                            "transverterDeltaFrequency": 0,
+                            "transverterMode": 0,
+                            "useReverseAPI": 0
+                        }
+                    },
+                    "deviceId": "sdrangel.samplesource.limesdr",
+                    "deviceSequence": 0,
+                    "deviceSerial": "LimeSDR-USB, media=USB 2.0, module=FX3, addr=1d50:6108, serial=0009081C05C32134"
+                }
+            ],
+            "group": "Sat",
+            "iqImbalanceCorrection": 0,
+            "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAFwAAACwfwCAAAABPsAAAAaAGkAbgBwAHUAdABWAGkAZQB3AEQAbwBjAGsBAAAAEwAAAOwAAADfAAABV/sAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAQAAAQUAAACFAAAAhQAAAIX7AAAAJABzAHAAZQBjAHQAcgBhAEQAaQBzAHAAbABhAHkARABvAGMAawEAAAGQAAAAawAAAGsAAABr/AAAAgEAAADTAAAAkQEAABn6AAAAAAIAAAAC+wAAABQAcAByAGUAcwBlAHQARABvAGMAawEAAAAA/////wAAAHcA////+wAAABgAYwBvAG0AbQBhAG4AZABzAEQAbwBjAGsBAAAAAP////8AAAB3AP///wAAAAEAAAHdAAACwfwCAAAAAfsAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAATAAACwQAAAJQA////AAAB+wAAAsEAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
+            "presetType": 0,
+            "spectrumConfig": {
+                "averagingMode": 2,
+                "averagingValue": 200,
+                "decay": 11,
+                "decayDivisor": 11,
+                "displayCurrent": 0,
+                "displayGrid": 1,
+                "displayGridIntensity": 10,
+                "displayHistogram": 0,
+                "displayMaxHold": 1,
+                "displayTraceIntensity": 65,
+                "displayWaterfall": 1,
+                "fftOverlap": 0,
+                "fftSize": 4096,
+                "fftWindow": 4,
+                "histogramStroke": 39,
+                "invertedWaterfall": 0,
+                "linear": 0,
+                "powerRange": 30,
+                "refLevel": -20,
+                "waterfallShare": 0.3295292258262634
+            }
+        },
+        {
+            "centerFrequency": 2400250000,
+            "channelConfigs": [
+                {
+                    "channelIdURI": "sdrangel.channeltx.modssb",
+                    "config": {
+                        "SSBModSettings": {
+                            "agc": 0,
+                            "audioBinaural": 0,
+                            "audioDeviceName": "QuiskDigitalInput.monitor",
+                            "audioFlipChannels": 0,
+                            "audioMute": 0,
+                            "bandwidth": 2800,
+                            "cwKeyer": {
+                                "dashKey": 45,
+                                "dashKeyModifiers": 0,
+                                "dotKey": 46,
+                                "dotKeyModifiers": 0,
+                                "keyboardIambic": 1,
+                                "loop": 1,
+                                "mode": 1,
+                                "sampleRate": 48000,
+                                "text": "vvv df7cb vvv",
+                                "wpm": 13
+                            },
+                            "dsb": 0,
+                            "inputFrequencyOffset": -210000,
+                            "lowCutoff": 300,
+                            "modAFInput": 0,
+                            "playLoop": 0,
+                            "reverseAPIAddress": "127.0.0.1",
+                            "reverseAPIChannelIndex": 0,
+                            "reverseAPIDeviceIndex": 0,
+                            "reverseAPIPort": 8888,
+                            "rgbColor": -16711936,
+                            "spanLog2": 3,
+                            "title": "SSB Modulator",
+                            "toneFrequency": 1000,
+                            "usb": 1,
+                            "useReverseAPI": 0,
+                            "volumeFactor": 1
+                        }
+                    }
+                }
+            ],
+            "dcOffsetCorrection": 0,
+            "description": "QO100 TX",
+            "deviceConfigs": [
+                {
+                    "config": {
+                        "limeSdrOutputSettings": {
+                            "antennaPath": 2,
+                            "centerFrequency": 435000000,
+                            "devSampleRate": 7000000,
+                            "extClock": 1,
+                            "extClockFreq": 10000000,
+                            "gain": 70,
+                            "gpioDir": 0,
+                            "gpioPins": 0,
+                            "log2HardInterp": 3,
+                            "log2SoftInterp": 0,
+                            "lpfBW": 5001000,
+                            "lpfFIRBW": 400000,
+                            "lpfFIREnable": 0,
+                            "ncoEnable": 0,
+                            "ncoFrequency": 0,
+                            "reverseAPIAddress": "127.0.0.1",
+                            "reverseAPIDeviceIndex": 0,
+                            "reverseAPIPort": 8888,
+                            "transverterDeltaFrequency": 0,
+                            "transverterMode": 0,
+                            "useReverseAPI": 0
+                        }
+                    },
+                    "deviceId": "sdrangel.samplesink.limesdr",
+                    "deviceSequence": 0,
+                    "deviceSerial": "LimeSDR-USB, media=USB 2.0, module=FX3, addr=1d50:6108, serial=0009081C05C32134"
+                },
+                {
+                    "config": {
+                        "limeSdrInputSettings": {
+                            "antennaPath": 2,
+                            "centerFrequency": 435000000,
+                            "dcBlock": 0,
+                            "devSampleRate": 500000,
+                            "extClock": 1,
+                            "extClockFreq": 10000000,
+                            "gain": 67,
+                            "gainMode": 0,
+                            "gpioDir": 0,
+                            "gpioPins": 0,
+                            "iqCorrection": 0,
+                            "lnaGain": 15,
+                            "log2HardDecim": 4,
+                            "log2SoftDecim": 0,
+                            "lpfBW": 1401000,
+                            "lpfFIRBW": 500000,
+                            "lpfFIREnable": 0,
+                            "ncoEnable": 0,
+                            "ncoFrequency": 0,
+                            "pgaGain": 16,
+                            "reverseAPIAddress": "127.0.0.1",
+                            "reverseAPIDeviceIndex": 0,
+                            "reverseAPIPort": 8888,
+                            "tiaGain": 2,
+                            "transverterDeltaFrequency": 0,
+                            "transverterMode": 0,
+                            "useReverseAPI": 0
+                        }
+                    },
+                    "deviceId": "sdrangel.samplesource.limesdr",
+                    "deviceSequence": 0,
+                    "deviceSerial": "LimeSDR-USB, media=USB 2.0, module=FX3, addr=1d50:6108, serial=0009081C05C32134"
+                }
+            ],
+            "group": "Sat",
+            "iqImbalanceCorrection": 0,
+            "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAFwAAACwfwCAAAABPsAAAAaAGkAbgBwAHUAdABWAGkAZQB3AEQAbwBjAGsBAAAAEwAAAS4AAADfAAABV/sAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAQAAAUcAAACFAAAAhQAAAIX7AAAAJABzAHAAZQBjAHQAcgBhAEQAaQBzAHAAbABhAHkARABvAGMAawEAAAHSAAAAawAAAGsAAABr/AAAAkMAAACRAAAAkQEAABn6AAAAAAIAAAAC+wAAABQAcAByAGUAcwBlAHQARABvAGMAawEAAAAA/////wAAAHcA////+wAAABgAYwBvAG0AbQBhAG4AZABzAEQAbwBjAGsBAAAAAP////8AAAB3AP///wAAAAEAAAH2AAACwfwCAAAAAfsAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAATAAACwQAAAJQA////AAAB4gAAAsEAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
+            "presetType": 1,
+            "spectrumConfig": {
+                "averagingMode": 2,
+                "averagingValue": 100,
+                "decay": 1,
+                "decayDivisor": 1,
+                "displayCurrent": 0,
+                "displayGrid": 0,
+                "displayGridIntensity": 5,
+                "displayHistogram": 0,
+                "displayMaxHold": 0,
+                "displayTraceIntensity": 50,
+                "displayWaterfall": 1,
+                "fftOverlap": 0,
+                "fftSize": 1024,
+                "fftWindow": 4,
+                "histogramStroke": 30,
+                "invertedWaterfall": 0,
+                "linear": 0,
+                "powerRange": 100,
+                "refLevel": 0,
+                "waterfallShare": 0.6600000262260437
+            }
+        }
+    ],
+    "workingPreset": {
+        "centerFrequency": 489750000,
+        "channelConfigs": [
+            {
+                "channelIdURI": "sdrangel.channel.ssbdemod",
+                "config": {
+                    "SSBDemodSettings": {
+                        "agc": 1,
+                        "agcClamping": 0,
+                        "agcPowerThreshold": -100,
+                        "agcThresholdGate": 4,
+                        "agcTimeLog2": 7,
+                        "audioBinaural": 0,
+                        "audioDeviceName": "System default device",
+                        "audioFlipChannels": 0,
+                        "audioMute": 0,
+                        "dsb": 0,
+                        "inputFrequencyOffset": -226000,
+                        "lowCutoff": 100,
+                        "reverseAPIAddress": "127.0.0.1",
+                        "reverseAPIChannelIndex": 0,
+                        "reverseAPIDeviceIndex": 0,
+                        "reverseAPIPort": 8888,
+                        "rfBandwidth": 2900,
+                        "rgbColor": -16711936,
+                        "spanLog2": 4,
+                        "streamIndex": 0,
+                        "title": "SSB Demodulator",
+                        "useReverseAPI": 1,
+                        "volume": 2
+                    }
+                }
+            }
+        ],
+        "dcOffsetCorrection": 0,
+        "description": "no name",
+        "deviceConfigs": [
+            {
+                "config": {
+                    "fileInputSettings": {
+                        "accelerationFactor": 1,
+                        "fileName": "./test.sdriq",
+                        "loop": 1,
+                        "reverseAPIAddress": "127.0.0.1",
+                        "reverseAPIDeviceIndex": 0,
+                        "reverseAPIPort": 8888,
+                        "useReverseAPI": 0
+                    }
+                },
+                "deviceId": "sdrangel.samplesource.fileinput",
+                "deviceSequence": 0
+            },
+            {
+                "config": {
+                    "limeSdrInputSettings": {
+                        "antennaPath": 2,
+                        "centerFrequency": 435000000,
+                        "dcBlock": 0,
+                        "devSampleRate": 7000000,
+                        "extClock": 1,
+                        "extClockFreq": 10000000,
+                        "gain": 52,
+                        "gainMode": 0,
+                        "gpioDir": 0,
+                        "gpioPins": 0,
+                        "iqCorrection": 0,
+                        "lnaGain": 15,
+                        "log2HardDecim": 3,
+                        "log2SoftDecim": 3,
+                        "lpfBW": 1401000,
+                        "lpfFIRBW": 500000,
+                        "lpfFIREnable": 0,
+                        "ncoEnable": 0,
+                        "ncoFrequency": 0,
+                        "pgaGain": 16,
+                        "reverseAPIAddress": "127.0.0.1",
+                        "reverseAPIDeviceIndex": 0,
+                        "reverseAPIPort": 8888,
+                        "tiaGain": 2,
+                        "transverterDeltaFrequency": -250000000,
+                        "transverterMode": 1,
+                        "useReverseAPI": 0
+                    }
+                },
+                "deviceId": "sdrangel.samplesource.limesdr",
+                "deviceSequence": 0,
+                "deviceSerial": "LimeSDR-USB, media=USB 2.0, module=FX3, addr=1d50:6108, serial=0009081C05C32134"
+            }
+        ],
+        "group": "default",
+        "iqImbalanceCorrection": 0,
+        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAFwAAACwfwCAAAABPsAAAAaAGkAbgBwAHUAdABWAGkAZQB3AEQAbwBjAGsBAAAAEwAAAOwAAADfAAABBfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAQAAAQUAAACFAAAAhQAAAIX7AAAAJABzAHAAZQBjAHQAcgBhAEQAaQBzAHAAbABhAHkARABvAGMAawEAAAGQAAAAawAAAGsAAABr/AAAAgEAAADTAAAAkQEAABn6AAAAAAIAAAAC+wAAABQAcAByAGUAcwBlAHQARABvAGMAawEAAAAA/////wAAAHcA////+wAAABgAYwBvAG0AbQBhAG4AZABzAEQAbwBjAGsBAAAAAP////8AAAB3AP///wAAAAEAAAGSAAACwfwCAAAAAfsAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAATAAACwQAAAJQA////AAACRgAAAsEAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
+        "presetType": 0,
+        "spectrumConfig": {
+            "averagingMode": 2,
+            "averagingValue": 50,
+            "decay": 11,
+            "decayDivisor": 11,
+            "displayCurrent": 0,
+            "displayGrid": 1,
+            "displayGridIntensity": 10,
+            "displayHistogram": 0,
+            "displayMaxHold": 1,
+            "displayTraceIntensity": 65,
+            "displayWaterfall": 1,
+            "fftOverlap": 0,
+            "fftSize": 4096,
+            "fftWindow": 4,
+            "histogramStroke": 39,
+            "invertedWaterfall": 1,
+            "linear": 0,
+            "powerRange": 25,
+            "refLevel": -25,
+            "waterfallShare": 0.3295292258262634
+        }
+    }
+}
