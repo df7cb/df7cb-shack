@@ -159,9 +159,9 @@ send_cw(int sockfd, int ttyfd)
 	int n;			/* message byte size */
 
 	if (sockfd == 0)
-		n = read(sockfd, buf, BUFSIZE);
+		n = read(sockfd, buf, BUFSIZE-1);
 	else
-		n = recv(sockfd, buf, BUFSIZE, 0);
+		n = recv(sockfd, buf, BUFSIZE-1, 0);
 	if (n < 0)
 		error("ERROR in recvfrom");
 	if (n == 0) /* skip empty packets */
@@ -182,9 +182,9 @@ send_cw(int sockfd, int ttyfd)
 		return;
 	}
 
-	buf[n-1] = '\0';
-	if (n > 1 && buf[n-2] == '\n')
-		buf[n-2] = '\0';
+	buf[n] = '\0';
+	if (n > 1 && buf[n-1] == '\n')
+		buf[n-1] = '\0';
 	if (DEBUG) printf("Sending '%s'\n", buf);
 
 	for (int i = 0; i < n; i++) {
