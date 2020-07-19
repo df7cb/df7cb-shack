@@ -4,7 +4,7 @@
     "limeSdrOutputSettings": {
         "antennaPath": 2,
         "centerFrequency": 2400250000,
-        "devSampleRate": 7000000,
+        "devSampleRate": 4500000,
         "extClock": 1,
         "extClockFreq": 10000000,
         "gain": 70,

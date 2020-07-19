@@ -255,7 +255,7 @@
         }
     ],
     "workingPreset": {
-        "centerFrequency": 489750000,
+        "centerFrequency": 2400250000,
         "channelConfigs": [
             {
                 "channelIdURI": "sdrangel.channel.ssbdemod",
@@ -271,7 +271,7 @@
                         "audioFlipChannels": 0,
                         "audioMute": 0,
                         "dsb": 0,
-                        "inputFrequencyOffset": -226000,
+                        "inputFrequencyOffset": -210000,
                         "lowCutoff": 100,
                         "reverseAPIAddress": "127.0.0.1",
                         "reverseAPIChannelIndex": 0,
@@ -312,7 +312,7 @@
                         "antennaPath": 2,
                         "centerFrequency": 435000000,
                         "dcBlock": 0,
-                        "devSampleRate": 7000000,
+                        "devSampleRate": 4300000,
                         "extClock": 1,
                         "extClockFreq": 10000000,
                         "gain": 52,
@@ -333,7 +333,7 @@
                         "reverseAPIDeviceIndex": 0,
                         "reverseAPIPort": 8888,
                         "tiaGain": 2,
-                        "transverterDeltaFrequency": -250000000,
+                        "transverterDeltaFrequency": 1660500000,
                         "transverterMode": 1,
                         "useReverseAPI": 0
                     }
@@ -345,7 +345,7 @@
         ],
         "group": "default",
         "iqImbalanceCorrection": 0,
-        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAFwAAACwfwCAAAABPsAAAAaAGkAbgBwAHUAdABWAGkAZQB3AEQAbwBjAGsBAAAAEwAAAOwAAADfAAABBfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAQAAAQUAAACFAAAAhQAAAIX7AAAAJABzAHAAZQBjAHQAcgBhAEQAaQBzAHAAbABhAHkARABvAGMAawEAAAGQAAAAawAAAGsAAABr/AAAAgEAAADTAAAAkQEAABn6AAAAAAIAAAAC+wAAABQAcAByAGUAcwBlAHQARABvAGMAawEAAAAA/////wAAAHcA////+wAAABgAYwBvAG0AbQBhAG4AZABzAEQAbwBjAGsBAAAAAP////8AAAB3AP///wAAAAEAAAGSAAACwfwCAAAAAfsAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAATAAACwQAAAJQA////AAACRgAAAsEAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
+        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAHRAAACwfwCAAAAAfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAAAAABMAAALBAAAAhQAAAIUAAAADAAAFVAAAAVf8AQAAAAL8AAAAAAAAAgEAAAFwAP////oAAAABAgAAAAP7AAAAFABwAHIAZQBzAGUAdABEAG8AYwBrAAAAAAD/////AAAAdwD////7AAAAGgBpAG4AcAB1AHQAVgBpAGUAdwBEAG8AYwBrAQAAAAD/////AAAA3wAAAVf7AAAAGABjAG8AbQBtAGEAbgBkAHMARABvAGMAawAAAAAA/////wAAAHcA/////AAAAgcAAANNAAAAaAD////6AAAAAQIAAAAC+wAAACQAcwBwAGUAYwB0AHIAYQBEAGkAcwBwAGwAYQB5AEQAbwBjAGsAAAAAAP////8AAAAbAAAAG/sAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAHbAAAA+QAAAJQA////AAAFVAAAAWQAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
         "presetType": 0,
         "spectrumConfig": {
             "averagingMode": 2,
