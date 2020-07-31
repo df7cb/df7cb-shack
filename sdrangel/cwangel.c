@@ -27,6 +27,10 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <ctype.h>
+#include <curl/curl.h>
+
+#define JSONAPI "http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings"
+#define JSONTEMPLATE "{ \"SSBModSettings\": { \"modAFInput\": %d }, \"channelType\": \"SSBMod\", \"direction\": 1}"
 
 /*
  * error - wrapper for perror
@@ -37,25 +41,68 @@ void error(char *msg)
 	exit(1);
 }
 
+size_t
+fdiscard (char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	return nmemb;
+}
+
+/*
+ * curl -X PATCH --data @settings.0 http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings
+ */
+void
+key_up_down (int state)
+{
+	CURLcode ret;
+	static CURL *hnd = NULL;
+	char request[sizeof(JSONTEMPLATE)];
+
+	sprintf(request, JSONTEMPLATE, state);
+
+	if (! hnd)
+		hnd = curl_easy_init();
+
+	curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, 102400L);
+	curl_easy_setopt(hnd, CURLOPT_URL, JSONAPI);
+	curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 1L);
+	curl_easy_setopt(hnd, CURLOPT_POSTFIELDS, request);
+	curl_easy_setopt(hnd, CURLOPT_POSTFIELDSIZE_LARGE, (curl_off_t)strlen(request));
+	curl_easy_setopt(hnd, CURLOPT_USERAGENT, "curl/7.68.0");
+	curl_easy_setopt(hnd, CURLOPT_MAXREDIRS, 50L);
+	curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_2TLS);
+	curl_easy_setopt(hnd, CURLOPT_CUSTOMREQUEST, "PATCH");
+	curl_easy_setopt(hnd, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, fdiscard); /* discard response body */
+
+	ret = curl_easy_perform(hnd);
+	if (ret != CURLE_OK)
+		error("curl");
+}
+
 int main(int argc, char **argv)
 {
+	char *device;
 	int keyerfd;
 	struct termios settings;
 	setlinebuf(stdout);
 
-	if (argc != 2) {
+	if (argc == 1) {
+		device = "/dev/ttyUSB0";
+	} else if (argc == 2) {
+		device = argv[1];
+	} else {
 		printf("Syntax: cwdaemon /dev/ttyACM0\n");
 		exit(1);
 	}
 
 	do {
-		keyerfd = open(argv[1], O_RDWR);
+		keyerfd = open(device, O_RDWR);
 		if (keyerfd < 0) {
 			if (errno == EBUSY) {
-				perror(argv[1]);
+				perror(device);
 				sleep(1);
 			} else
-				error(argv[1]);
+				error(device);
 		}
 	} while (keyerfd < 0);
 
@@ -65,7 +112,7 @@ int main(int argc, char **argv)
 	tcsetattr(keyerfd, TCSANOW, &settings); /* apply the settings */
 	tcflush(keyerfd, TCOFLUSH);
 
-	printf("Connected to %s\n", argv[1]);
+	printf("Connected to %s, sending requests to %s\n", device, JSONAPI);
 
 	int oldstate = -1; /* force off at start */
 	int state = 0;
@@ -102,15 +149,8 @@ int main(int argc, char **argv)
 		}
 
 		if (state != oldstate) {
-		switch (state) {
-			case 0:
-				system("curl -X PATCH --data @settings.0 http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings");
-				break;
-			case 1:
-				system("curl -X PATCH --data @settings.1 http://127.0.0.1:8091/sdrangel/deviceset/1/channel/0/settings");
-				break;
-		}
-		state = oldstate;
+			key_up_down (state);
+			state = oldstate;
 		}
 	}
 }

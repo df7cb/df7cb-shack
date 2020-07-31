@@ -1,4 +1,5 @@
-CFLAGS = -g -O2 -Wall
+CFLAGS = -g -O2 -Wall -Werror
+LDLIBS = -lcurl
 
 cwangel: cwangel.o
 
