@@ -2,7 +2,7 @@
     "SSBModSettings": {
         "agc": 0,
         "audioBinaural": 0,
-        "audioDeviceName": "QuiskDigitalInput.monitor",
+        "audioDeviceName": "sdrangel.monitor",
         "audioFlipChannels": 0,
         "audioMute": 0,
         "bandwidth": 2800,

@@ -255,7 +255,7 @@
         }
     ],
     "workingPreset": {
-        "centerFrequency": 2400250000,
+        "centerFrequency": 250000,
         "channelConfigs": [
             {
                 "channelIdURI": "sdrangel.channel.ssbdemod",
@@ -312,7 +312,7 @@
                         "antennaPath": 2,
                         "centerFrequency": 435000000,
                         "dcBlock": 0,
-                        "devSampleRate": 4300000,
+                        "devSampleRate": 4500000,
                         "extClock": 1,
                         "extClockFreq": 10000000,
                         "gain": 52,
@@ -333,7 +333,7 @@
                         "reverseAPIDeviceIndex": 0,
                         "reverseAPIPort": 8888,
                         "tiaGain": 2,
-                        "transverterDeltaFrequency": 1660500000,
+                        "transverterDeltaFrequency": -739500000,
                         "transverterMode": 1,
                         "useReverseAPI": 0
                     }
@@ -345,7 +345,7 @@
         ],
         "group": "default",
         "iqImbalanceCorrection": 0,
-        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAHRAAACwfwCAAAAAfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAAAAABMAAALBAAAAhQAAAIUAAAADAAAFVAAAAVf8AQAAAAL8AAAAAAAAAgEAAAFwAP////oAAAABAgAAAAP7AAAAFABwAHIAZQBzAGUAdABEAG8AYwBrAAAAAAD/////AAAAdwD////7AAAAGgBpAG4AcAB1AHQAVgBpAGUAdwBEAG8AYwBrAQAAAAD/////AAAA3wAAAVf7AAAAGABjAG8AbQBtAGEAbgBkAHMARABvAGMAawAAAAAA/////wAAAHcA/////AAAAgcAAANNAAAAaAD////6AAAAAQIAAAAC+wAAACQAcwBwAGUAYwB0AHIAYQBEAGkAcwBwAGwAYQB5AEQAbwBjAGsAAAAAAP////8AAAAbAAAAG/sAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAHbAAAA+QAAAJQA////AAAFVAAAAWQAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
+        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAHRAAACwfwCAAAAAfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAAAAABMAAALBAAAAhQAAAIUAAAADAAAFVAAAAN/8AQAAAAL8AAAAAAAAAfEAAAFwAP////oAAAABAgAAAAP7AAAAFABwAHIAZQBzAGUAdABEAG8AYwBrAAAAAAD/////AAAAdwD////7AAAAGgBpAG4AcAB1AHQAVgBpAGUAdwBEAG8AYwBrAQAAAAD/////AAAA3wAAAVf7AAAAGABjAG8AbQBtAGEAbgBkAHMARABvAGMAawAAAAAA/////wAAAHcA/////AAAAfcAAANdAAAAaAD////6AAAAAQIAAAAC+wAAACQAcwBwAGUAYwB0AHIAYQBEAGkAcwBwAGwAYQB5AEQAbwBjAGsAAAAAAP////8AAAAbAAAAG/sAAAAWAGMAaABhAG4AbgBlAGwARABvAGMAawEAAAHbAAAA+QAAAJQA////AAAFVAAAAdwAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
         "presetType": 0,
         "spectrumConfig": {
             "averagingMode": 2,
@@ -365,7 +365,7 @@
             "histogramStroke": 39,
             "invertedWaterfall": 1,
             "linear": 0,
-            "powerRange": 25,
+            "powerRange": 30,
             "refLevel": -25,
             "waterfallShare": 0.3295292258262634
         }

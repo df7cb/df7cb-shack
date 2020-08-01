@@ -7,6 +7,11 @@ set -eux
 API="http://127.0.0.1:8091/sdrangel"
 DEVICESET="$API/deviceset"
 
+# create virtual soundcard
+if ! pacmd list-sinks | grep -q 'name: <sdrangel>'; then
+  pacmd load-module module-null-sink sink_name=sdrangel sink_properties=device.description=sdrangel
+fi
+
 # wait for sdrangel to start
 sdrangel &
 while ! curl -f $API; do
