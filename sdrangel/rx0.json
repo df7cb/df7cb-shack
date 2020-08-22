@@ -10,7 +10,7 @@
         "audioFlipChannels": 0,
         "audioMute": 0,
         "dsb": 0,
-        "inputFrequencyOffset": -210000,
+        "inputFrequencyOffset": -230000,
         "lowCutoff": 100,
         "reverseAPIAddress": "127.0.0.1",
         "reverseAPIChannelIndex": 0,
@@ -22,7 +22,7 @@
         "streamIndex": 0,
         "title": "SSB Demodulator",
         "useReverseAPI": 1,
-        "volume": 2
+        "volume": 1
     },
     "channelType": "SSBDemod",
     "direction": 0

@@ -2,10 +2,10 @@
     "SSBModSettings": {
         "agc": 0,
         "audioBinaural": 0,
-        "audioDeviceName": "sdrangel.monitor",
+        "audioDeviceName": "System default device",
         "audioFlipChannels": 0,
         "audioMute": 0,
-        "bandwidth": 2800,
+        "bandwidth": 2900,
         "cwKeyer": {
             "dashKey": 45,
             "dashKeyModifiers": 0,
@@ -19,8 +19,8 @@
             "wpm": 13
         },
         "dsb": 0,
-        "inputFrequencyOffset": -210000,
-        "lowCutoff": 300,
+        "inputFrequencyOffset": -230000,
+        "lowCutoff": 0,
         "modAFInput": 0,
         "playLoop": 0,
         "reverseAPIAddress": "127.0.0.1",
@@ -28,7 +28,7 @@
         "reverseAPIDeviceIndex": 0,
         "reverseAPIPort": 8888,
         "rgbColor": -16711936,
-        "spanLog2": 3,
+        "spanLog2": 4,
         "title": "SSB Modulator",
         "toneFrequency": 850,
         "usb": 1,

@@ -13,6 +13,7 @@
         "gpioDir": 0,
         "gpioPins": 0,
         "iqCorrection": 0,
+        "iqOrder": 1,
         "lnaGain": 15,
         "log2HardDecim": 3,
         "log2SoftDecim": 3,
