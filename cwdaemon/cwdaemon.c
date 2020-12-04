@@ -271,15 +271,15 @@ int main(int argc, char **argv)
 		fd_set fds;
 		FD_ZERO(&fds);
 		FD_SET(ttyfd, &fds);
-		FD_SET(0, &fds);
+		//FD_SET(0, &fds);
 		FD_SET(sockfd, &fds);
 
 		if (select(sockfd + 1, &fds, NULL, NULL, NULL) < 0)
 			error("select");
 		if (FD_ISSET(ttyfd, &fds))
 			read_digispark(ttyfd);
-		if (FD_ISSET(0, &fds))
-			send_cw(0, ttyfd);
+		//if (FD_ISSET(0, &fds))
+		//	send_cw(0, ttyfd);
 		if (FD_ISSET(sockfd, &fds))
 			send_cw(sockfd, ttyfd);
 	}
