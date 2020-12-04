@@ -5,6 +5,7 @@ Frequency tracker: Keep TX offset in sync with RX offset
 Listens on a TCP port for SDRangel reverse API requests.
 '''
 
+import Hamlib
 import requests
 import time
 import argparse
@@ -14,6 +15,7 @@ from flask import request, jsonify
 SDRANGEL_API_ADDR = None
 SDRANGEL_API_PORT = 8091
 
+my_rig = Hamlib.Rig(Hamlib.RIG_MODEL_NETRIGCTL)
 app = Flask(__name__)
 
 # ======================================================================
@@ -116,6 +118,8 @@ def channel_settings(deviceset_index, channel_index):
     if r.status_code // 100 != 2:
         print(f'SDRangel::adjust_xvtr: {sdrangel_ip}:{SDRANGEL_API_PORT} tracker [{tracker_device_index}:{tracker_channel_index}] adjust failed')
 
+    my_rig.set_freq(Hamlib.RIG_VFO_A, 2400250000 + freq)
+
     return "OK processed "
 
 
@@ -123,6 +127,10 @@ def channel_settings(deviceset_index, channel_index):
 def main():
     """ This is the main routine """
 # ----------------------------------------------------------------------
+    #Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
+    my_rig.set_conf("rig_pathname", "localhost:4534")
+    my_rig.open()
+
     global SDRANGEL_API_ADDR
     global SDRANGEL_API_PORT
     addr, port, SDRANGEL_API_ADDR, SDRANGEL_API_PORT = getInputOptions()
