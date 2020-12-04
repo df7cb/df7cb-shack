@@ -21,5 +21,5 @@ curl -f > rx2.json $DEVICESET/0/channel/2/settings
 curl -f > txdevice.json $DEVICESET/1/device/settings
 curl -f > txspectrum.json $DEVICESET/1/spectrum/settings
 curl -f > tx0.json $DEVICESET/1/channel/0/settings
-curl -f > tx1.json $DEVICESET/1/channel/1/settings
-curl -f > tx2.json $DEVICESET/1/channel/2/settings
+#curl -f > tx1.json $DEVICESET/1/channel/1/settings
+#curl -f > tx2.json $DEVICESET/1/channel/2/settings

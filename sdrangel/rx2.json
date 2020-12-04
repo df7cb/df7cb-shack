@@ -17,7 +17,7 @@
         "reverseAPIDeviceIndex": 0,
         "reverseAPIPort": 8888,
         "rfBandwidth": 2900,
-        "rgbColor": -16711936,
+        "rgbColor": -11184641,
         "spanLog2": 4,
         "streamIndex": 0,
         "title": "SSB Demodulator",

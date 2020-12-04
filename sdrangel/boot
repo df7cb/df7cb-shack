@@ -8,7 +8,7 @@ API="http://127.0.0.1:8091/sdrangel"
 DEVICESET="$API/deviceset"
 
 # create virtual soundcards
-for card in rx1 tx1 rx2 tx2; do
+for card in tx0 rx1 rx2; do
   if ! pacmd list-sinks | grep -q "name: <$card>"; then
     echo "Adding pulseaudio sink $card ..."
     pacmd load-module module-null-sink sink_name=$card sink_properties=device.description=$card
@@ -17,6 +17,7 @@ done
 
 # wait for sdrangel to start
 sdrangel &
+SDRPID="$!"
 while ! curl -f $API; do
   sleep 1
 done
@@ -55,12 +56,20 @@ if ! curl -sf $DEVICESET/0/channel/1/settings; then
   curl -fX POST --data @rx1.json $DEVICESET/0/channel
 fi
 curl -fX PATCH --data @rx1.json $DEVICESET/0/channel/1/settings
-curl -fX POST  --data @tx1.json $DEVICESET/1/channel
-curl -fX PATCH --data @tx1.json $DEVICESET/1/channel/1/settings
+#curl -fX POST  --data @tx1.json $DEVICESET/1/channel
+#curl -fX PATCH --data @tx1.json $DEVICESET/1/channel/1/settings
 
 if ! curl -sf $DEVICESET/0/channel/2/settings; then
   curl -fX POST --data @rx2.json $DEVICESET/0/channel
 fi
 curl -fX PATCH --data @rx2.json $DEVICESET/0/channel/2/settings
-curl -fX POST  --data @tx2.json $DEVICESET/1/channel
-curl -fX PATCH --data @tx2.json $DEVICESET/1/channel/2/settings
+#curl -fX POST  --data @tx2.json $DEVICESET/1/channel
+#curl -fX PATCH --data @tx2.json $DEVICESET/1/channel/2/settings
+
+# start cwangel
+./cwangel &
+CWPID="$!"
+
+# wait for sdrangel to exit and stop cwangel
+trap "kill $SDRPID $CWPID" EXIT INT TERM
+wait $SDRPID
