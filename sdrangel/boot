@@ -16,8 +16,11 @@ for card in tx0 rx1 rx2; do
 done
 
 # wait for sdrangel to start
-sdrangel &
-SDRPID="$!"
+
+if ! SDRPID=$(pidof sdrangel); then
+  sdrangel &
+  SDRPID="$!"
+fi
 while ! curl -f $API; do
   sleep 1
 done
