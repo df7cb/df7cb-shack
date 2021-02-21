@@ -19,7 +19,7 @@
             "wpm": 13
         },
         "dsb": 0,
-        "inputFrequencyOffset": -230000,
+        "inputFrequencyOffset": -210000,
         "lowCutoff": 0,
         "modAFInput": 3,
         "playLoop": 0,
@@ -32,7 +32,7 @@
         "title": "SSB Modulator",
         "toneFrequency": 850,
         "usb": 1,
-        "useReverseAPI": 0,
+        "useReverseAPI": 1,
         "volumeFactor": 3
     },
     "channelType": "SSBMod",
