@@ -29,11 +29,15 @@ MIDI_PRESS = 127
 MIDI_RELEASE = 0
 
 MIDI_REC = 43
+#MIDI_SCRATCH = 45
 MIDI_JOG_B = 49
+#MIDI_CUE_KP4_B = 52
 MIDI_VOL_B = 61
 MIDI_TREB_B = 63
 MIDI_BASS_B = 64
+MIDI_CUE_B = 82
 MIDI_SYNC_B = 83
+MIDI_READ_ALL = 0x7f
 
 Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
 my_rig = Hamlib.Rig(Hamlib.RIG_MODEL_NETRIGCTL)
@@ -148,8 +152,15 @@ def channel_settings(deviceset_index, channel_index):
         settings[deviceset_index, channel_index]['SSBModSettings'] |= new_settings
 
         if 'modAFInput' in content['SSBModSettings']:
-            velocity = MIDI_RELEASE if new_settings['modAFInput'] == MIDI_RELEASE else MIDI_PRESS
-            midiport.send(mido.Message('note_on', note=MIDI_REC, velocity=velocity))
+            if new_settings['modAFInput'] == 0: # off
+                midiport.send(mido.Message('note_on', note=MIDI_REC, velocity=MIDI_RELEASE))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_B, velocity=MIDI_RELEASE))
+            elif new_settings['modAFInput'] == 1: # CW carrier
+                midiport.send(mido.Message('note_on', note=MIDI_REC, velocity=MIDI_PRESS))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_B, velocity=MIDI_PRESS))
+            elif new_settings['modAFInput'] == 3: # SSB
+                midiport.send(mido.Message('note_on', note=MIDI_REC, velocity=MIDI_PRESS))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_B, velocity=MIDI_RELEASE))
 
     #print('Updated settings:', deviceset_index, channel_index, settings[deviceset_index, channel_index])
 
@@ -183,7 +194,7 @@ def channel_settings(deviceset_index, channel_index):
 def midiloop():
     global midiport
     print('midiloop starting')
-    #midiport.send(mido.Message('control_change', control=0x7f, value=0x00)) # read all MIDI settings
+    #midiport.send(mido.Message('control_change', control=MIDI_READ_ALL, value=0x00)) # read all MIDI settings
 
     midiport.send(mido.Message('note_on', note=MIDI_SYNC_B, velocity=MIDI_PRESS))
     settings['sync_b'] = True
@@ -217,6 +228,12 @@ def midiloop():
                 print("REC pressed")
                 if settings[1, 0]['SSBModSettings']['modAFInput'] == 0:
                     patch_tx({'modAFInput': 3})
+                else:
+                    patch_tx({'modAFInput': 0})
+
+            elif msg.type == 'note_on' and msg.note == MIDI_CUE_B:
+                if msg.velocity == MIDI_PRESS:
+                    patch_tx({'modAFInput': 1}) # CW carrier
                 else:
                     patch_tx({'modAFInput': 0})
 
