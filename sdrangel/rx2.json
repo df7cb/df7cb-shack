@@ -21,7 +21,7 @@
         "spanLog2": 4,
         "streamIndex": 0,
         "title": "SSB Demodulator",
-        "useReverseAPI": 0,
+        "useReverseAPI": 1,
         "volume": 1
     },
     "channelType": "SSBDemod",

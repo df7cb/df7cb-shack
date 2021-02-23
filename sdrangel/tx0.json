@@ -6,6 +6,8 @@
         "audioFlipChannels": 0,
         "audioMute": 0,
         "bandwidth": 2900,
+        "cmpPreGainDB": -10,
+        "cmpThresholdDB": -60,
         "cwKeyer": {
             "dashKey": 45,
             "dashKeyModifiers": 0,
