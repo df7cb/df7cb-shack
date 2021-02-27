@@ -1,0 +1,4 @@
+Input:
+added 4.7nF and voltage divider 1MΩ/1MΩ
+
+Thanks DM6AS!
