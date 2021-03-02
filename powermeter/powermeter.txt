@@ -1,0 +1,31 @@
+RF power meter 0-500Mhz -80 ~ 10dBm can be set RF power attenuation value
+
+Description:
+Features: 
+
+RF-Power8000 is an RF power module. Advantages: 0.96 inch OLED display, PC to
+read data and settings, you can set the frequency, the amount of attenuation
+can be preset, simple structure, easy to use, stable performance, reliable,
+high sensitivity and measurement speed and so on.
+
+Second, the product application:
+● RF power measurement;
+● instrument calibration;
+
+Third, the product specifications:
+1, measuring power range-45～-5 dBm (external RF attenuator can be extended to 80dBm)
+2, the measurement resolution of 0.1 dBm power
+3, measurement frequency range 1 1MHz-5GHz 
+4, the measured power 1nW ~ 2W
+5, the working voltage of 5VDC (direct selection MICRO-USB powered)
+6, the working current <50 mA
+7, the working temperature of -40 ℃ ~ 65 ℃ degrees Celsius
+8, storage temperature -40 ℃ ~ 65 ℃ degrees Celsius
+9, size 50 * 50 * 25 mm length X width X height
+
+Package Contents
+100% Brand New
+1xRF power meter
+1x cable
+
+https://www.aliexpress.com/item/33038137193.html?spm=a2g0s.9042311.0.0.73514c4d9TJd6j
