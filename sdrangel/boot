@@ -70,9 +70,9 @@ curl -fX PATCH --data @rx2.json $DEVICESET/0/channel/2/settings
 #curl -fX PATCH --data @tx2.json $DEVICESET/1/channel/2/settings
 
 # start cwangel
-./cwangel &
-CWPID="$!"
+#./cwangel &
+#CWPID="$!"
 
 # wait for sdrangel to exit and stop cwangel
-trap "kill $SDRPID $CWPID" EXIT INT TERM
-wait $SDRPID
+#trap "kill $SDRPID $CWPID" EXIT INT TERM
+#wait $SDRPID

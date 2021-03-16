@@ -13,6 +13,7 @@
     "fftOverlap": 0,
     "fftSize": 1024,
     "fftWindow": 4,
+    "fpsPeriodMs": 50,
     "histogramStroke": 30,
     "invertedWaterfall": 1,
     "linear": 0,

@@ -23,6 +23,8 @@
                             "audioFlipChannels": 0,
                             "audioMute": 0,
                             "bandwidth": 2800,
+                            "cmpPreGainDB": -10,
+                            "cmpThresholdDB": -60,
                             "cwKeyer": {
                                 "dashKey": 45,
                                 "dashKeyModifiers": 0,
@@ -145,6 +147,7 @@
                 "fftOverlap": 0,
                 "fftSize": 1024,
                 "fftWindow": 4,
+                "fpsPeriodMs": 50,
                 "histogramStroke": 30,
                 "invertedWaterfall": 0,
                 "linear": 0,
@@ -166,6 +169,8 @@
                             "audioFlipChannels": 0,
                             "audioMute": 0,
                             "bandwidth": 2800,
+                            "cmpPreGainDB": -10,
+                            "cmpThresholdDB": -60,
                             "cwKeyer": {
                                 "dashKey": 45,
                                 "dashKeyModifiers": 0,
@@ -288,6 +293,7 @@
                 "fftOverlap": 0,
                 "fftSize": 1024,
                 "fftWindow": 4,
+                "fpsPeriodMs": 50,
                 "histogramStroke": 30,
                 "invertedWaterfall": 0,
                 "linear": 0,
@@ -390,6 +396,7 @@
                 "fftOverlap": 0,
                 "fftSize": 4096,
                 "fftWindow": 4,
+                "fpsPeriodMs": 50,
                 "histogramStroke": 39,
                 "invertedWaterfall": 0,
                 "linear": 0,
@@ -492,6 +499,7 @@
                 "fftOverlap": 0,
                 "fftSize": 4096,
                 "fftWindow": 4,
+                "fpsPeriodMs": 50,
                 "histogramStroke": 39,
                 "invertedWaterfall": 0,
                 "linear": 0,
@@ -501,6 +509,10 @@
             }
         }
     ],
+    "workingFeatureSetPreset": {
+        "description": "no name",
+        "group": "default"
+    },
     "workingPreset": {
         "centerFrequency": 250000,
         "channelConfigs": [
@@ -514,17 +526,17 @@
                         "agcThresholdGate": 4,
                         "agcTimeLog2": 7,
                         "audioBinaural": 0,
-                        "audioDeviceName": "System default device",
+                        "audioDeviceName": "alsa_output.usb-Plantronics_Plantronics_Blackwire_3220_Series_24C16E47570F4914863034C5033A0005-00.analog-stereo",
                         "audioFlipChannels": 0,
                         "audioMute": 0,
                         "dsb": 0,
-                        "inputFrequencyOffset": -230000,
-                        "lowCutoff": 100,
+                        "inputFrequencyOffset": -225470,
+                        "lowCutoff": 500,
                         "reverseAPIAddress": "127.0.0.1",
                         "reverseAPIChannelIndex": 0,
                         "reverseAPIDeviceIndex": 0,
                         "reverseAPIPort": 8888,
-                        "rfBandwidth": 2900,
+                        "rfBandwidth": 1100,
                         "rgbColor": -16711936,
                         "spanLog2": 4,
                         "streamIndex": 0,
@@ -555,11 +567,11 @@
                         "reverseAPIDeviceIndex": 0,
                         "reverseAPIPort": 8888,
                         "rfBandwidth": 2900,
-                        "rgbColor": -16711936,
+                        "rgbColor": -65536,
                         "spanLog2": 4,
                         "streamIndex": 0,
                         "title": "SSB Demodulator",
-                        "useReverseAPI": 0,
+                        "useReverseAPI": 1,
                         "volume": 1
                     }
                 }
@@ -585,11 +597,11 @@
                         "reverseAPIDeviceIndex": 0,
                         "reverseAPIPort": 8888,
                         "rfBandwidth": 2900,
-                        "rgbColor": -16711936,
+                        "rgbColor": -11184641,
                         "spanLog2": 4,
                         "streamIndex": 0,
                         "title": "SSB Demodulator",
-                        "useReverseAPI": 0,
+                        "useReverseAPI": 1,
                         "volume": 1
                     }
                 }
@@ -690,7 +702,7 @@
         ],
         "group": "default",
         "iqImbalanceCorrection": 0,
-        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAHRAAADwfwCAAAAAfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAAAAABMAAAPBAAAAhQAAAIUAAAADAAAE/gAAAPn8AQAAAAL8AAAAAAAABP4AAAFmAP////oAAAABAgAAAAT7AAAAGgBpAG4AcAB1AHQAVgBpAGUAdwBEAG8AYwBrAQAAAAD/////AAAA3wAAAQX7AAAAFgBjAGgAYQBuAG4AZQBsAEQAbwBjAGsBAAAAAP////8AAACUAP////sAAAAUAHAAcgBlAHMAZQB0AEQAbwBjAGsAAAAAAP////8AAAB3AP////sAAAAYAGMAbwBtAG0AYQBuAGQAcwBEAG8AYwBrAAAAAAD/////AAAAdwD////7AAAAJABzAHAAZQBjAHQAcgBhAEQAaQBzAHAAbABhAHkARABvAGMAawAAAAHXAAADJwAAAIMA////AAAE/gAAAsIAAAABAAAAAgAAAAEAAAAC/AAAAAA=",
+        "layout": "AAAA/wAAAAD9AAAAAgAAAAAAAAHRAAADwfwCAAAAAfsAAAAeAGkAbgBwAHUAdABTAGUAbABlAGMAdABEAG8AYwBrAAAAABMAAAPBAAAAAAAAAAAAAAADAAAE/gAAAhD8AQAAAAP7AAAAFgBjAGgAYQBuAG4AZQBsAEQAbwBjAGsBAAAAAAAABP4AAABtAP////wAAAAAAAAE/gAAAAAA////+v////8CAAAABPsAAAAWAGYAZQBhAHQAdQByAGUARABvAGMAawAAAAAA/////wAAAJEA////+wAAABoAaQBuAHAAdQB0AFYAaQBlAHcARABvAGMAawAAAAAA/////wAAAN4AAADe+wAAABQAcAByAGUAcwBlAHQARABvAGMAawAAAAAA/////wAAAHcA////+wAAABgAYwBvAG0AbQBhAG4AZABzAEQAbwBjAGsAAAAAAP////8AAAB3AP////sAAAAkAHMAcABlAGMAdAByAGEARABpAHMAcABsAGEAeQBEAG8AYwBrAAAAAdcAAAMnAAABUQD///8AAAT+AAABqwAAAAEAAAACAAAAAQAAAAL8AAAAAA==",
         "presetType": 0,
         "spectrumConfig": {
             "averagingMode": 2,
@@ -707,6 +719,7 @@
             "fftOverlap": 0,
             "fftSize": 4096,
             "fftWindow": 4,
+            "fpsPeriodMs": 50,
             "histogramStroke": 39,
             "invertedWaterfall": 1,
             "linear": 0,
