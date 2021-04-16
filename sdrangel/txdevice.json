@@ -22,6 +22,6 @@
         "reverseAPIPort": 8888,
         "transverterDeltaFrequency": 0,
         "transverterMode": 0,
-        "useReverseAPI": 0
+        "useReverseAPI": 1
     }
 }

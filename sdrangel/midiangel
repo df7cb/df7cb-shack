@@ -23,12 +23,14 @@ rx_channel_index = 0
 tx_device = 1
 tx_channel_index = 0
 base_url = f'http://{sdrangel_ip}:{SDRANGEL_API_PORT}/sdrangel'
-rx_url = [
+rxdev_url = base_url + f'/deviceset/{rx_device}/device/settings'
+rxch_url = [
         base_url + f'/deviceset/{rx_device}/channel/0/settings',
         base_url + f'/deviceset/{rx_device}/channel/1/settings',
         base_url + f'/deviceset/{rx_device}/channel/2/settings',
         ]
-tx0_url = base_url + f'/deviceset/{tx_device}/channel/0/settings'
+txdev_url = base_url + f'/deviceset/{tx_device}/device/settings'
+txch0_url = base_url + f'/deviceset/{tx_device}/channel/0/settings'
 
 MIDI_PRESS = 127
 MIDI_RELEASE = 0
@@ -44,6 +46,7 @@ MIDI_CUE_KP1_B = 49
 MIDI_CUE_KP2_B = 50
 MIDI_CUE_KP3_B = 51
 MIDI_CUE_KP4_B = 52
+MIDI_CROSSFADE = 54
 MIDI_VOL_B = 61
 MIDI_TREB_B = 63
 MIDI_BASS_B = 64
@@ -118,8 +121,14 @@ def gen_dict_extract(key, var):
 #                    frequency_key: frequency
 #                })
 
+def patch_txdev(content):
+    requests.patch(url=txdev_url, json={'deviceHwType': 'LimeSDR',
+        'direction': 1,
+        'limeSdrOutputSettings': content,
+        'originatorIndex': 1})
+
 def patch_tx(content):
-    requests.patch(url=tx0_url, json={'SSBModSettings': content,
+    requests.patch(url=txch0_url, json={'SSBModSettings': content,
         'channelType': 'SSBMod',
         'direction': 1,
         'originatorDeviceSetIndex': 1,
@@ -127,13 +136,34 @@ def patch_tx(content):
         })
 
 def patch_rx(rx_channel_index, content):
-    requests.patch(url=rx_url[rx_channel_index], json={
+    requests.patch(url=rxch_url[rx_channel_index], json={
         'SSBDemodSettings': content,
         'channelType': 'SSBDemod',
         'direction': 0,
         'originatorDeviceSetIndex': 0,
         'originatorChannelIndex': 0,
         })
+
+# ======================================================================
+@app.route('/sdrangel/deviceset/<int:deviceset_index>/device/settings', methods=['GET', 'PATCH', 'PUT'])
+def device_settings(deviceset_index):
+    """ Receiving device settings from reverse API """
+# ----------------------------------------------------------------------
+    content = request.get_json(silent=True)
+    print('Reverse API request:', content)
+    {'deviceHwType': 'LimeSDR', 'direction': 1, 'limeSdrOutputSettings': {'gain': 67}, 'originatorIndex': 1}
+    # reverse API requests seem to all go to 0,0, use channel values from inside json
+    deviceset_index = content['originatorIndex']
+
+    ## store settings
+    if 'limeSdrInputSettings' in content:
+        new_settings = content['limeSdrInputSettings']
+        settings[deviceset_index]['limeSdrInputSettings'] |= new_settings
+    elif 'limeSdrOutputSettings' in content:
+        new_settings = content['limeSdrOutputSettings']
+        settings[deviceset_index]['limeSdrOutputSettings'] |= new_settings
+
+    return "OK processed "
 
 # ======================================================================
 @app.route('/sdrangel/deviceset/<int:deviceset_index>/channel/<int:channel_index>/settings', methods=['GET', 'PATCH', 'PUT'])
@@ -229,6 +259,7 @@ def midiloop():
 
     while True:
         freq_step = 0
+        tx_gain = None
 
         # block waiting for the first message, and then read everything pending
         msgs = [midiport.receive()]
@@ -239,7 +270,11 @@ def midiloop():
         for msg in msgs:
             print('MIDI:', msg) #, msg.bytes())
 
-            if msg.type == 'control_change' and msg.control == MIDI_JOG_B:
+            #MIDI: control_change channel=0 control=54 value=65 time=0
+            if msg.type == 'control_change' and msg.control == MIDI_CROSSFADE:
+                tx_gain = int(msg.value / 127.0 * 70.0)
+
+            elif msg.type == 'control_change' and msg.control == MIDI_JOG_B:
                 tick = msg.value
                 if tick > 64: tick -= 128
                 # remove hysteresis on changing direction
@@ -306,6 +341,10 @@ def midiloop():
                 high = 3000 - 20 * (127-msg.value)
                 patch_rx(rx_channel_index, {'rfBandwidth': high})
 
+        if tx_gain is not None and tx_gain != settings[tx_device]['limeSdrOutputSettings']['gain']:
+            print("Setting TX gain to", tx_gain)
+            patch_txdev({'gain': tx_gain})
+
         if freq_step != 0:
             scaled_freq_step = 10 * (-1)**(freq_step < 0) * int(abs(freq_step)**1.7)
             print('Updating freq:', freq_step, scaled_freq_step)
@@ -327,16 +366,28 @@ def main():
     addr, port, SDRANGEL_API_ADDR, SDRANGEL_API_PORT = getInputOptions()
     sdrangel_ip = '127.0.0.1'
 
+    rx_status = requests.get(url=rxdev_url)
+    if rx_status.status_code // 100 != 2:
+        print('Failed to request', rxdev_url)
+    print('Initial RX status:', rx_status.json())
+    settings[rx_device] = rx_status.json()
+
     for rx_channel_index in range(3):
-        rx_status = requests.get(url=rx_url[rx_channel_index])
+        rx_status = requests.get(url=rxch_url[rx_channel_index])
         if rx_status.status_code // 100 != 2:
-            print('Failed to request', rx_url[rx_channel_index])
+            print('Failed to request', rxch_url[rx_channel_index])
         print('Initial RX status:', rx_status.json())
         settings[rx_device, rx_channel_index] = rx_status.json()
 
-    tx_status = requests.get(url=tx0_url)
+    tx_status = requests.get(url=txdev_url)
     if tx_status.status_code // 100 != 2:
-        print('Failed to request', tx0_url)
+        print('Failed to request', txdev_url)
+    print('Initial TX status:', tx_status.json())
+    settings[tx_device] = tx_status.json()
+
+    tx_status = requests.get(url=txch0_url)
+    if tx_status.status_code // 100 != 2:
+        print('Failed to request', txch0_url)
     print('Initial TX status:', tx_status.json())
     settings[tx_device, tx_channel_index] = tx_status.json()
 

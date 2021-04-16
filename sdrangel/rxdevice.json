@@ -29,6 +29,6 @@
         "tiaGain": 2,
         "transverterDeltaFrequency": -739500000,
         "transverterMode": 1,
-        "useReverseAPI": 0
+        "useReverseAPI": 1
     }
 }
