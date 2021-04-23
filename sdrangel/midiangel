@@ -14,6 +14,9 @@ import argparse
 from flask import Flask
 from flask import request, jsonify
 
+tx_center_freq = 2_399_000_000
+freq_offset = 1_250_000 # TX tuned 1.25 MHz below TPX passband center
+
 SDRANGEL_API_ADDR = None
 SDRANGEL_API_PORT = 8091
 
@@ -55,8 +58,8 @@ MIDI_CUE_B = 82
 MIDI_SYNC_B = 83
 MIDI_READ_ALL = 0x7f
 
-AUDIO_USB_OUTPUT= 'alsa_output.usb-GeneralPlus_USB_Audio_Device-00.analog-stereo'
-AUDIO_USB_INPUT = 'alsa_input.usb-GeneralPlus_USB_Audio_Device-00.mono-fallback'
+AUDIO_USB_OUTPUT= 'alsa_output.usb-Plantronics_Plantronics_Blackwire_3220_Series_24C16E47570F4914863034C5033A0005-00.analog-stereo'
+AUDIO_USB_INPUT = 'alsa_input.usb-Plantronics_Plantronics_Blackwire_3220_Series_24C16E47570F4914863034C5033A0005-00.analog-stereo'
 
 Hamlib.rig_set_debug(Hamlib.RIG_DEBUG_NONE)
 my_rig = Hamlib.Rig(Hamlib.RIG_MODEL_NETRIGCTL)
@@ -190,7 +193,7 @@ def channel_settings(deviceset_index, channel_index):
         if 'inputFrequencyOffset' in new_settings:
             freq = new_settings['inputFrequencyOffset']
             if settings['sync_b']:
-                patch_tx({'inputFrequencyOffset': freq})
+                patch_tx({'inputFrequencyOffset': freq + freq_offset})
 
     elif 'SSBModSettings' in content:
         new_settings = content['SSBModSettings']
@@ -198,7 +201,7 @@ def channel_settings(deviceset_index, channel_index):
 
         if 'inputFrequencyOffset' in new_settings:
             freq = new_settings['inputFrequencyOffset']
-            my_rig.set_freq(Hamlib.RIG_VFO_A, 2400250000 + freq)
+            my_rig.set_freq(Hamlib.RIG_VFO_A, tx_center_freq + freq)
 
         if 'modAFInput' in content['SSBModSettings']:
             if new_settings['modAFInput'] == 0: # off
@@ -302,8 +305,21 @@ def midiloop():
 
             elif msg.type == 'note_on' and msg.note == MIDI_CUE_KP1_A and msg.velocity == MIDI_PRESS:
                 patch_rx(rx_channel_index, {'audioDeviceName': 'System default device'})
+                patch_tx({'audioDeviceName': 'System default device'})
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP1_A, velocity=MIDI_PRESS))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP2_A, velocity=MIDI_RELEASE))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP3_A, velocity=MIDI_RELEASE))
             elif msg.type == 'note_on' and msg.note == MIDI_CUE_KP2_A and msg.velocity == MIDI_PRESS:
                 patch_rx(rx_channel_index, {'audioDeviceName': AUDIO_USB_OUTPUT})
+                patch_tx({'audioDeviceName': AUDIO_USB_INPUT})
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP1_A, velocity=MIDI_RELEASE))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP2_A, velocity=MIDI_PRESS))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP3_A, velocity=MIDI_RELEASE))
+            elif msg.type == 'note_on' and msg.note == MIDI_CUE_KP3_A and msg.velocity == MIDI_PRESS:
+                patch_tx({'audioDeviceName': 'tx0.monitor'})
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP1_A, velocity=MIDI_RELEASE))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP2_A, velocity=MIDI_RELEASE))
+                midiport.send(mido.Message('note_on', note=MIDI_CUE_KP3_A, velocity=MIDI_PRESS))
 
             elif msg.type == 'note_on' and msg.note in (MIDI_CUE_KP1_B, MIDI_CUE_KP2_B, MIDI_CUE_KP3_B) and msg.velocity == MIDI_PRESS:
                 rx_channel_index = msg.note - MIDI_CUE_KP1_B
@@ -314,7 +330,7 @@ def midiloop():
                 midiport.send(mido.Message('note_on', note=msg.note, velocity=MIDI_PRESS))
                 if settings['sync_b']:
                     tx = settings[rx_device, rx_channel_index]['SSBDemodSettings']['inputFrequencyOffset']
-                    patch_tx({'inputFrequencyOffset': tx})
+                    patch_tx({'inputFrequencyOffset': tx + freq_offset})
 
             elif msg.type == 'note_on' and msg.note == MIDI_CUE_B:
                 if msg.velocity == MIDI_PRESS:
@@ -327,7 +343,7 @@ def midiloop():
                 if settings['sync_b']:
                     midiport.send(mido.Message('note_on', note=MIDI_SYNC_B, velocity=MIDI_PRESS))
                     tx = settings[rx_device, rx_channel_index]['SSBDemodSettings']['inputFrequencyOffset']
-                    patch_tx({'inputFrequencyOffset': tx})
+                    patch_tx({'inputFrequencyOffset': tx + freq_offset})
                 else:
                     midiport.send(mido.Message('note_on', note=MIDI_SYNC_B, velocity=MIDI_RELEASE))
 

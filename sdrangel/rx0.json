@@ -6,7 +6,7 @@
         "agcThresholdGate": 4,
         "agcTimeLog2": 7,
         "audioBinaural": 0,
-        "audioDeviceName": "System default device",
+        "audioDeviceName": "alsa_output.usb-Plantronics_Plantronics_Blackwire_3220_Series_24C16E47570F4914863034C5033A0005-00.analog-stereo",
         "audioFlipChannels": 0,
         "audioMute": 0,
         "dsb": 0,
