@@ -7,7 +7,7 @@
         "devSampleRate": 4500000,
         "extClock": 1,
         "extClockFreq": 10000000,
-        "gain": 70,
+        "gain": 60,
         "gpioDir": 0,
         "gpioPins": 0,
         "log2HardInterp": 2,
