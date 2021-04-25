@@ -44,15 +44,14 @@ curl -fX PATCH --data @txspectrum.json $DEVICESET/1/spectrum/settings
 curl -fX POST  $DEVICESET/1/device/run
 curl -fX POST  $DEVICESET/0/device/run
 
-# set focus on RX device
-curl -fX PATCH $DEVICESET/0/focus
-
 # configure channels
 if ! curl -sf $DEVICESET/0/channel/0/settings; then
   curl -fX POST --data @rx0.json $DEVICESET/0/channel
 fi
 curl -fX PATCH --data @rx0.json $DEVICESET/0/channel/0/settings
-curl -fX POST  --data @tx0.json $DEVICESET/1/channel
+if ! curl -sf $DEVICESET/1/channel/0/settings; then
+  curl -fX POST  --data @tx0.json $DEVICESET/1/channel
+fi
 curl -fX PATCH --data @tx0.json $DEVICESET/1/channel/0/settings
 
 if ! curl -sf $DEVICESET/0/channel/1/settings; then
@@ -69,10 +68,7 @@ curl -fX PATCH --data @rx2.json $DEVICESET/0/channel/2/settings
 #curl -fX POST  --data @tx2.json $DEVICESET/1/channel
 #curl -fX PATCH --data @tx2.json $DEVICESET/1/channel/2/settings
 
-# start cwangel
-#./cwangel &
-#CWPID="$!"
+# set focus on RX device
+curl -fX PATCH $DEVICESET/0/focus
 
-# wait for sdrangel to exit and stop cwangel
-#trap "kill $SDRPID $CWPID" EXIT INT TERM
-#wait $SDRPID
+systemctl --user start midiangel.service

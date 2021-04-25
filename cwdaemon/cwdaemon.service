@@ -2,10 +2,7 @@
 Description=Digispark keyer daemon
 
 [Service]
-ExecStart=/bin/sh -c "exec /home/myon/shack/cwdaemon/cwdaemon /dev/ttyACM*"
-#Restart=on-failure
-Restart=always
-#StartLimitIntervalSec=0
+ExecStart=/home/myon/shack/cwdaemon/cwdaemon /dev/ttyUSBdigikeyer
 
-[Install]
-WantedBy=default.target
+#[Install]
+#WantedBy=default.target
