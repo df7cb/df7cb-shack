@@ -27,7 +27,7 @@
         "playLoop": 0,
         "reverseAPIAddress": "127.0.0.1",
         "reverseAPIChannelIndex": 0,
-        "reverseAPIDeviceIndex": 0,
+        "reverseAPIDeviceIndex": 1,
         "reverseAPIPort": 8888,
         "rgbColor": -16711936,
         "spanLog2": 4,
