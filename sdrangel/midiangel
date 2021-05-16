@@ -46,7 +46,7 @@ MIDI_PLAY_A = 33
 MIDI_CUE_A = 34
 MIDI_SYNC_A = 35
 MIDI_REC = 43
-#MIDI_SCRATCH = 45
+MIDI_SCRATCH = 45
 MIDI_JOG_A = 48
 MIDI_JOG_B = 49
 MIDI_CUE_KP1_B = 49
@@ -165,7 +165,7 @@ def channel_settings(deviceset_index, channel_index):
 
         if 'inputFrequencyOffset' in new_settings:
             freq = new_settings['inputFrequencyOffset']
-            if settings['sync_b']:
+            if channel_index == 0 and settings['sync_a'] or channel_index == 1 and settings['sync_b']:
                 patch_tx({'inputFrequencyOffset': freq + freq_offset})
 
     elif 'SSBModSettings' in content:
@@ -209,6 +209,7 @@ def midiloop():
 
     settings['sync_a'] = True
     settings['sync_b'] = False
+    settings['sync_c'] = False
 
     midi_set(MIDI_CUE_KP1_A, True)
     midi_set(MIDI_CUE_KP2_A, False)
@@ -225,6 +226,8 @@ def midiloop():
     midi_set(MIDI_SYNC_B, settings['sync_b'])
     midi_set(MIDI_CUE_B, False)
     midi_set(MIDI_PLAY_B, False)
+
+    midi_set(MIDI_SCRATCH, settings['sync_c'])
 
     last_tick_a = 0
     last_tick_b = 0
@@ -326,6 +329,8 @@ def midiloop():
                 if settings['sync_a']:
                     settings['sync_b'] = False
                     midi_set(MIDI_SYNC_B, settings['sync_b'])
+                    settings['sync_c'] = False
+                    midi_set(MIDI_SCRATCH, settings['sync_c'])
                     tx = settings[rx_device, 0]['SSBDemodSettings']['inputFrequencyOffset']
                     patch_tx({'inputFrequencyOffset': tx + freq_offset})
 
@@ -335,7 +340,20 @@ def midiloop():
                 if settings['sync_b']:
                     settings['sync_a'] = False
                     midi_set(MIDI_SYNC_A, settings['sync_a'])
+                    settings['sync_c'] = False
+                    midi_set(MIDI_SCRATCH, settings['sync_c'])
                     tx = settings[rx_device, 1]['SSBDemodSettings']['inputFrequencyOffset']
+                    patch_tx({'inputFrequencyOffset': tx + freq_offset})
+
+            elif msg.type == 'note_on' and msg.note == MIDI_SCRATCH and msg.velocity == MIDI_PRESS:
+                settings['sync_c'] = not settings['sync_c']
+                midi_set(MIDI_SCRATCH, settings['sync_c'])
+                if settings['sync_c']:
+                    settings['sync_a'] = False
+                    midi_set(MIDI_SYNC_A, settings['sync_a'])
+                    settings['sync_b'] = False
+                    midi_set(MIDI_SYNC_B, settings['sync_b'])
+                    tx = settings[rx_device, 2]['SSBDemodSettings']['inputFrequencyOffset']
                     patch_tx({'inputFrequencyOffset': tx + freq_offset})
 
             elif msg.type == 'control_change' and msg.control == MIDI_VOL_A:
