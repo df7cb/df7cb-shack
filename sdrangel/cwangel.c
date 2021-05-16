@@ -2,7 +2,7 @@
  * listen to CW keyer input from an arduino on a USB port and forward to
  * sdrangel API
  *
- * Copyright (C) 2019-2020 Christoph Berg DF7CB <cb@df7cb.de>
+ * Copyright (C) 2019-2021 Christoph Berg DF7CB <cb@df7cb.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,9 @@
 
 //#define BAUD 115200
 #define BAUD 1200
+//#define PORTNO 6789
+#define PORTNO 6790
+#define BUFSIZE 1024
 
 #include <errno.h>
 #include <stdio.h>
@@ -24,6 +27,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <ctype.h>
@@ -77,12 +84,93 @@ key_up_down (int state)
 	ret = curl_easy_perform(hnd);
 	if (ret != CURLE_OK)
 		error("curl");
+	//printf("CW %i\n", state);
+}
+
+int setup_cwdaemon()
+{
+	int sockfd;		/* socket */
+	struct sockaddr_in serveraddr;	/* server's addr */
+	int optval;		/* flag value for setsockopt */
+
+	/*
+	 * socket: create the parent socket
+	 */
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (sockfd < 0)
+		error("ERROR opening socket");
+
+	/* setsockopt: Handy debugging trick that lets
+	 * us rerun the server immediately after we kill it;
+	 * otherwise we have to wait about 20 secs.
+	 * Eliminates "ERROR on binding: Address already in use" error.
+	 */
+	optval = 1;
+	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR,
+		   (const void *)&optval, sizeof(int));
+
+	/*
+	 * build the server's Internet address
+	 */
+	bzero((char *)&serveraddr, sizeof(serveraddr));
+	serveraddr.sin_family = AF_INET;
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	serveraddr.sin_port = htons((unsigned short)PORTNO);
+
+	/*
+	 * bind: associate the parent socket with a port
+	 */
+	if (bind(sockfd, (struct sockaddr *)&serveraddr,
+		 sizeof(serveraddr)) < 0)
+		error("ERROR on binding");
+	printf("Listening on :%d\n", PORTNO);
+
+	return sockfd;
+}
+
+void
+read_cwdaemon(int sockfd, int keyerfd)
+{
+	char buf[BUFSIZE];	/* message buf */
+	int n;			/* message byte size */
+
+	n = recv(sockfd, buf, BUFSIZE-1, 0);
+	if (n < 0)
+		error("ERROR in recvfrom");
+	if (n == 0) /* skip empty packets */
+		return;
+
+#if 0
+	if (buf[0] == '\033') {
+		switch (buf[1]) {
+			case '4': /* abort current message */
+				break;
+			default:
+				buf[n] = '\0';
+				printf("Unknown ESC message: %s\n", buf + 1);
+				break;
+		}
+		return;
+	}
+#endif
+
+	buf[n] = '\0';
+	if (n > 1 && buf[n-1] == '\n')
+		buf[n-1] = '\0';
+
+	for (int i = 0; i < n; i++) {
+		if (buf[i] == '\0')
+			return;
+		write(keyerfd, buf + i, 1);
+		//printf("Sending %c\n", buf[i]);
+	}
 }
 
 int main(int argc, char **argv)
 {
 	char *device;
 	int keyerfd;
+	int sockfd;
 	struct termios settings;
 	setlinebuf(stdout);
 
@@ -114,6 +202,8 @@ int main(int argc, char **argv)
 
 	printf("Connected to %s, sending requests to %s\n", device, JSONAPI);
 
+	sockfd = setup_cwdaemon();
+
 	int oldstate = -1; /* force off at start */
 	int state = 0;
 
@@ -124,8 +214,9 @@ int main(int argc, char **argv)
 		fd_set fds;
 		FD_ZERO(&fds);
 		FD_SET(keyerfd, &fds);
+		FD_SET(sockfd, &fds);
 
-		if (select(keyerfd + 1, &fds, NULL, NULL, NULL) < 0)
+		if (select(sockfd + 1, &fds, NULL, NULL, NULL) < 0)
 			error("select");
 		if (FD_ISSET(keyerfd, &fds)) {
 			char buf[100];
@@ -151,6 +242,10 @@ int main(int argc, char **argv)
 		if (state != oldstate) {
 			key_up_down (state);
 			state = oldstate;
+		}
+
+		if (FD_ISSET(sockfd, &fds)) {
+			read_cwdaemon(sockfd, keyerfd);
 		}
 	}
 }
