@@ -4,6 +4,15 @@
 
 set -eux
 
+while getopts "k" opt ; do
+    case $opt in
+        k) killall sdrangel; sleep 1 ;;
+        *) exit 5 ;;
+    esac
+done
+# shift away args
+shift $(($OPTIND - 1))
+
 API="http://127.0.0.1:8091/sdrangel"
 DEVICESET="$API/deviceset"
 
@@ -20,10 +29,11 @@ done
 if ! SDRPID=$(pidof sdrangel); then
   sdrangel &
   SDRPID="$!"
+  while ! curl -f $API; do
+    sleep 1
+  done
+  sleep 10
 fi
-while ! curl -f $API; do
-  sleep 1
-done
 
 # add TX device set
 #curl -fX PUT   --data @rxdevice-type.json $DEVICESET/0/device
