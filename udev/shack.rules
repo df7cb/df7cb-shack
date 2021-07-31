@@ -19,3 +19,6 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="06f8", ATTRS{idProduct}=="b11e", ENV{SYSTEM
 
 # NanoVNA
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", MODE="0660", GROUP="plugdev"
+
+# 091e:0003 Garmin International GPS (various models)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="ttyUSBGarmin"
