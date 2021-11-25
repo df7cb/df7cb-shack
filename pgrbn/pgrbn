@@ -1,0 +1,64 @@
+#!/usr/bin/python3
+
+"""
+Connect to reversebeacon.net and store all spots in a PostgreSQL database
+
+Copyright (C) 2021 Christoph Berg DF7CB
+License: MIT
+"""
+
+"""
+create table rbn (
+  start timestamptz(0) not null default now(),
+  spotter text not null,
+  qrg numeric not null,
+  dx text not null,
+  mode text not null,
+  db int,
+  wpm int,
+  extra text
+);
+"""
+
+import psycopg2
+import socket
+import select
+import re
+
+conn = psycopg2.connect("service=cb application_name=pgrbn")
+cur = conn.cursor()
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("arcluster.reversebeacon.net", 7000))
+
+s.send(b"DF7CB\r\n")
+
+# DX de DF2CK-#:   14009.8  EA8VI          CW     3 dB  23 WPM  CQ      0838Z
+# DX de IK4VET-#: 14022.90  9A2N           CW    19 dB  29 WPM  CQ      0940Z
+# DX de LZ7AA-#:   14070.8  IZ4ISM         PSK31 19 dB  31 BPS  CQ      0936Z
+# DX de G4ZFE-#:   14071.0  IZ5GUB         PSK31 20 dB  31 BPS  CQ      0942Z
+re1 = re.compile('DX de ([^ -#]+)(?:-#)?: +([\d.]+) +([^ ]+) +(\S+) +([0-9-]+) dB +([0-9-]+) \S+ +(\S(?:.*\S)?)? +\d\d\d\dZ')
+
+def dx(msg):
+    try:
+        line = msg.decode(encoding='UTF-8', errors='replace')
+        if m := re.match(re1, line):
+            print(m.groups())
+            cur.execute('insert into rbn (spotter, qrg, dx, mode, db, wpm, extra) values (%s, %s, %s, %s, %s, %s, %s)', m.groups())
+            conn.commit()
+        else:
+            print("Could not handle", line)
+    except Exception as e:
+        print("Something went wrong with", msg, e)
+        conn.rollback()
+
+
+while True:
+    r, w, x = select.select([s], [], [], None)
+    buf = b""
+    if s in r:
+        buf += s.recv(1024)
+        while b"\r\n" in buf:
+            pos = buf.index(b"\r\n")
+            dx(buf[:pos])
+            buf = buf[pos+2:]
