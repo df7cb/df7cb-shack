@@ -43,7 +43,7 @@ def dx(msg):
     try:
         line = msg.decode(encoding='UTF-8', errors='replace')
         if m := re.match(re1, line):
-            print(m.groups())
+            #print(m.groups())
             cur.execute('insert into rbn (spotter, qrg, dx, mode, db, wpm, extra) values (%s, %s, %s, %s, %s, %s, %s)', m.groups())
             conn.commit()
         else:
