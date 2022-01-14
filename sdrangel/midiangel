@@ -450,7 +450,7 @@ def main():
     settings[tx_device, tx_channel_index] = tx_status.json()
 
     global midiport
-    midiport = mido.open_ioport('DJControl Compact MIDI 1')
+    midiport = mido.open_ioport('DJControl Compact:DJControl Compact DJControl Com 24:0')
     threading.Thread(target=midiloop, daemon=True).start()
 
     print(f'main: starting at: {addr}:{port}')
