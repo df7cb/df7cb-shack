@@ -400,7 +400,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    const: '50'
+    const: '10'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: float
@@ -666,9 +666,9 @@ blocks:
     alpha8: '1.0'
     alpha9: '1.0'
     autoscale: 'False'
-    average: '1.0'
+    average: '0.1'
     axislabels: 'True'
-    bw: 6e3
+    bw: 48e3
     color1: '"blue"'
     color10: '"dark blue"'
     color2: '"red"'
@@ -680,11 +680,11 @@ blocks:
     color8: '"dark red"'
     color9: '"dark green"'
     comment: ''
-    ctrlpanel: 'False'
+    ctrlpanel: 'True'
     fc: '0'
     fftsize: '1024'
     freqhalf: 'True'
-    grid: 'False'
+    grid: 'True'
     gui_hint: ''
     label: Relative Gain
     label1: ''
@@ -710,7 +710,7 @@ blocks:
     tr_tag: '""'
     type: complex
     units: dB
-    update_time: '0.10'
+    update_time: '0.01'
     width1: '1'
     width10: '1'
     width2: '1'
@@ -722,15 +722,15 @@ blocks:
     width8: '1'
     width9: '1'
     wintype: window.WIN_HAMMING
-    ymax: '10'
-    ymin: '-140'
+    ymax: '-40'
+    ymin: '-85'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1144, 812.0]
+    coordinate: [936, 812.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_waterfall_sink_x_0
   id: qtgui_waterfall_sink_x
   parameters:
@@ -852,26 +852,6 @@ blocks:
     coordinate: [712, 948.0]
     rotation: 0
     state: true
-- name: rational_resampler_xxx_1
-  id: rational_resampler_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    decim: '16'
-    fbw: '0.4'
-    interp: '1'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    taps: '[]'
-    type: ccf
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [936, 812.0]
-    rotation: 0
-    state: disabled
 
 connections:
 - [analog_const_source_x_0, '0', blocks_float_to_complex_1_0, '1']
@@ -899,10 +879,9 @@ connections:
 - [limesdr_source_0, '0', blocks_multiply_xx_0_0_0_0_0, '0']
 - [limesdr_source_0, '0', qtgui_freq_sink_x_0, '0']
 - [rational_resampler_xxx_0, '0', blocks_complex_to_float_0, '0']
-- [rational_resampler_xxx_0, '0', rational_resampler_xxx_1, '0']
+- [rational_resampler_xxx_0, '0', qtgui_freq_sink_x_1, '0']
 - [rational_resampler_xxx_0_0, '0', blocks_multiply_xx_0_0_0, '0']
 - [rational_resampler_xxx_0_1, '0', blocks_complex_to_float_0_0, '0']
-- [rational_resampler_xxx_1, '0', qtgui_freq_sink_x_1, '0']
 
 metadata:
   file_format: 1
