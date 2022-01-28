@@ -152,7 +152,7 @@ class qo100(gr.top_block, Qt.QWidget):
             window.WIN_HAMMING, #wintype
             0, #fc
             24e3, #bw
-            "", #name
+            '', #name
             1,
             None # parent
         )
@@ -233,7 +233,7 @@ class qo100(gr.top_block, Qt.QWidget):
                 10,
                 samp_rate,
                 0,
-                3000,
+                5000,
                 1000,
                 window.WIN_HAMMING,
                 6.76))
@@ -243,7 +243,7 @@ class qo100(gr.top_block, Qt.QWidget):
                 af_gain,
                 samp_rate,
                 0,
-                3000,
+                5000,
                 1000,
                 window.WIN_HAMMING,
                 6.76))
@@ -253,7 +253,7 @@ class qo100(gr.top_block, Qt.QWidget):
                 1,
                 48e3,
                 0,
-                5000,
+                3000,
                 1000,
                 window.WIN_HAMMING,
                 6.76))
@@ -326,8 +326,8 @@ class qo100(gr.top_block, Qt.QWidget):
         self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0_0_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0_0_0_0.set_sampling_freq(self.samp_rate)
-        self.band_pass_filter_0_0.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, 0, 3000, 1000, window.WIN_HAMMING, 6.76))
-        self.band_pass_filter_0_0_0.set_taps(firdes.complex_band_pass(10, self.samp_rate, 0, 3000, 1000, window.WIN_HAMMING, 6.76))
+        self.band_pass_filter_0_0.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, 0, 5000, 1000, window.WIN_HAMMING, 6.76))
+        self.band_pass_filter_0_0_0.set_taps(firdes.complex_band_pass(10, self.samp_rate, 0, 5000, 1000, window.WIN_HAMMING, 6.76))
         self.band_pass_filter_0_0_1.set_taps(firdes.complex_band_pass(1, self.samp_rate, -12e3, 12e3, 1000, window.WIN_HAMMING, 6.76))
         self.qtgui_waterfall_sink_x_0.set_frequency_range(250e3, self.samp_rate)
 
@@ -345,7 +345,7 @@ class qo100(gr.top_block, Qt.QWidget):
 
     def set_af_gain(self, af_gain):
         self.af_gain = af_gain
-        self.band_pass_filter_0_0.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, 0, 3000, 1000, window.WIN_HAMMING, 6.76))
+        self.band_pass_filter_0_0.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, 0, 5000, 1000, window.WIN_HAMMING, 6.76))
 
 
 
