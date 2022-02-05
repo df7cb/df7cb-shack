@@ -1,0 +1,205 @@
+options:
+  parameters:
+    author: DF7CB
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: cw
+    max_nouts: '500'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: run
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: CW Generator
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: 48e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 12.0]
+    rotation: 0
+    state: enabled
+- name: band_pass_filter_0
+  id: band_pass_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    beta: '6.76'
+    comment: ''
+    decim: '1'
+    gain: '1'
+    high_cutoff_freq: '950'
+    interp: '1'
+    low_cutoff_freq: '750'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_rate: samp_rate
+    type: fir_filter_fff
+    width: '50'
+    win: window.WIN_HAMMING
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 156.0]
+    rotation: 0
+    state: true
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [344, 320.0]
+    rotation: 0
+    state: disabled
+- name: cw_audio_sink
+  id: audio_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: pulse:tx0
+    num_inputs: '1'
+    ok_to_block: 'True'
+    samp_rate: '48000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [816, 204.0]
+    rotation: 0
+    state: true
+- name: cw_modulator
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\nimport pmt\n\nclass blk(gr.sync_block):  # other base\
+      \ classes are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python\
+      \ Block example - a simple multiply const\"\"\"\n\n    def __init__(self):\n\
+      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
+      \n        gr.sync_block.__init__(\n            self,\n            name='Embedded\
+      \ Python Block',   # will show up in GRC\n            in_sig=[np.float32],\n\
+      \            out_sig=[np.float32]\n        )\n        self.message_port_register_in(pmt.intern(\"\
+      cw_in\"))\n        self.set_msg_handler(pmt.intern('cw_in'), self.key)\n   \
+      \     self.keyed = 0.0\n\n    def key(self, msg):\n        if pmt.car(msg) ==\
+      \ pmt.intern('cw'):\n            self.keyed = pmt.to_float(pmt.cdr(msg))\n\n\
+      \    def work(self, input_items, output_items):\n        output_items[0][:]\
+      \ = input_items[0] * self.keyed\n        return len(output_items[0])\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Embedded Python Block', 'blk', [], [('0', 'float', 1), ('cw_in',
+      'message', 1)], [('0', 'float', 1)], 'Embedded Python Block example - a simple
+      multiply const', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 208.0]
+    rotation: 0
+    state: true
+- name: cw_source
+  id: epy_block
+  parameters:
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\nimport\
+      \ threading\nimport serial\n\nclass blk(gr.sync_block):\n    \"\"\"Read CW input\
+      \ from modified K3NG keyer\"\"\"\n\n    def __init__(self, port='/dev/ttyUSBK3NG'):\
+      \  # only default arguments here\n        \"\"\"arguments to this function show\
+      \ up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n         \
+      \   self,\n            name='CW Source',\n            in_sig=None,\n       \
+      \     out_sig=None,\n        )\n        # if an attribute with the same name\
+      \ as a parameter is found,\n        # a callback is registered (properties work,\
+      \ too).\n        self.port = port\n\n        self.message_port_register_out(pmt.intern(\"\
+      cw_out\"))\n\n    def start(self):\n        self.serial = serial.Serial(self.port,\
+      \ 1200)\n\n        self.cwthread = threading.Thread(target=self.cw, daemon=True)\n\
+      \        self.cwthread.start()\n\n    def set_ampl(self, ampl):\n        self.message_port_pub(pmt.intern(\"\
+      cw_out\"),\n                pmt.cons(pmt.intern('cw'), pmt.from_float(ampl)))\n\
+      \n    def cw(self):\n        while True:\n            try:\n               \
+      \ x = self.serial.read()\n                if x in (b'^', b'_'):\n          \
+      \          ampl = 0.5 if x == b'^' else 0.0\n                    self.set_ampl(ampl)\n\
+      \            except Exception as e:\n                self.set_ampl(0.0) # turn\
+      \ signal off on error\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    port: '''/dev/ttyUSBK3NG'''
+  states:
+    _io_cache: ('CW Source', 'blk', [('port', "'/dev/ttyUSBK3NG'")], [], [('cw_out',
+      'message', 1)], 'Read CW input from modified K3NG keyer', ['port'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 308.0]
+    rotation: 0
+    state: true
+- name: pitch_source
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: ''
+    freq: '850'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    type: float
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 156.0]
+    rotation: 0
+    state: true
+
+connections:
+- [band_pass_filter_0, '0', cw_audio_sink, '0']
+- [cw_modulator, '0', band_pass_filter_0, '0']
+- [cw_source, cw_out, blocks_message_debug_0, print]
+- [cw_source, cw_out, cw_modulator, cw_in]
+- [pitch_source, '0', cw_modulator, '0']
+
+metadata:
+  file_format: 1
