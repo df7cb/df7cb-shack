@@ -45,31 +45,6 @@ blocks:
     coordinate: [208, 12.0]
     rotation: 0
     state: enabled
-- name: band_pass_filter_0
-  id: band_pass_filter
-  parameters:
-    affinity: ''
-    alias: ''
-    beta: '6.76'
-    comment: ''
-    decim: '1'
-    gain: '1'
-    high_cutoff_freq: '950'
-    interp: '1'
-    low_cutoff_freq: '750'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    samp_rate: samp_rate
-    type: fir_filter_fff
-    width: '50'
-    win: window.WIN_HAMMING
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [560, 156.0]
-    rotation: 0
-    state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -98,37 +73,39 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [816, 204.0]
+    coordinate: [512, 204.0]
     rotation: 0
     state: true
 - name: cw_modulator
   id: epy_block
   parameters:
-    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
-      \ GRC will instantiate the first class it finds\nto get ports and parameters\
-      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
-      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
-      from gnuradio import gr\nimport pmt\n\nclass blk(gr.sync_block):  # other base\
-      \ classes are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python\
-      \ Block example - a simple multiply const\"\"\"\n\n    def __init__(self):\n\
-      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
-      \n        gr.sync_block.__init__(\n            self,\n            name='Embedded\
-      \ Python Block',   # will show up in GRC\n            in_sig=[np.float32],\n\
-      \            out_sig=[np.float32]\n        )\n        self.message_port_register_in(pmt.intern(\"\
-      cw_in\"))\n        self.set_msg_handler(pmt.intern('cw_in'), self.key)\n   \
-      \     self.keyed = 0.0\n\n    def key(self, msg):\n        if pmt.car(msg) ==\
-      \ pmt.intern('cw'):\n            self.keyed = pmt.to_float(pmt.cdr(msg))\n\n\
-      \    def work(self, input_items, output_items):\n        output_items[0][:]\
-      \ = input_items[0] * self.keyed\n        return len(output_items[0])\n"
+    _source_code: "\"\"\"\nCW Modulator Block\n\"\"\"\n\nimport numpy as np\nfrom\
+      \ gnuradio import gr\nimport pmt\n\nclass blk(gr.sync_block):  # other base\
+      \ classes are basic_block, decim_block, interp_block\n    \"\"\"CW Modulator\
+      \ block\"\"\"\n\n    def __init__(self, transition=1000):\n        \"\"\"arguments\
+      \ to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='CW Modulator',   # will show up in GRC\n\
+      \            in_sig=[np.float32],\n            out_sig=[np.float32]\n      \
+      \  )\n        # ramp up signal over this many ticks\n        self.transition\
+      \ = transition\n        self.level = 0\n        self.keyed = False\n\n     \
+      \   self.message_port_register_in(pmt.intern(\"key\"))\n        self.set_msg_handler(pmt.intern('key'),\
+      \ self.key)\n\n    def key(self, msg):\n        if pmt.is_pair(msg) and pmt.car(msg)\
+      \ == pmt.intern('key'):\n            self.keyed = pmt.to_bool(pmt.cdr(msg))\n\
+      \n    def work(self, input_items, output_items):\n        for i in range(len(output_items[0])):\n\
+      \            if self.keyed and self.level < self.transition:\n             \
+      \   self.level += 1\n            if not self.keyed and self.level > 0:\n   \
+      \             self.level -= 1\n            factor = 0.5 * (1 - np.cos(np.pi\
+      \ * self.level / self.transition))\n            output_items[0][i] = input_items[0][i]\
+      \ * factor\n        return len(output_items[0])\n"
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
+    transition: '500'
   states:
-    _io_cache: ('Embedded Python Block', 'blk', [], [('0', 'float', 1), ('cw_in',
-      'message', 1)], [('0', 'float', 1)], 'Embedded Python Block example - a simple
-      multiply const', [])
+    _io_cache: ('CW Modulator', 'blk', [('transition', '1000')], [('0', 'float', 1),
+      ('key', 'message', 1)], [('0', 'float', 1)], 'CW Modulator block', ['transition'])
     bus_sink: false
     bus_source: false
     bus_structure: null
@@ -147,15 +124,15 @@ blocks:
       \     out_sig=None,\n        )\n        # if an attribute with the same name\
       \ as a parameter is found,\n        # a callback is registered (properties work,\
       \ too).\n        self.port = port\n\n        self.message_port_register_out(pmt.intern(\"\
-      cw_out\"))\n\n    def start(self):\n        self.serial = serial.Serial(self.port,\
+      key\"))\n\n    def start(self):\n        self.serial = serial.Serial(self.port,\
       \ 1200)\n\n        self.cwthread = threading.Thread(target=self.cw, daemon=True)\n\
-      \        self.cwthread.start()\n\n    def set_ampl(self, ampl):\n        self.message_port_pub(pmt.intern(\"\
-      cw_out\"),\n                pmt.cons(pmt.intern('cw'), pmt.from_float(ampl)))\n\
+      \        self.cwthread.start()\n\n    def set_key(self, key):\n        self.message_port_pub(pmt.intern(\"\
+      key\"),\n                pmt.cons(pmt.intern(\"key\"), pmt.from_bool(key)))\n\
       \n    def cw(self):\n        while True:\n            try:\n               \
       \ x = self.serial.read()\n                if x in (b'^', b'_'):\n          \
-      \          ampl = 0.5 if x == b'^' else 0.0\n                    self.set_ampl(ampl)\n\
-      \            except Exception as e:\n                self.set_ampl(0.0) # turn\
-      \ signal off on error\n"
+      \          self.set_key(x == b'^')\n            except Exception as e:\n   \
+      \             self.set_key(False) # turn signal off on error\n             \
+      \   print(e)\n"
     affinity: ''
     alias: ''
     comment: ''
@@ -163,7 +140,7 @@ blocks:
     minoutbuf: '0'
     port: '''/dev/ttyUSBK3NG'''
   states:
-    _io_cache: ('CW Source', 'blk', [('port', "'/dev/ttyUSBK3NG'")], [], [('cw_out',
+    _io_cache: ('CW Source', 'blk', [('port', "'/dev/ttyUSBK3NG'")], [], [('key',
       'message', 1)], 'Read CW input from modified K3NG keyer', ['port'])
     bus_sink: false
     bus_source: false
@@ -176,7 +153,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    amp: '1'
+    amp: '0.5'
     comment: ''
     freq: '850'
     maxoutbuf: '0'
@@ -195,10 +172,9 @@ blocks:
     state: true
 
 connections:
-- [band_pass_filter_0, '0', cw_audio_sink, '0']
-- [cw_modulator, '0', band_pass_filter_0, '0']
-- [cw_source, cw_out, blocks_message_debug_0, print]
-- [cw_source, cw_out, cw_modulator, cw_in]
+- [cw_modulator, '0', cw_audio_sink, '0']
+- [cw_source, key, blocks_message_debug_0, print]
+- [cw_source, key, cw_modulator, key]
 - [pitch_source, '0', cw_modulator, '0']
 
 metadata:
