@@ -280,7 +280,9 @@ blocks:
       \   out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
       midi_in\"))\n        self.set_msg_handler(pmt.intern(\"midi_in\"), self.midi_in)\n\
       \        self.message_port_register_in(pmt.intern(\"rx_freq_in\"))\n       \
-      \ self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n        self.message_port_register_out(pmt.intern(\"\
+      \ self.set_msg_handler(pmt.intern(\"rx_freq_in\"), self.rx_freq_in)\n      \
+      \  self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"\
+      tx_freq_in\"), self.tx_freq_in)\n\n        self.message_port_register_out(pmt.intern(\"\
       rx_freq_out\"))\n        self.message_port_register_out(pmt.intern(\"tx_freq_out\"\
       ))\n        self.message_port_register_out(pmt.intern(\"rx0_low_cutoff\"))\n\
       \        self.message_port_register_out(pmt.intern(\"rx0_high_cutoff\"))\n \
@@ -298,8 +300,13 @@ blocks:
       \ 510000)\n        self.message_port_pub(pmt.intern(\"tx_freq_out\"), pmt.cons(pmt.intern('freq'),\
       \ pmt.from_long(freq)))\n        # FT8 indicator LED\n        self.note_on(2,\
       \ 127 if freq == 40000 else 0)\n        self.note_on(6, 127 if freq == 40000\
-      \ else 0) # shift-KP 2 A\n\n    def midi_in(self, msg):\n        if not msg.is_pair():\
-      \ return\n        msgtype = str(pmt.car(msg))\n\n        if msgtype == 'control_change':\n\
+      \ else 0) # shift-KP 2 A\n\n    def rx_freq_in(self, msg):\n        if msg.is_pair()\
+      \ and pmt.car(msg) == pmt.intern('freq'):\n            self.rx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
+      \            #if self.sync_a:\n            #    self.set_tx_freq(self.rx_freq)\n\
+      \n    def tx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
+      \ == pmt.intern('freq'):\n            self.tx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
+      \n    def midi_in(self, msg):\n        if not msg.is_pair(): return\n      \
+      \  msgtype = str(pmt.car(msg))\n\n        if msgtype == 'control_change':\n\
       \            payload = pmt.cdr(msg)\n            control = pmt.to_long(pmt.car(payload))\n\
       \            value = pmt.to_long(pmt.cdr(payload))\n\n            if control\
       \ == 48: # jog A\n                delta = value if value < 64 else value - 128\n\
@@ -1086,11 +1093,9 @@ blocks:
 
 connections:
 - [blocks_swapiq_0, '0', vfo0_waterfall_atten, '0']
-- [control, midi_out, blocks_message_debug_0, print]
 - [control, midi_out, midi_block, midi_in]
 - [control, rx0_high_cutoff, high_cutoff_gauge, value]
 - [control, rx0_high_cutoff, rx0_high_cutoff_setter, inpair]
-- [control, rx0_low_cutoff, blocks_message_debug_0, print]
 - [control, rx0_low_cutoff, low_cutoff_gauge, value]
 - [control, rx0_low_cutoff, rx0_low_cutoff_setter, inpair]
 - [control, rx_freq_out, vfo, valuein]
@@ -1099,7 +1104,6 @@ connections:
 - [limesdr_source, '0', vfo0_mixer, '0']
 - [limesdr_source, '0', vfo0_waterfall_add, '0']
 - [limesdr_source, '0', vfo2_mixer, '0']
-- [midi_block, midi_out, blocks_message_debug_0, print]
 - [midi_block, midi_out, control, midi_in]
 - [rx_resampler, '0', tx_mixer, '0']
 - [tx_audio_source, '0', tx_to_complex, '0']
@@ -1108,6 +1112,7 @@ connections:
 - [tx_to_complex, '0', tx_bandpass, '0']
 - [tx_vfo, valueout, control, tx_freq_in]
 - [tx_vfo_signal_source, '0', tx_mixer, '1']
+- [vfo, valueout, blocks_message_debug_0, print]
 - [vfo, valueout, control, rx_freq_in]
 - [vfo0_bandpass, '0', vfo0_to_float, '0']
 - [vfo0_mixer, '0', vfo0_bandpass, '0']
