@@ -1,0 +1,243 @@
+options:
+  parameters:
+    author: DF7CB
+    catch_exceptions: 'True'
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: GPL-3+
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: ft84_decoder
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: run
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: FT8 and FT4 Decoder
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 12.0]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: 48e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 12.0]
+    rotation: 0
+    state: enabled
+- name: audio_source_rx2
+  id: audio_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    device_name: pulse:rx2.monitor
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '1'
+    ok_to_block: 'True'
+    samp_rate: '48000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [56, 180.0]
+    rotation: 0
+    state: true
+- name: cron
+  id: epy_block
+  parameters:
+    _source_code: "from gnuradio import gr\nimport pmt\nimport time\nimport threading\n\
+      \nclass blk(gr.basic_block):\n    \"\"\"Send Timed Msgs\"\"\"\n\n    def __init__(self):\n\
+      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
+      \n        gr.sync_block.__init__(\n            self,\n            name='Send\
+      \ Timed Msgs',   # will show up in GRC\n            in_sig=None,\n         \
+      \   out_sig=None,\n        )\n        self.message_port_register_out(pmt.intern(\"\
+      cron_ft8\"))\n        self.message_port_register_out(pmt.intern(\"cron_ft4\"\
+      ))\n\n    def start(self):\n        self.cron_thread = threading.Thread(target=self.cron_ft8,\
+      \ daemon=True)\n        self.cron_thread.start()\n        self.cron_thread =\
+      \ threading.Thread(target=self.cron_ft4, daemon=True)\n        self.cron_thread.start()\n\
+      \n    def sleep(self, interval):\n        time.sleep(interval - (time.time()\
+      \ % interval))\n        return True\n\n    def cron_ft8(self):\n        while\
+      \ self.sleep(15):\n            self.message_port_pub(pmt.intern(\"cron_ft8\"\
+      ), pmt.intern(\"rotate_ft8\"))\n\n    def cron_ft4(self):\n        while self.sleep(7.5):\n\
+      \            self.message_port_pub(pmt.intern(\"cron_ft4\"), pmt.intern(\"rotate_ft4\"\
+      ))\n\nif __name__ == \"__main__\":\n    b = blk()\n    b.cron_ft8()\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Send Timed Msgs', 'blk', [], [], [('cron_ft4', 'message', 1), ('cron_ft8',
+      'message', 1)], 'Send Timed Msgs', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 336.0]
+    rotation: 0
+    state: true
+- name: ft4_sink
+  id: blocks_wavfile_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    bits_per_sample1: FORMAT_PCM_16
+    bits_per_sample2: FORMAT_PCM_16
+    bits_per_sample3: FORMAT_VORBIS
+    bits_per_sample4: FORMAT_PCM_16
+    comment: ''
+    file: /dev/null
+    format: FORMAT_WAV
+    nchan: '1'
+    samp_rate: '12000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 292.0]
+    rotation: 0
+    state: enabled
+- name: ft84_init
+  id: snippet
+  parameters:
+    alias: ''
+    code: 'import os
+
+
+      # make top block accessible in rotate block
+
+      self.rotate.tb = self
+
+
+      # change to temp dir
+
+      self.dir = ''/run/user/1000/gnuradio''
+
+      try: os.mkdir(self.dir)
+
+      except: pass
+
+      os.chdir(self.dir)'
+    comment: ''
+    priority: '1'
+    section: main_after_init
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 12.0]
+    rotation: 0
+    state: enabled
+- name: ft8_sink
+  id: blocks_wavfile_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    bits_per_sample1: FORMAT_PCM_16
+    bits_per_sample2: FORMAT_PCM_16
+    bits_per_sample3: FORMAT_VORBIS
+    bits_per_sample4: FORMAT_PCM_16
+    comment: ''
+    file: /dev/null
+    format: FORMAT_WAV
+    nchan: '1'
+    samp_rate: '12000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 156.0]
+    rotation: 0
+    state: true
+- name: rational_resampler_4
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: '4'
+    fbw: '0'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 164.0]
+    rotation: 0
+    state: true
+- name: rotate
+  id: epy_block
+  parameters:
+    _source_code: "from gnuradio import gr\nimport pmt\nimport os\nimport subprocess\n\
+      \nclass blk(gr.basic_block):\n    \"\"\"Rotate wav files and feed them to jt9\
+      \ for FT8 and FT4 decoding\"\"\"\n\n    def __init__(self):\n        \"\"\"\
+      arguments to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='Rotate and Decode Wav File',   # will\
+      \ show up in GRC\n            in_sig=None,\n            out_sig=None,\n    \
+      \    )\n\n        self.message_port_register_in(pmt.intern(\"rotate_ft8\"))\n\
+      \        self.set_msg_handler(pmt.intern(\"rotate_ft8\"), self.rotate_ft8)\n\
+      \        self.message_port_register_in(pmt.intern(\"rotate_ft4\"))\n       \
+      \ self.set_msg_handler(pmt.intern(\"rotate_ft4\"), self.rotate_ft4)\n\n    def\
+      \ rotate_and_decode(self, mode, sink):\n        # rotate file\n        try:\
+      \ os.unlink(mode + \".wav\")\n        except: pass\n        try: os.rename(mode\
+      \ + \"-tmp.wav\", mode + \".wav\")\n        except: pass\n\n        # ask sink\
+      \ to re-open file\n        sink.open(mode + \"-tmp.wav\")\n\n        # decode\
+      \ it\n        res = subprocess.run([\"jt9\", \"--\" + mode, mode + \".wav\"\
+      ], capture_output=True)\n        out = res.stdout.decode()\n\n        for line\
+      \ in out.split(\"\\n\"):\n            if line[:6] == \"000000\":\n         \
+      \       print(mode, line)\n\n    def rotate_ft8(self, msg):\n        self.rotate_and_decode(\"\
+      ft8\", self.tb.ft8_sink)\n\n    def rotate_ft4(self, msg):\n        self.rotate_and_decode(\"\
+      ft4\", self.tb.ft4_sink)\n\nif __name__ == \"__main__\":\n    b = blk()\n  \
+      \  b.rotate('foo')\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [], [('rotate_ft4', 'message',
+      1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed them to jt9
+      for FT8 and FT4 decoding', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [360, 336.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [audio_source_rx2, '0', rational_resampler_4, '0']
+- [cron, cron_ft4, rotate, rotate_ft4]
+- [cron, cron_ft8, rotate, rotate_ft8]
+- [rational_resampler_4, '0', ft4_sink, '0']
+- [rational_resampler_4, '0', ft8_sink, '0']
+
+metadata:
+  file_format: 1
