@@ -123,23 +123,9 @@ blocks:
   id: snippet
   parameters:
     alias: ''
-    code: 'import os
+    code: '# make top block accessible in rotate block
 
-
-      # make top block accessible in rotate block
-
-      self.rotate.tb = self
-
-
-      # change to temp dir
-
-      self.dir = ''/run/user/1000/gnuradio''
-
-      try: os.mkdir(self.dir)
-
-      except: pass
-
-      os.chdir(self.dir)'
+      self.rotate.tb = self'
     comment: ''
     priority: '1'
     section: main_after_init
@@ -196,35 +182,42 @@ blocks:
   id: epy_block
   parameters:
     _source_code: "from gnuradio import gr\nimport pmt\nimport os\nimport subprocess\n\
-      \nclass blk(gr.basic_block):\n    \"\"\"Rotate wav files and feed them to jt9\
-      \ for FT8 and FT4 decoding\"\"\"\n\n    def __init__(self):\n        \"\"\"\
-      arguments to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
-      \            self,\n            name='Rotate and Decode Wav File',   # will\
-      \ show up in GRC\n            in_sig=None,\n            out_sig=None,\n    \
-      \    )\n\n        self.message_port_register_in(pmt.intern(\"rotate_ft8\"))\n\
-      \        self.set_msg_handler(pmt.intern(\"rotate_ft8\"), self.rotate_ft8)\n\
-      \        self.message_port_register_in(pmt.intern(\"rotate_ft4\"))\n       \
-      \ self.set_msg_handler(pmt.intern(\"rotate_ft4\"), self.rotate_ft4)\n\n    def\
-      \ rotate_and_decode(self, mode, sink):\n        # rotate file\n        try:\
-      \ os.unlink(mode + \".wav\")\n        except: pass\n        try: os.rename(mode\
-      \ + \"-tmp.wav\", mode + \".wav\")\n        except: pass\n\n        # ask sink\
-      \ to re-open file\n        sink.open(mode + \"-tmp.wav\")\n\n        # decode\
-      \ it\n        res = subprocess.run([\"jt9\", \"--\" + mode, mode + \".wav\"\
-      ], capture_output=True)\n        out = res.stdout.decode()\n\n        for line\
-      \ in out.split(\"\\n\"):\n            if line[:6] == \"000000\":\n         \
-      \       print(mode, line)\n\n    def rotate_ft8(self, msg):\n        self.rotate_and_decode(\"\
-      ft8\", self.tb.ft8_sink)\n\n    def rotate_ft4(self, msg):\n        self.rotate_and_decode(\"\
-      ft4\", self.tb.ft4_sink)\n\nif __name__ == \"__main__\":\n    b = blk()\n  \
+      import time\n\nclass blk(gr.basic_block):\n    \"\"\"Rotate wav files and feed\
+      \ them to jt9 for FT8 and FT4 decoding\"\"\"\n\n    def __init__(self, tmp_path='.'):\n\
+      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
+      \n        gr.sync_block.__init__(\n            self,\n            name='Rotate\
+      \ and Decode Wav File',   # will show up in GRC\n            in_sig=None,\n\
+      \            out_sig=None,\n        )\n        self.tmp_path = tmp_path\n\n\
+      \        self.message_port_register_in(pmt.intern(\"rotate_ft8\"))\n       \
+      \ self.set_msg_handler(pmt.intern(\"rotate_ft8\"), self.rotate_ft8)\n      \
+      \  self.message_port_register_in(pmt.intern(\"rotate_ft4\"))\n        self.set_msg_handler(pmt.intern(\"\
+      rotate_ft4\"), self.rotate_ft4)\n\n    def start(self):\n        try: os.mkdir(self.tmp_path)\n\
+      \        except: pass\n\n        self.all_txt = open(\"ft84.txt\", \"a\")\n\n\
+      \    def rotate_and_decode(self, mode, sink, interval):\n        tmp_file =\
+      \ f\"{self.tmp_path}/{mode}-tmp.wav\"\n        decode_file = f\"{self.tmp_path}/{mode}.wav\"\
+      \n\n        # rotate file\n        try: os.unlink(decode_file)\n        except:\
+      \ pass\n        try: os.rename(tmp_file, decode_file)\n        except: pass\n\
+      \n        # ask sink to re-open file\n        sink.open(tmp_file)\n\n      \
+      \  stamp = time.strftime('%H%M%S', time.gmtime(time.time() - interval))\n\n\
+      \        # decode it\n        res = subprocess.run([\"jt9\", \"--\" + mode,\
+      \ decode_file], capture_output=True)\n        out = res.stdout.decode()\n\n\
+      \        for line in out.split(\"\\n\"):\n            if line[:6] == \"000000\"\
+      :\n                msg = f\"{mode} {stamp} {line[7:]}\"\n                print(msg)\n\
+      \                self.all_txt.write(msg + \"\\n\")\n                self.all_txt.flush()\n\
+      \n    def rotate_ft8(self, msg):\n        self.rotate_and_decode(\"ft8\", self.tb.ft8_sink,\
+      \ 15)\n\n    def rotate_ft4(self, msg):\n        self.rotate_and_decode(\"ft4\"\
+      , self.tb.ft4_sink, 7.5)\n\nif __name__ == \"__main__\":\n    b = blk()\n  \
       \  b.rotate('foo')\n"
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
+    tmp_path: '''/run/user/1000/gnuradio'''
   states:
-    _io_cache: ('Rotate and Decode Wav File', 'blk', [], [('rotate_ft4', 'message',
-      1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed them to jt9
-      for FT8 and FT4 decoding', [])
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft4',
+      'message', 1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed
+      them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
     bus_sink: false
     bus_source: false
     bus_structure: null
