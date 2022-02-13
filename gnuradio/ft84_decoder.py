@@ -47,7 +47,7 @@ class ft84_decoder(gr.top_block):
         ##################################################
         # Blocks
         ##################################################
-        self.rotate = rotate.blk(tmp_path='/run/user/1000/gnuradio')
+        self.rotate = rotate.blk(tmp_path='/run/user/1000/gnuradio', PG_conn='service=cb')
         self.rational_resampler_4 = filter.rational_resampler_fff(
                 interpolation=1,
                 decimation=4,
