@@ -213,22 +213,22 @@ blocks:
       \ nothing\"\"\", (stamp, 2400.040, 'Rx', mode.upper(), fields[1], fields[2],\
       \ fields[3], msg))\n\n            call_re = '<?(?:([A-Z0-9/]+)|\\.\\.\\.)>?'\
       \ # also matches CQ\n            loc_rrr_re = '(?:([A-R]{2}[0-9]{2})|R?[+-][0-9]+|RRR|73)'\
-      \ # only loc captured\n\n            if m := re.match(f\"{call_re} {call_re}\
-      \ {loc_rrr_re}\\\\b\", msg):\n                dx, call, loc = m.group(1), m.group(2),\
-      \ m.group(3)\n\n                if dx == 'DF7CB':\n                    print(\"\
-      \\033[1;33m\", end='')\n\n                if call == \"DF7CB\":\n          \
-      \          print(\"\\033[41m\", end='')\n                elif call:\n      \
-      \              logged = self.query(\"\"\"select call from log where call = %s\
-      \ and mode in ('FT8', 'FT4') and qrg::band = '13cm'\"\"\", (call,)).fetchone()\n\
-      \                    if not logged:\n                        print(\"\\033[46mNew\
-      \ call\", call)\n\n                if loc and loc != \"RR73\":\n           \
-      \         logged = self.query(\"\"\"select call from log where loc::varchar(4)\
-      \ = %s and mode in ('FT8', 'FT4') and qrg::band = '13cm'\"\"\", (loc,)).fetchone()\n\
-      \                    if not logged:\n                        print(\"\\033[43mNew\
-      \ loc\", loc)\n\n            else:\n                print(\"Unknown format:\
-      \ \", end='')\n\n            out = f\"{mode} {stamp} {line[7:]}\"\n        \
-      \    self.all_txt.write(out + \"\\n\")\n            self.all_txt.flush()\n \
-      \           print(out, end=\"\\033[0m\\n\")\n\n    def rotate_and_decode(self,\
+      \ # only loc captured\n\n            if m := re.match(f\"{call_re} {call_re}(?:\
+      \ {loc_rrr_re})?\\\\b\", msg):\n                dx, call, loc = m.group(1),\
+      \ m.group(2), m.group(3)\n\n                if call == \"DF7CB\":\n        \
+      \            print(\"\\033[41m\", end='')\n                elif call:\n    \
+      \                logged = self.query(\"\"\"select call from log where call =\
+      \ %s and mode in ('FT8', 'FT4') and qrg::band = '13cm'\"\"\", (call,)).fetchone()\n\
+      \                    if not logged:\n                        print(\"\\033[46m\"\
+      , end='')\n\n                if loc and loc != \"RR73\":\n                 \
+      \   logged = self.query(\"\"\"select call from log where loc::varchar(4) = %s\
+      \ and mode in ('FT8', 'FT4') and qrg::band = '13cm'\"\"\", (loc,)).fetchone()\n\
+      \                    if not logged:\n                        print(\"\\033[43m\"\
+      , end='')\n\n                if dx == 'DF7CB':\n                    print(\"\
+      \\033[48;5;226m\", end='')\n\n            else:\n                print(\"Unknown\
+      \ format: \", end='')\n\n            out = f\"{mode} {stamp} {line[7:]}\"\n\
+      \            self.all_txt.write(out + \"\\n\")\n            self.all_txt.flush()\n\
+      \            print(out, end=\"\\033[0m\\n\")\n\n    def rotate_and_decode(self,\
       \ mode, sink, interval):\n        tmp_file = f\"{mode}-tmp.wav\"\n        decode_file\
       \ = f\"{mode}.wav\"\n\n        # rotate file\n        try: os.unlink(decode_file)\n\
       \        except: pass\n        try: os.rename(tmp_file, decode_file)\n     \
@@ -249,12 +249,12 @@ blocks:
     tmp_path: '''/run/user/1000/gnuradio'''
   states:
     _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'"), ('PG_conn',
-      "''")], [('rotate_ft4', 'message', 1), ('rotate_ft8', 'message', 1)], [], 'Rotate
+      "''")], [('rotate_ft8', 'message', 1), ('rotate_ft4', 'message', 1)], [], 'Rotate
       wav files and feed them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 332.0]
+    coordinate: [368, 364.0]
     rotation: 0
     state: enabled
 

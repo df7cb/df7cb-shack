@@ -68,23 +68,23 @@ class blk(gr.basic_block):
             call_re = '<?(?:([A-Z0-9/]+)|\.\.\.)>?' # also matches CQ
             loc_rrr_re = '(?:([A-R]{2}[0-9]{2})|R?[+-][0-9]+|RRR|73)' # only loc captured
 
-            if m := re.match(f"{call_re} {call_re} {loc_rrr_re}\\b", msg):
+            if m := re.match(f"{call_re} {call_re}(?: {loc_rrr_re})?\\b", msg):
                 dx, call, loc = m.group(1), m.group(2), m.group(3)
-
-                if dx == 'DF7CB':
-                    print("\033[1;33m", end='')
 
                 if call == "DF7CB":
                     print("\033[41m", end='')
                 elif call:
                     logged = self.query("""select call from log where call = %s and mode in ('FT8', 'FT4') and qrg::band = '13cm'""", (call,)).fetchone()
                     if not logged:
-                        print("\033[46mNew call", call)
+                        print("\033[46m", end='')
 
                 if loc and loc != "RR73":
                     logged = self.query("""select call from log where loc::varchar(4) = %s and mode in ('FT8', 'FT4') and qrg::band = '13cm'""", (loc,)).fetchone()
                     if not logged:
-                        print("\033[43mNew loc", loc)
+                        print("\033[43m", end='')
+
+                if dx == 'DF7CB':
+                    print("\033[48;5;226m", end='')
 
             else:
                 print("Unknown format: ", end='')

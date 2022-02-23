@@ -8,7 +8,7 @@
 # Title: FT8 and FT4 Decoder
 # Author: DF7CB
 # Copyright: GPL-3+
-# GNU Radio version: 3.10.0.0
+# GNU Radio version: 3.10.1.1
 
 from gnuradio import audio
 from gnuradio import blocks
