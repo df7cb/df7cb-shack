@@ -315,42 +315,75 @@ blocks:
 - name: control
   id: epy_block
   parameters:
-    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\n# buttons\
-      \ (notes)\nMIDI_FT8_QRG = 2 # KP 2 A\nMIDI_SHIFT_FT8_QRG = 6 # Shift-KP 2 A\n\
-      MIDI_SYNC_A = 35\nMIDI_SHIFT_SYNC_A = 38\n# controls\nMIDI_VFO_A = 48 # Jog\
-      \ A\nMIDI_SHIFT_VFO_A = 55 # Shift-Jog A\nMIDI_POWER = 54 # Sync A\nMIDI_BANDPASS_CENTER\
-      \ = 59 # Medium A\nMIDI_BANDPASS_WIDTH = 60 # Bass A\nMIDI_REPORT_ALL_CONTROLS\
-      \ = 0x7f\n\nclass blk(gr.sync_block):\n    \"\"\"TRX Control block\"\"\"\n\n\
-      \    def __init__(self):  # only default arguments here\n        \"\"\"arguments\
-      \ to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
-      \            self,\n            name='Control',\n            in_sig=None,\n\
-      \            out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
-      midi_in\"))\n        self.set_msg_handler(pmt.intern(\"midi_in\"), self.midi_in)\n\
-      \        self.message_port_register_in(pmt.intern(\"rx_freq_in\"))\n       \
-      \ self.set_msg_handler(pmt.intern(\"rx_freq_in\"), self.rx_freq_in)\n      \
-      \  self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"\
-      tx_freq_in\"), self.tx_freq_in)\n\n        self.message_port_register_out(pmt.intern(\"\
-      midi_out\"))\n        self.message_port_register_out(pmt.intern(\"rx_freq_out\"\
-      ))\n        self.message_port_register_out(pmt.intern(\"tx_freq_out\"))\n\n\
-      \        self.rx0_freq = 40000.0\n        self.tx_freq = 40000.0\n        self.filter_center\
-      \ = 850\n        self.filter_bw = 3000\n\n        self.sync_a = False # start\
-      \ false so set_sync_a sets the LEDs\n        #self.record = True\n\n    def\
-      \ note_on(self, note, velocity):\n        self.message_port_pub(pmt.intern(\"\
-      midi_out\"),\n                pmt.cons(pmt.intern('note_on'),\n            \
-      \        pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))\n\n    def\
-      \ start(self):\n        # MIDI\n        #self.note_on(43, 127) # REC\n     \
-      \   self.set_sync_a(True)\n        self.set_rx_freq(40000.0)\n        self.set_tx_freq(40000.0)\n\
-      \n        # read out knobs and slider on startup\n        self.message_port_pub(pmt.intern(\"\
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nimport\
+      \ os\nimport pulsectl\n\n# buttons (notes)\nMIDI_FT8_QRG = 2 # KP 2 A\nMIDI_SHIFT_FT8_QRG\
+      \ = 6 # Shift-KP 2 A\nMIDI_SYNC_A = 35\nMIDI_SHIFT_SYNC_A = 38\nMIDI_RECORD\
+      \ = 43\n\nMIDI_AUDIO_HEADPHONES = 49 # KP 1 B\nMIDI_AUDIO_SPEAKER = 51 # KP\
+      \ 3 B\nMIDI_AUDIO_STEREO = 52 # KP 4 B\nMIDI_AUDIOS = [MIDI_AUDIO_HEADPHONES,\
+      \ MIDI_AUDIO_STEREO, MIDI_AUDIO_SPEAKER]\n\n# controls\nMIDI_VFO_A = 48 # Jog\
+      \ A\nMIDI_SHIFT_VFO_A = 55 # Shift-Jog A\nMIDI_POWER = 54 # Sync A\nMIDI_VOLUME\
+      \ = 57 # Volume A\nMIDI_BANDPASS_CENTER = 59 # Medium A\nMIDI_BANDPASS_WIDTH\
+      \ = 60 # Bass A\nMIDI_REPORT_ALL_CONTROLS = 0x7f\n\nclass blk(gr.sync_block):\n\
+      \    \"\"\"TRX Control block\"\"\"\n\n    def __init__(self):  # only default\
+      \ arguments here\n        \"\"\"arguments to this function show up as parameters\
+      \ in GRC\"\"\"\n        gr.sync_block.__init__(\n            self,\n       \
+      \     name='Control',\n            in_sig=None,\n            out_sig=None,\n\
+      \        )\n\n        self.message_port_register_in(pmt.intern(\"midi_in\"))\n\
+      \        self.set_msg_handler(pmt.intern(\"midi_in\"), self.midi_in)\n     \
+      \   self.message_port_register_in(pmt.intern(\"rx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"\
+      rx_freq_in\"), self.rx_freq_in)\n        self.message_port_register_in(pmt.intern(\"\
+      tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"tx_freq_in\"), self.tx_freq_in)\n\
+      \n        self.message_port_register_out(pmt.intern(\"midi_out\"))\n       \
+      \ self.message_port_register_out(pmt.intern(\"rx_freq_out\"))\n        self.message_port_register_out(pmt.intern(\"\
+      tx_freq_out\"))\n\n        self.rx0_freq = 40000.0\n        self.tx_freq = 40000.0\n\
+      \        self.filter_center = 850\n        self.filter_bw = 3000\n        self.record\
+      \ = False\n        self.sync_a = False # start false so set_sync_a sets the\
+      \ LEDs\n\n        self.pulse = None\n\n    def note_on(self, note, velocity):\n\
+      \        self.message_port_pub(pmt.intern(\"midi_out\"),\n                pmt.cons(pmt.intern('note_on'),\n\
+      \                    pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))\n\
+      \n    def start(self):\n        self.pulse = pulsectl.Pulse('qo100')\n\n   \
+      \     # MIDI\n        self.set_sync_a(True)\n        self.set_rx_freq(40000.0)\n\
+      \        self.set_tx_freq(40000.0)\n        self.set_record(False)\n\n     \
+      \   # Audio output\n        self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek\
+      \ Y')\n\n        # read out knobs and slider on startup\n        self.message_port_pub(pmt.intern(\"\
       midi_out\"),\n                pmt.cons(pmt.intern('control_change'),\n     \
       \               pmt.cons(pmt.from_long(MIDI_REPORT_ALL_CONTROLS), pmt.from_long(127))))\n\
       \n        # without this, the spectrum display updates only once per second\
-      \ (GR bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n    def set_rx_freq(self,\
-      \ freq):\n        self.message_port_pub(pmt.intern(\"rx_freq_out\"),\n     \
-      \           pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n    def\
-      \ set_tx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"tx_freq_out\"\
+      \ (GR bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n    def set_audio_volume(self,\
+      \ new_volume):\n        try:\n            rx2_sink_index = [x.index for x in\
+      \ self.pulse.sink_list() if x.description == 'rx2'][0]\n            # the rx0\
+      \ sink is the one not connected to rx2\n            rx0_sink = [self.pulse.sink_info(x.sink)\
+      \ for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id'))\
+      \ == os.getpid() and x.sink != rx2_sink_index][0]\n            rx0_sink.volume.value_flat\
+      \ = new_volume\n            print(f\"Setting volume on {rx0_sink.index} to {new_volume}\"\
+      )\n            self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)\n\
+      \        except Exception as e:\n            print(e)\n\n    def set_audio_output(self,\
+      \ midi_key, sink_name):\n        try:\n            rx2_sink_index = [x.index\
+      \ for x in self.pulse.sink_list() if x.description == 'rx2'][0]\n          \
+      \  # the rx0 sink is the one not connected to rx2\n            rx0_audio = [x.index\
+      \ for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id'))\
+      \ == os.getpid() and x.sink != rx2_sink_index][0]\n\n            for sink in\
+      \ self.pulse.sink_list():\n                if sink_name in sink.description:\n\
+      \                    print(f\"Moving {rx0_audio} to {sink.index}\")\n      \
+      \              self.pulse.sink_input_move(rx0_audio, sink.index)\n         \
+      \           break\n\n            for key in MIDI_AUDIOS:\n                self.note_on(key,\
+      \ 127 if key == midi_key else 0)\n\n        except Exception as e:\n       \
+      \     print(e)\n\n    def set_audio_input(self, source_name):\n        try:\n\
+      \            tx_audio = [x.index for x in self.pulse.source_output_list() if\
+      \ int(x.proplist.get('application.process.id')) == os.getpid()][0]\n\n     \
+      \       for source in self.pulse.source_list():\n                if source.description.startswith(source_name):\n\
+      \                    print(f\"Moving {tx_audio} to {source.index}\")\n     \
+      \               self.pulse.source_output_move(tx_audio, source.index)\n    \
+      \                break\n        except Exception as e:\n            print(e)\n\
+      \n    def set_record(self, record):\n        self.record = record\n        self.note_on(MIDI_RECORD,\
+      \ 127 if self.record else 0)\n        if self.record:\n            self.set_audio_input('Plantronics')\n\
+      \        else:\n            self.set_audio_input('Monitor of tx0')\n\n    def\
+      \ set_rx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"rx_freq_out\"\
       ),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n\
-      \    def set_sync_a(self, sync_a):\n        if self.sync_a != sync_a:\n    \
-      \        self.sync_a = sync_a\n            self.note_on(MIDI_SYNC_A, 127 if\
+      \    def set_tx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"\
+      tx_freq_out\"),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\
+      \n    def set_sync_a(self, sync_a):\n        if self.sync_a != sync_a:\n   \
+      \         self.sync_a = sync_a\n            self.note_on(MIDI_SYNC_A, 127 if\
       \ sync_a else 0)\n            self.note_on(MIDI_SHIFT_SYNC_A, 127 if sync_a\
       \ else 0)\n            if sync_a:\n                self.set_tx_freq(self.rx0_freq)\n\
       \n    def rx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
@@ -376,11 +409,12 @@ blocks:
       \ 64: # shift-jog a (64 reported on all-buttons-readout, ignore that)\n    \
       \            delta = value if value < 64 else value - 128\n                self.set_sync_a(False)\n\
       \                self.set_tx_freq(self.tx_freq + delta * 20)\n\n           \
-      \ elif control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): # medium A, bass\
-      \ A\n                if control == MIDI_BANDPASS_CENTER:\n                 \
-      \   self.filter_center = 100 + int(2800 * (value / 127.0))\n               \
-      \ if control == MIDI_BANDPASS_WIDTH:\n                    self.filter_bw = 100\
-      \ + int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
+      \ elif control == MIDI_VOLUME:\n                self.set_audio_volume(value\
+      \ / 100.0) # 0 .. 127%\n\n            elif control in (MIDI_BANDPASS_CENTER,\
+      \ MIDI_BANDPASS_WIDTH): # medium A, bass A\n                if control == MIDI_BANDPASS_CENTER:\n\
+      \                    self.filter_center = 100 + int(2800 * (value / 127.0))\n\
+      \                if control == MIDI_BANDPASS_WIDTH:\n                    self.filter_bw\
+      \ = 100 + int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
       \ - self.filter_bw // 2, 0)\n                high_cutoff = min(self.filter_center\
       \ + self.filter_bw // 2, 3000)\n                self.tb.set_rx0_low_cutoff(low_cutoff)\n\
       \                self.tb.set_rx0_high_cutoff(high_cutoff)\n\n            if\
@@ -394,11 +428,15 @@ blocks:
       \     # set RX from TX\n                    self.set_rx_freq(self.tx_freq)\n\
       \                self.set_sync_a(not self.sync_a)\n\n            elif note ==\
       \ MIDI_FT8_QRG and velocity == 127: # KP 2 A\n                self.set_rx_freq(40000)\n\
-      \                self.set_sync_a(True)\n\n            #if note == 43 and velocity\
-      \ == 127: # REC\n            #    self.record = not self.record\n          \
-      \  #    self.note_on(43, 127 if self.record else 0)\n            #    if self.record:\n\
-      \            #        self.tb.rx_waterfall.start()\n            #    else:\n\
-      \            #        self.tb.rx_waterfall.stop()\n\nif __name__ == '__main__':\n\
+      \                self.set_sync_a(True)\n                self.set_record(False)\n\
+      \n            elif note == MIDI_AUDIO_HEADPHONES and velocity == 127: # KP 1\
+      \ A\n                self.set_audio_output(MIDI_AUDIO_HEADPHONES, 'Plantronics')\n\
+      \n            elif note == MIDI_AUDIO_STEREO and velocity == 127: # KP 3 A\n\
+      \                self.set_audio_output(MIDI_AUDIO_STEREO, 'Internes Audio Analog\
+      \ Stereo')\n\n            elif note == MIDI_AUDIO_SPEAKER and velocity == 127:\
+      \ # KP 4 A\n                self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek\
+      \ Y')\n\n            if note == MIDI_RECORD and velocity == 127: # REC\n   \
+      \             self.set_record(not self.record)\n\nif __name__ == '__main__':\n\
       \    blk()\n"
     affinity: ''
     alias: ''

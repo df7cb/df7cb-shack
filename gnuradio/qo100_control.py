@@ -2,15 +2,26 @@ import numpy as np
 from gnuradio import gr
 import pmt
 
+import os
+import pulsectl
+
 # buttons (notes)
 MIDI_FT8_QRG = 2 # KP 2 A
 MIDI_SHIFT_FT8_QRG = 6 # Shift-KP 2 A
 MIDI_SYNC_A = 35
 MIDI_SHIFT_SYNC_A = 38
+MIDI_RECORD = 43
+
+MIDI_AUDIO_HEADPHONES = 49 # KP 1 B
+MIDI_AUDIO_SPEAKER = 51 # KP 3 B
+MIDI_AUDIO_STEREO = 52 # KP 4 B
+MIDI_AUDIOS = [MIDI_AUDIO_HEADPHONES, MIDI_AUDIO_STEREO, MIDI_AUDIO_SPEAKER]
+
 # controls
 MIDI_VFO_A = 48 # Jog A
 MIDI_SHIFT_VFO_A = 55 # Shift-Jog A
 MIDI_POWER = 54 # Sync A
+MIDI_VOLUME = 57 # Volume A
 MIDI_BANDPASS_CENTER = 59 # Medium A
 MIDI_BANDPASS_WIDTH = 60 # Bass A
 MIDI_REPORT_ALL_CONTROLS = 0x7f
@@ -42,9 +53,10 @@ class blk(gr.sync_block):
         self.tx_freq = 40000.0
         self.filter_center = 850
         self.filter_bw = 3000
-
+        self.record = False
         self.sync_a = False # start false so set_sync_a sets the LEDs
-        #self.record = True
+
+        self.pulse = None
 
     def note_on(self, note, velocity):
         self.message_port_pub(pmt.intern("midi_out"),
@@ -52,11 +64,16 @@ class blk(gr.sync_block):
                     pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))
 
     def start(self):
+        self.pulse = pulsectl.Pulse('qo100')
+
         # MIDI
-        #self.note_on(43, 127) # REC
         self.set_sync_a(True)
         self.set_rx_freq(40000.0)
         self.set_tx_freq(40000.0)
+        self.set_record(False)
+
+        # Audio output
+        self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek Y')
 
         # read out knobs and slider on startup
         self.message_port_pub(pmt.intern("midi_out"),
@@ -65,6 +82,55 @@ class blk(gr.sync_block):
 
         # without this, the spectrum display updates only once per second (GR bug?)
         self.tb.vfo0_spectrum.set_fft_size(2048)
+
+    def set_audio_volume(self, new_volume):
+        try:
+            rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description == 'rx2'][0]
+            # the rx0 sink is the one not connected to rx2
+            rx0_sink = [self.pulse.sink_info(x.sink) for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink != rx2_sink_index][0]
+            rx0_sink.volume.value_flat = new_volume
+            print(f"Setting volume on {rx0_sink.index} to {new_volume}")
+            self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)
+        except Exception as e:
+            print(e)
+
+    def set_audio_output(self, midi_key, sink_name):
+        try:
+            rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description == 'rx2'][0]
+            # the rx0 sink is the one not connected to rx2
+            rx0_audio = [x.index for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink != rx2_sink_index][0]
+
+            for sink in self.pulse.sink_list():
+                if sink_name in sink.description:
+                    print(f"Moving {rx0_audio} to {sink.index}")
+                    self.pulse.sink_input_move(rx0_audio, sink.index)
+                    break
+
+            for key in MIDI_AUDIOS:
+                self.note_on(key, 127 if key == midi_key else 0)
+
+        except Exception as e:
+            print(e)
+
+    def set_audio_input(self, source_name):
+        try:
+            tx_audio = [x.index for x in self.pulse.source_output_list() if int(x.proplist.get('application.process.id')) == os.getpid()][0]
+
+            for source in self.pulse.source_list():
+                if source.description.startswith(source_name):
+                    print(f"Moving {tx_audio} to {source.index}")
+                    self.pulse.source_output_move(tx_audio, source.index)
+                    break
+        except Exception as e:
+            print(e)
+
+    def set_record(self, record):
+        self.record = record
+        self.note_on(MIDI_RECORD, 127 if self.record else 0)
+        if self.record:
+            self.set_audio_input('Plantronics')
+        else:
+            self.set_audio_input('Monitor of tx0')
 
     def set_rx_freq(self, freq):
         self.message_port_pub(pmt.intern("rx_freq_out"),
@@ -126,6 +192,9 @@ class blk(gr.sync_block):
                 self.set_sync_a(False)
                 self.set_tx_freq(self.tx_freq + delta * 20)
 
+            elif control == MIDI_VOLUME:
+                self.set_audio_volume(value / 100.0) # 0 .. 127%
+
             elif control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): # medium A, bass A
                 if control == MIDI_BANDPASS_CENTER:
                     self.filter_center = 100 + int(2800 * (value / 127.0))
@@ -158,14 +227,19 @@ class blk(gr.sync_block):
             elif note == MIDI_FT8_QRG and velocity == 127: # KP 2 A
                 self.set_rx_freq(40000)
                 self.set_sync_a(True)
+                self.set_record(False)
 
-            #if note == 43 and velocity == 127: # REC
-            #    self.record = not self.record
-            #    self.note_on(43, 127 if self.record else 0)
-            #    if self.record:
-            #        self.tb.rx_waterfall.start()
-            #    else:
-            #        self.tb.rx_waterfall.stop()
+            elif note == MIDI_AUDIO_HEADPHONES and velocity == 127: # KP 1 A
+                self.set_audio_output(MIDI_AUDIO_HEADPHONES, 'Plantronics')
+
+            elif note == MIDI_AUDIO_STEREO and velocity == 127: # KP 3 A
+                self.set_audio_output(MIDI_AUDIO_STEREO, 'Internes Audio Analog Stereo')
+
+            elif note == MIDI_AUDIO_SPEAKER and velocity == 127: # KP 4 A
+                self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek Y')
+
+            if note == MIDI_RECORD and velocity == 127: # REC
+                self.set_record(not self.record)
 
 if __name__ == '__main__':
     blk()
