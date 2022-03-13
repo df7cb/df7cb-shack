@@ -53,5 +53,12 @@ class blk(gr.sync_block):
 
             self.midiport.send(mido.Message('note_on', note=note, velocity=velocity))
 
+        elif msgtype == 'control_change':
+            payload = pmt.cdr(msg)
+            control = pmt.to_long(pmt.car(payload))
+            value = pmt.to_long(pmt.cdr(payload))
+
+            self.midiport.send(mido.Message('control_change', control=control, value=value))
+
 if __name__ == '__main__':
     blk()

@@ -217,7 +217,7 @@ blocks:
     ThousandsSeparator: .
     affinity: ''
     alias: ''
-    comment: ''
+    comment: TX VFO frequency display
     gui_hint: ''
     lbl: TX
     maxFreqHz: 510e3
@@ -233,7 +233,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1232, 484.0]
+    coordinate: [1240, 428.0]
     rotation: 0
     state: true
 - name: vfo
@@ -263,7 +263,7 @@ blocks:
     ThousandsSeparator: .
     affinity: ''
     alias: ''
-    comment: ''
+    comment: RX VFO frequency display
     gui_hint: ''
     lbl: RX
     maxFreqHz: 510e3
@@ -279,7 +279,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1240, 780.0]
+    coordinate: [1240, 812.0]
     rotation: 0
     state: true
 - name: blocks_message_debug_0
@@ -293,9 +293,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1656, 488.0]
+    coordinate: [1616, 752.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_swapiq_0
   id: blocks_swapiq
   parameters:
@@ -315,9 +315,13 @@ blocks:
 - name: control
   id: epy_block
   parameters:
-    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nMIDI_POWER\
-      \ = 54\n\nclass blk(gr.sync_block):\n    \"\"\"TRX Control block\"\"\"\n\n \
-      \   def __init__(self):  # only default arguments here\n        \"\"\"arguments\
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\n# buttons\
+      \ (notes)\nMIDI_FT8_QRG = 2 # KP 2 A\nMIDI_SHIFT_FT8_QRG = 6 # Shift-KP 2 A\n\
+      MIDI_SYNC_A = 35\nMIDI_SHIFT_SYNC_A = 38\n# controls\nMIDI_VFO_A = 48 # Jog\
+      \ A\nMIDI_SHIFT_VFO_A = 55 # Shift-Jog A\nMIDI_POWER = 54 # Sync A\nMIDI_BANDPASS_CENTER\
+      \ = 59 # Medium A\nMIDI_BANDPASS_WIDTH = 60 # Bass A\nMIDI_REPORT_ALL_CONTROLS\
+      \ = 0x7f\n\nclass blk(gr.sync_block):\n    \"\"\"TRX Control block\"\"\"\n\n\
+      \    def __init__(self):  # only default arguments here\n        \"\"\"arguments\
       \ to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
       \            self,\n            name='Control',\n            in_sig=None,\n\
       \            out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
@@ -326,42 +330,57 @@ blocks:
       \ self.set_msg_handler(pmt.intern(\"rx_freq_in\"), self.rx_freq_in)\n      \
       \  self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"\
       tx_freq_in\"), self.tx_freq_in)\n\n        self.message_port_register_out(pmt.intern(\"\
-      midi_out\"))\n\n        self.filter_center = 850\n        self.filter_bw = 3000\n\
-      \n        self.sync_a = True\n        #self.record = True\n\n    def note_on(self,\
-      \ note, velocity):\n        self.message_port_pub(pmt.intern(\"midi_out\"),\n\
-      \                pmt.cons(pmt.intern('note_on'),\n                    pmt.cons(pmt.from_long(note),\
-      \ pmt.from_long(velocity))))\n\n    def start(self):\n        # MIDI\n     \
-      \   self.note_on(35, 127) # Sync A\n        #self.note_on(43, 127) # REC\n \
-      \       self.tb.set_vfo(40000.0)\n        self.tb.set_tx_vfo(40000.0)\n\n  \
-      \      # without this, the spectrum display updates only once per second (GR\
-      \ bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n    def set_rx_freq(self,\
-      \ freq):\n        self.tb._vfo_msgdigctl_win.setValue(freq)\n        self.tb.set_vfo(freq)\n\
-      \        if self.sync_a:\n            self.set_tx_freq(freq)\n\n    def set_tx_freq(self,\
-      \ freq):\n        self.tb._tx_vfo_msgdigctl_win.setValue(freq)\n        self.tb.set_tx_vfo(freq)\n\
+      midi_out\"))\n        self.message_port_register_out(pmt.intern(\"rx_freq_out\"\
+      ))\n        self.message_port_register_out(pmt.intern(\"tx_freq_out\"))\n\n\
+      \        self.rx0_freq = 40000.0\n        self.tx_freq = 40000.0\n        self.filter_center\
+      \ = 850\n        self.filter_bw = 3000\n\n        self.sync_a = False # start\
+      \ false so set_sync_a sets the LEDs\n        #self.record = True\n\n    def\
+      \ note_on(self, note, velocity):\n        self.message_port_pub(pmt.intern(\"\
+      midi_out\"),\n                pmt.cons(pmt.intern('note_on'),\n            \
+      \        pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))\n\n    def\
+      \ start(self):\n        # MIDI\n        #self.note_on(43, 127) # REC\n     \
+      \   self.set_sync_a(True)\n        self.set_rx_freq(40000.0)\n        self.set_tx_freq(40000.0)\n\
+      \n        # read out knobs and slider on startup\n        self.message_port_pub(pmt.intern(\"\
+      midi_out\"),\n                pmt.cons(pmt.intern('control_change'),\n     \
+      \               pmt.cons(pmt.from_long(MIDI_REPORT_ALL_CONTROLS), pmt.from_long(127))))\n\
+      \n        # without this, the spectrum display updates only once per second\
+      \ (GR bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n    def set_rx_freq(self,\
+      \ freq):\n        self.message_port_pub(pmt.intern(\"rx_freq_out\"),\n     \
+      \           pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n    def\
+      \ set_tx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"tx_freq_out\"\
+      ),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n\
+      \    def set_sync_a(self, sync_a):\n        if self.sync_a != sync_a:\n    \
+      \        self.sync_a = sync_a\n            self.note_on(MIDI_SYNC_A, 127 if\
+      \ sync_a else 0)\n            self.note_on(MIDI_SHIFT_SYNC_A, 127 if sync_a\
+      \ else 0)\n            if sync_a:\n                self.set_tx_freq(self.rx0_freq)\n\
       \n    def rx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
-      \ == pmt.intern('freq'):\n            if self.sync_a:\n                freq\
-      \ = int(pmt.to_double(pmt.cdr(msg)))\n                self.set_tx_freq(freq)\n\
+      \ == pmt.intern('freq'):\n            self.rx0_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
+      \            if self.sync_a:\n                self.set_tx_freq(self.rx0_freq)\n\
       \n    def tx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
       \ == pmt.intern('freq'):\n            tx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
-      \n            # FT8 indicator LED\n            self.note_on(2, 127 if tx_freq\
-      \ == 40000 else 0)\n            self.note_on(6, 127 if tx_freq == 40000 else\
-      \ 0) # shift-KP 2 A\n\n            freqfile = open(\"/run/user/1000/gnuradio/qo100.qrg\"\
-      , \"w\")\n            freqfile.write(str(tx_freq + 2400000000) + \"\\n\")\n\
-      \            # fake frequency on 10m so tlf can deal with it\n            #freqfile.write(str(tx_freq\
+      \n            if (tx_freq == 40000) != (self.tx_freq == 40000):\n          \
+      \      # FT8 frequency indicator LED\n                self.note_on(MIDI_FT8_QRG,\
+      \ 127 if tx_freq == 40000 else 0)\n                self.note_on(MIDI_SHIFT_FT8_QRG,\
+      \ 127 if tx_freq == 40000 else 0)\n\n            self.tx_freq = tx_freq\n\n\
+      \            if self.tx_freq != self.rx0_freq:\n                self.set_sync_a(False)\n\
+      \n            freqfile = open(\"/run/user/1000/gnuradio/qo100.qrg\", \"w\")\n\
+      \            freqfile.write(str(tx_freq + 2400000000) + \"\\n\")\n         \
+      \   # fake frequency on 10m so tlf can deal with it\n            #freqfile.write(str(tx_freq\
       \ + 28000000) + \"\\n\")\n            freqfile.close()\n\n    def midi_in(self,\
       \ msg):\n        if not msg.is_pair(): return\n        msgtype = str(pmt.car(msg))\n\
       \n        if msgtype == 'control_change':\n            payload = pmt.cdr(msg)\n\
       \            control = pmt.to_long(pmt.car(payload))\n            value = pmt.to_long(pmt.cdr(payload))\n\
-      \n            if control == 48: # jog A\n                delta = value if value\
-      \ < 64 else value - 128\n                self.set_rx_freq(self.tb.get_vfo()\
-      \ + delta * 20)\n\n            elif control == 55: # shift-jog a\n         \
-      \       delta = value if value < 64 else value - 128\n                if self.sync_a:\n\
-      \                    self.sync_a = False\n                    self.note_on(35,\
-      \ 0)\n                self.set_tx_freq(self.tb.get_tx_vfo() + delta * 20)\n\n\
-      \            elif control in (59, 60): # medium A, bass A\n                if\
-      \ control == 59:\n                    self.filter_center = 100 + int(2800 *\
-      \ (value / 127.0))\n                if control == 60:\n                    self.filter_bw\
-      \ = 100 + int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
+      \n            if control == MIDI_VFO_A: # jog A\n                delta = value\
+      \ if value < 64 else value - 128\n                self.set_rx_freq(self.rx0_freq\
+      \ + delta * 20)\n\n            elif control == MIDI_SHIFT_VFO_A and value !=\
+      \ 64: # shift-jog a (64 reported on all-buttons-readout, ignore that)\n    \
+      \            delta = value if value < 64 else value - 128\n                self.set_sync_a(False)\n\
+      \                self.set_tx_freq(self.tx_freq + delta * 20)\n\n           \
+      \ elif control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): # medium A, bass\
+      \ A\n                if control == MIDI_BANDPASS_CENTER:\n                 \
+      \   self.filter_center = 100 + int(2800 * (value / 127.0))\n               \
+      \ if control == MIDI_BANDPASS_WIDTH:\n                    self.filter_bw = 100\
+      \ + int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
       \ - self.filter_bw // 2, 0)\n                high_cutoff = min(self.filter_center\
       \ + self.filter_bw // 2, 3000)\n                self.tb.set_rx0_low_cutoff(low_cutoff)\n\
       \                self.tb.set_rx0_high_cutoff(high_cutoff)\n\n            if\
@@ -369,30 +388,32 @@ blocks:
       \                self.tb.set_tx_power(power)\n\n        elif msgtype == 'note_on':\n\
       \            payload = pmt.cdr(msg)\n            note = pmt.to_long(pmt.car(payload))\n\
       \            velocity = pmt.to_long(pmt.cdr(payload))\n\n            if note\
-      \ == 35 and velocity == 127: # Sync A\n                self.sync_a = not self.sync_a\n\
-      \                self.note_on(35, 127 if self.sync_a else 0)\n             \
-      \   if self.sync_a:\n                    self.set_tx_freq(self.tb.get_vfo())\n\
-      \n            if note == 2 and velocity == 127: # KP 2 A\n                self.sync_a\
-      \ = True\n                self.note_on(35, 127)\n                self.set_rx_freq(40000)\n\
-      \n            #if note == 43 and velocity == 127: # REC\n            #    self.record\
-      \ = not self.record\n            #    self.note_on(43, 127 if self.record else\
-      \ 0)\n            #    if self.record:\n            #        self.tb.rx_waterfall.start()\n\
-      \            #    else:\n            #        self.tb.rx_waterfall.stop()\n\n\
-      if __name__ == '__main__':\n    blk()\n"
+      \ == MIDI_SYNC_A and velocity == 127: # Sync A\n                self.set_sync_a(not\
+      \ self.sync_a)\n\n            elif note == MIDI_SHIFT_SYNC_A and velocity ==\
+      \ 127: # Shift-Sync A\n                if not self.sync_a:\n               \
+      \     # set RX from TX\n                    self.set_rx_freq(self.tx_freq)\n\
+      \                self.set_sync_a(not self.sync_a)\n\n            elif note ==\
+      \ MIDI_FT8_QRG and velocity == 127: # KP 2 A\n                self.set_rx_freq(40000)\n\
+      \                self.set_sync_a(True)\n\n            #if note == 43 and velocity\
+      \ == 127: # REC\n            #    self.record = not self.record\n          \
+      \  #    self.note_on(43, 127 if self.record else 0)\n            #    if self.record:\n\
+      \            #        self.tb.rx_waterfall.start()\n            #    else:\n\
+      \            #        self.tb.rx_waterfall.stop()\n\nif __name__ == '__main__':\n\
+      \    blk()\n"
     affinity: ''
     alias: ''
-    comment: ''
+    comment: Control logic
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
     _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('rx_freq_in',
-      'message', 1), ('midi_in', 'message', 1)], [('midi_out', 'message', 1)], 'TRX
-      Control block', [])
+      'message', 1), ('midi_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
+      'message', 1), ('midi_out', 'message', 1)], 'TRX Control block', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1648, 680.0]
-    rotation: 0
+    coordinate: [1304, 576.0]
+    rotation: 180
     state: true
 - name: inject_tb
   id: snippet
@@ -506,10 +527,13 @@ blocks:
       \       if msgtype == 'note_on':\n            payload = pmt.cdr(msg)\n     \
       \       note = pmt.to_long(pmt.car(payload))\n            velocity = pmt.to_long(pmt.cdr(payload))\n\
       \n            self.midiport.send(mido.Message('note_on', note=note, velocity=velocity))\n\
-      \nif __name__ == '__main__':\n    blk()\n"
+      \n        elif msgtype == 'control_change':\n            payload = pmt.cdr(msg)\n\
+      \            control = pmt.to_long(pmt.car(payload))\n            value = pmt.to_long(pmt.cdr(payload))\n\
+      \n            self.midiport.send(mido.Message('control_change', control=control,\
+      \ value=value))\n\nif __name__ == '__main__':\n    blk()\n"
     affinity: ''
     alias: ''
-    comment: ''
+    comment: MIDI interface
     maxoutbuf: '0'
     midi_port: '''DJControl Compact:DJControl Compact DJControl Com'''
     minoutbuf: '0'
@@ -520,8 +544,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1600, 604.0]
-    rotation: 180
+    coordinate: [1240, 716.0]
+    rotation: 0
     state: true
 - name: rx0_high_cutoff_to_msg
   id: blocks_var_to_msg
@@ -685,7 +709,7 @@ blocks:
     color7: '0'
     color8: '0'
     color9: '0'
-    comment: ''
+    comment: Transponder waterfall
     fc: 250e3
     fftsize: '2048'
     freqhalf: 'True'
@@ -972,7 +996,7 @@ blocks:
     color7: '"yellow"'
     color8: '"dark red"'
     color9: '"dark green"'
-    comment: ''
+    comment: Spectrum around VFO 0
     ctrlpanel: 'True'
     fc: 40e3
     fftsize: '1024'
@@ -1045,7 +1069,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: Display VFO 0 in waterfall
     maxoutbuf: '0'
     minoutbuf: '0'
     num_inputs: '2'
@@ -1178,6 +1202,8 @@ blocks:
 connections:
 - [blocks_swapiq_0, '0', vfo0_waterfall_atten, '0']
 - [control, midi_out, midi_block, midi_in]
+- [control, rx_freq_out, vfo, valuein]
+- [control, tx_freq_out, tx_vfo, valuein]
 - [limesdr_source, '0', rx_freq_sink, '0']
 - [limesdr_source, '0', vfo0_mixer, '0']
 - [limesdr_source, '0', vfo0_waterfall_add, '0']
@@ -1187,9 +1213,7 @@ connections:
 - [rx0_high_cutoff_to_msg, msgout, high_cutoff_gauge, value]
 - [rx0_low_cutoff_to_msg, msgout, low_cutoff_gauge, value]
 - [rx_resampler, '0', tx_mixer, '0']
-- [rx_waterfall, freq, control, rx_freq_in]
 - [rx_waterfall, freq, vfo, valuein]
-- [rx_waterfall, freq, vfo0_spectrum, freq]
 - [tx_audio_source, '0', tx_to_complex, '0']
 - [tx_bandpass, '0', rx_resampler, '0']
 - [tx_mixer, '0', limesdr_sink, '0']
@@ -1205,7 +1229,6 @@ connections:
 - [vfo0_scope_bandpass, '0', vfo0_spectrum, '0']
 - [vfo0_signal_source, '0', blocks_swapiq_0, '0']
 - [vfo0_signal_source, '0', vfo0_mixer, '1']
-- [vfo0_spectrum, freq, control, rx_freq_in]
 - [vfo0_spectrum, freq, vfo, valuein]
 - [vfo0_spectrum, freq, vfo0_spectrum, freq]
 - [vfo0_to_float, '0', vfo0_audio_sink, '0']

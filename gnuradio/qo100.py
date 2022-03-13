@@ -324,25 +324,22 @@ class qo100(gr.top_block, Qt.QWidget):
         self.top_layout.addWidget(_high_cutoff_gauge_lg_win)
         self.control = control.blk()
         self.blocks_swapiq_0 = blocks.swap_iq(1, gr.sizeof_gr_complex)
-        self.blocks_message_debug_0 = blocks.message_debug(True)
 
 
         ##################################################
         # Connections
         ##################################################
         self.msg_connect((self.control, 'midi_out'), (self.midi_block, 'midi_in'))
-        self.msg_connect((self.midi_block, 'midi_out'), (self.blocks_message_debug_0, 'print'))
+        self.msg_connect((self.control, 'tx_freq_out'), (self.tx_vfo, 'valuein'))
+        self.msg_connect((self.control, 'rx_freq_out'), (self.vfo, 'valuein'))
         self.msg_connect((self.midi_block, 'midi_out'), (self.control, 'midi_in'))
         self.msg_connect((self.rx0_high_cutoff_to_msg, 'msgout'), (self.high_cutoff_gauge, 'value'))
         self.msg_connect((self.rx0_low_cutoff_to_msg, 'msgout'), (self.low_cutoff_gauge, 'value'))
-        self.msg_connect((self.rx_waterfall, 'freq'), (self.control, 'rx_freq_in'))
         self.msg_connect((self.rx_waterfall, 'freq'), (self.vfo, 'valuein'))
-        self.msg_connect((self.rx_waterfall, 'freq'), (self.vfo0_spectrum, 'freq'))
         self.msg_connect((self.tx_power_to_msg, 'msgout'), (self.tx_power_gauge, 'value'))
         self.msg_connect((self.tx_vfo, 'valueout'), (self.control, 'tx_freq_in'))
         self.msg_connect((self.vfo, 'valueout'), (self.control, 'rx_freq_in'))
         self.msg_connect((self.vfo, 'valueout'), (self.vfo0_spectrum, 'freq'))
-        self.msg_connect((self.vfo0_spectrum, 'freq'), (self.control, 'rx_freq_in'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo, 'valuein'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo0_spectrum, 'freq'))
         self.connect((self.blocks_swapiq_0, 0), (self.vfo0_waterfall_atten, 0))
