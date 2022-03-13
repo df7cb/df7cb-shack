@@ -90,7 +90,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [944, 1228.0]
+    coordinate: [1696, 292.0]
     rotation: 0
     state: true
 - name: low_cutoff_gauge
@@ -117,7 +117,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [944, 1404.0]
+    coordinate: [1696, 172.0]
     rotation: 0
     state: true
 - name: mag
@@ -135,25 +135,29 @@ blocks:
 - name: rx0_high_cutoff
   id: variable
   parameters:
-    comment: ''
+    comment: 'RX bandpass
+
+      high edge'
     value: '3000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [816, 1308.0]
+    coordinate: [1272, 308.0]
     rotation: 0
     state: true
 - name: rx0_low_cutoff
   id: variable
   parameters:
-    comment: ''
+    comment: 'RX bandpass
+
+      low edge'
     value: '0'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [816, 1380.0]
+    coordinate: [1272, 188.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -168,6 +172,45 @@ blocks:
     coordinate: [224, 36.0]
     rotation: 0
     state: enabled
+- name: tx_power
+  id: variable
+  parameters:
+    comment: TX power
+    value: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1272, 60.0]
+    rotation: 0
+    state: true
+- name: tx_power_gauge
+  id: qtgui_levelgauge
+  parameters:
+    affinity: ''
+    alias: ''
+    backgroundColor: default
+    barColor: default
+    comment: ''
+    fontColor: default
+    gui_hint: ''
+    isVertical: 'False'
+    label: TX Power
+    maximum: '100'
+    minimum: '0'
+    msize: '100'
+    position: '1'
+    scaleFactor: '100'
+    showValue: 'True'
+    type: real
+    value: '1.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1696, 36.0]
+    rotation: 0
+    state: true
 - name: tx_vfo
   id: qtgui_msgdigitalnumbercontrol
   parameters:
@@ -190,8 +233,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [296, 1596.0]
-    rotation: 180
+    coordinate: [1232, 484.0]
+    rotation: 0
     state: true
 - name: vfo
   id: variable_qtgui_range
@@ -236,8 +279,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [296, 1468.0]
-    rotation: 180
+    coordinate: [1240, 780.0]
+    rotation: 0
     state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
@@ -250,9 +293,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [752, 1512.0]
+    coordinate: [1656, 488.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_swapiq_0
   id: blocks_swapiq
   parameters:
@@ -266,72 +309,76 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 588.0]
+    coordinate: [296, 580.0]
     rotation: 0
     state: true
 - name: control
   id: epy_block
   parameters:
-    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nclass\
-      \ blk(gr.sync_block):\n    \"\"\"TRX Control block\"\"\"\n\n    def __init__(self):\
-      \  # only default arguments here\n        \"\"\"arguments to this function show\
-      \ up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n         \
-      \   self,\n            name='Control',\n            in_sig=None,\n         \
-      \   out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
+    _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nMIDI_POWER\
+      \ = 54\n\nclass blk(gr.sync_block):\n    \"\"\"TRX Control block\"\"\"\n\n \
+      \   def __init__(self):  # only default arguments here\n        \"\"\"arguments\
+      \ to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='Control',\n            in_sig=None,\n\
+      \            out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
       midi_in\"))\n        self.set_msg_handler(pmt.intern(\"midi_in\"), self.midi_in)\n\
       \        self.message_port_register_in(pmt.intern(\"rx_freq_in\"))\n       \
       \ self.set_msg_handler(pmt.intern(\"rx_freq_in\"), self.rx_freq_in)\n      \
       \  self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"\
       tx_freq_in\"), self.tx_freq_in)\n\n        self.message_port_register_out(pmt.intern(\"\
-      rx_freq_out\"))\n        self.message_port_register_out(pmt.intern(\"tx_freq_out\"\
-      ))\n        self.message_port_register_out(pmt.intern(\"rx0_low_cutoff\"))\n\
-      \        self.message_port_register_out(pmt.intern(\"rx0_high_cutoff\"))\n \
-      \       self.message_port_register_out(pmt.intern(\"midi_out\"))\n\n       \
-      \ self.rx_freq = 40000\n        self.tx_freq = 40000\n        self.filter_center\
-      \ = 850\n        self.filter_bw = 3000\n\n        self.sync_a = True\n\n   \
-      \ def note_on(self, note, velocity):\n        self.message_port_pub(pmt.intern(\"\
-      midi_out\"),\n                pmt.cons(pmt.intern('note_on'),\n            \
-      \        pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))\n\n    def\
-      \ start(self):\n        self.note_on(35, 127) # Sync A\n        self.set_rx_freq(self.rx_freq)\n\
-      \n    def set_rx_freq(self, freq):\n        self.rx_freq = min(max(freq, -10000),\
-      \ 510000)\n        self.message_port_pub(pmt.intern(\"rx_freq_out\"), pmt.cons(pmt.intern('freq'),\
-      \ pmt.from_long(freq)))\n        if self.sync_a:\n            self.set_tx_freq(self.rx_freq)\n\
-      \n    def set_tx_freq(self, freq):\n        self.tx_freq = min(max(freq, -10000),\
-      \ 510000)\n        self.message_port_pub(pmt.intern(\"tx_freq_out\"), pmt.cons(pmt.intern('freq'),\
-      \ pmt.from_long(freq)))\n        # FT8 indicator LED\n        self.note_on(2,\
-      \ 127 if freq == 40000 else 0)\n        self.note_on(6, 127 if freq == 40000\
-      \ else 0) # shift-KP 2 A\n\n    def rx_freq_in(self, msg):\n        if msg.is_pair()\
-      \ and pmt.car(msg) == pmt.intern('freq'):\n            self.rx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
-      \            #if self.sync_a:\n            #    self.set_tx_freq(self.rx_freq)\n\
+      midi_out\"))\n\n        self.filter_center = 850\n        self.filter_bw = 3000\n\
+      \n        self.sync_a = True\n        #self.record = True\n\n    def note_on(self,\
+      \ note, velocity):\n        self.message_port_pub(pmt.intern(\"midi_out\"),\n\
+      \                pmt.cons(pmt.intern('note_on'),\n                    pmt.cons(pmt.from_long(note),\
+      \ pmt.from_long(velocity))))\n\n    def start(self):\n        # MIDI\n     \
+      \   self.note_on(35, 127) # Sync A\n        #self.note_on(43, 127) # REC\n \
+      \       self.tb.set_vfo(40000.0)\n        self.tb.set_tx_vfo(40000.0)\n\n  \
+      \      # without this, the spectrum display updates only once per second (GR\
+      \ bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n    def set_rx_freq(self,\
+      \ freq):\n        self.tb._vfo_msgdigctl_win.setValue(freq)\n        self.tb.set_vfo(freq)\n\
+      \        if self.sync_a:\n            self.set_tx_freq(freq)\n\n    def set_tx_freq(self,\
+      \ freq):\n        self.tb._tx_vfo_msgdigctl_win.setValue(freq)\n        self.tb.set_tx_vfo(freq)\n\
+      \n    def rx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
+      \ == pmt.intern('freq'):\n            if self.sync_a:\n                freq\
+      \ = int(pmt.to_double(pmt.cdr(msg)))\n                self.set_tx_freq(freq)\n\
       \n    def tx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
-      \ == pmt.intern('freq'):\n            self.tx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
-      \n    def midi_in(self, msg):\n        if not msg.is_pair(): return\n      \
-      \  msgtype = str(pmt.car(msg))\n\n        if msgtype == 'control_change':\n\
-      \            payload = pmt.cdr(msg)\n            control = pmt.to_long(pmt.car(payload))\n\
-      \            value = pmt.to_long(pmt.cdr(payload))\n\n            if control\
-      \ == 48: # jog A\n                delta = value if value < 64 else value - 128\n\
-      \                self.set_rx_freq(self.rx_freq + delta * 20)\n\n           \
-      \ elif control == 55: # shift-jog a\n                delta = value if value\
-      \ < 64 else value - 128\n                if self.sync_a:\n                 \
-      \   self.sync_a = False\n                    self.note_on(35, 0)\n         \
-      \       self.set_tx_freq(self.tx_freq + delta * 20)\n\n            elif control\
-      \ in (59, 60): # medium A, bass A\n                if control == 59:\n     \
-      \               self.filter_center = 100 + int(2800 * (value / 127.0))\n   \
-      \             if control == 60:\n                    self.filter_bw = 100 +\
-      \ int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
+      \ == pmt.intern('freq'):\n            tx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
+      \n            # FT8 indicator LED\n            self.note_on(2, 127 if tx_freq\
+      \ == 40000 else 0)\n            self.note_on(6, 127 if tx_freq == 40000 else\
+      \ 0) # shift-KP 2 A\n\n            freqfile = open(\"/run/user/1000/gnuradio/qo100.qrg\"\
+      , \"w\")\n            freqfile.write(str(tx_freq + 2400000000) + \"\\n\")\n\
+      \            # fake frequency on 10m so tlf can deal with it\n            #freqfile.write(str(tx_freq\
+      \ + 28000000) + \"\\n\")\n            freqfile.close()\n\n    def midi_in(self,\
+      \ msg):\n        if not msg.is_pair(): return\n        msgtype = str(pmt.car(msg))\n\
+      \n        if msgtype == 'control_change':\n            payload = pmt.cdr(msg)\n\
+      \            control = pmt.to_long(pmt.car(payload))\n            value = pmt.to_long(pmt.cdr(payload))\n\
+      \n            if control == 48: # jog A\n                delta = value if value\
+      \ < 64 else value - 128\n                self.set_rx_freq(self.tb.get_vfo()\
+      \ + delta * 20)\n\n            elif control == 55: # shift-jog a\n         \
+      \       delta = value if value < 64 else value - 128\n                if self.sync_a:\n\
+      \                    self.sync_a = False\n                    self.note_on(35,\
+      \ 0)\n                self.set_tx_freq(self.tb.get_tx_vfo() + delta * 20)\n\n\
+      \            elif control in (59, 60): # medium A, bass A\n                if\
+      \ control == 59:\n                    self.filter_center = 100 + int(2800 *\
+      \ (value / 127.0))\n                if control == 60:\n                    self.filter_bw\
+      \ = 100 + int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
       \ - self.filter_bw // 2, 0)\n                high_cutoff = min(self.filter_center\
-      \ + self.filter_bw // 2, 3000)\n\n                self.message_port_pub(pmt.intern(\"\
-      rx0_low_cutoff\"), pmt.cons(pmt.intern('value'), pmt.from_long(low_cutoff)))\n\
-      \                self.message_port_pub(pmt.intern(\"rx0_high_cutoff\"), pmt.cons(pmt.intern('value'),\
-      \ pmt.from_long(high_cutoff)))\n\n        elif msgtype == 'note_on':\n     \
-      \       payload = pmt.cdr(msg)\n            note = pmt.to_long(pmt.car(payload))\n\
+      \ + self.filter_bw // 2, 3000)\n                self.tb.set_rx0_low_cutoff(low_cutoff)\n\
+      \                self.tb.set_rx0_high_cutoff(high_cutoff)\n\n            if\
+      \ control == MIDI_POWER:\n                power = 0.1 + 0.9 * (value/127.0)\n\
+      \                self.tb.set_tx_power(power)\n\n        elif msgtype == 'note_on':\n\
+      \            payload = pmt.cdr(msg)\n            note = pmt.to_long(pmt.car(payload))\n\
       \            velocity = pmt.to_long(pmt.cdr(payload))\n\n            if note\
       \ == 35 and velocity == 127: # Sync A\n                self.sync_a = not self.sync_a\n\
       \                self.note_on(35, 127 if self.sync_a else 0)\n             \
-      \   if self.sync_a:\n                    self.set_tx_freq(self.rx_freq)\n\n\
-      \            if note == 2 and velocity == 127: # KP 2 A\n                self.sync_a\
+      \   if self.sync_a:\n                    self.set_tx_freq(self.tb.get_vfo())\n\
+      \n            if note == 2 and velocity == 127: # KP 2 A\n                self.sync_a\
       \ = True\n                self.note_on(35, 127)\n                self.set_rx_freq(40000)\n\
-      \n\nif __name__ == '__main__':\n    blk()\n"
+      \n            #if note == 43 and velocity == 127: # REC\n            #    self.record\
+      \ = not self.record\n            #    self.note_on(43, 127 if self.record else\
+      \ 0)\n            #    if self.record:\n            #        self.tb.rx_waterfall.start()\n\
+      \            #    else:\n            #        self.tb.rx_waterfall.stop()\n\n\
+      if __name__ == '__main__':\n    blk()\n"
     affinity: ''
     alias: ''
     comment: ''
@@ -339,13 +386,27 @@ blocks:
     minoutbuf: '0'
   states:
     _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('rx_freq_in',
-      'message', 1), ('midi_in', 'message', 1)], [('midi_out', 'message', 1), ('rx0_high_cutoff',
-      'message', 1), ('rx0_low_cutoff', 'message', 1), ('tx_freq_out', 'message',
-      1), ('rx_freq_out', 'message', 1)], 'TRX Control block', [])
+      'message', 1), ('midi_in', 'message', 1)], [('midi_out', 'message', 1)], 'TRX
+      Control block', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [368, 1272.0]
+    coordinate: [1648, 680.0]
+    rotation: 0
+    state: true
+- name: inject_tb
+  id: snippet
+  parameters:
+    alias: ''
+    code: self.control.tb = self
+    comment: ''
+    priority: '0'
+    section: main_after_init
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [768, 28.0]
     rotation: 0
     state: true
 - name: limesdr_sink
@@ -359,7 +420,7 @@ blocks:
     calibr_bandw_ch0: 2.5e6
     calibr_bandw_ch1: 5e6
     channel_mode: '0'
-    comment: ''
+    comment: Transmitter
     dacVal: '125'
     digital_bandw_ch0: '0'
     digital_bandw_ch1: '0'
@@ -379,7 +440,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1000, 164.0]
+    coordinate: [1048, 164.0]
     rotation: 0
     state: enabled
 - name: limesdr_source
@@ -393,7 +454,7 @@ blocks:
     calibr_bandw_ch0: 5e6
     calibr_bandw_ch1: 5e6
     channel_mode: '0'
-    comment: ''
+    comment: Receiver
     dacVal: '125'
     digital_bandw_ch0: '0'
     digital_bandw_ch1: '0'
@@ -414,7 +475,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 460.0]
+    coordinate: [40, 436.0]
     rotation: 0
     state: true
 - name: midi_block
@@ -459,96 +520,41 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [320, 1196.0]
+    coordinate: [1600, 604.0]
     rotation: 180
     state: true
-- name: qtgui_waterfall_sink_x_0
-  id: qtgui_waterfall_sink_x
+- name: rx0_high_cutoff_to_msg
+  id: blocks_var_to_msg
   parameters:
     affinity: ''
     alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    axislabels: 'True'
-    bw: samp_rate
-    color1: '0'
-    color10: '0'
-    color2: '0'
-    color3: '0'
-    color4: '0'
-    color5: '0'
-    color6: '0'
-    color7: '0'
-    color8: '0'
-    color9: '0'
     comment: ''
-    fc: 250e3
-    fftsize: '2048'
-    freqhalf: 'True'
-    grid: 'False'
-    gui_hint: 0,0,14,1
-    int_max: '-45'
-    int_min: '-75'
-    label1: ''
-    label10: ''
-    label2: ''
-    label3: ''
-    label4: ''
-    label5: ''
-    label6: ''
-    label7: ''
-    label8: ''
-    label9: ''
-    legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: '""'
-    nconnections: '1'
-    showports: 'False'
-    type: complex
-    update_time: '0.05'
-    wintype: window.WIN_BLACKMAN_hARRIS
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [888, 540.0]
-    rotation: 0
-    state: true
-- name: rx0_high_cutoff_setter
-  id: blocks_msgpair_to_var
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
+    msgname: value
     target: rx0_high_cutoff
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [656, 1308.0]
+    coordinate: [1400, 308.0]
     rotation: 0
     state: true
-- name: rx0_low_cutoff_setter
-  id: blocks_msgpair_to_var
+- name: rx0_low_cutoff_to_msg
+  id: blocks_var_to_msg
   parameters:
     affinity: ''
     alias: ''
     comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: value
     target: rx0_low_cutoff
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 1380.0]
+    coordinate: [1400, 188.0]
     rotation: 0
     state: true
 - name: rx_freq_sink
@@ -649,7 +655,68 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [672, 212.0]
+    coordinate: [704, 212.0]
+    rotation: 0
+    state: true
+- name: rx_waterfall
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: 250e3
+    fftsize: '2048'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: 0,0,14,1
+    int_max: '-45'
+    int_min: '-75'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'True'
+    type: complex
+    update_time: '0.05'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [896, 544.0]
     rotation: 0
     state: true
 - name: tx_audio_source
@@ -657,7 +724,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: Transmitter audio input
     device_name: pulse:tx0.monitor
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -679,7 +746,7 @@ blocks:
     beta: '6.76'
     comment: ''
     decim: '1'
-    gain: '1'
+    gain: tx_power
     high_cutoff_freq: '3000'
     interp: '1'
     low_cutoff_freq: '0'
@@ -693,7 +760,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 180.0]
+    coordinate: [464, 180.0]
     rotation: 0
     state: enabled
 - name: tx_mixer
@@ -711,9 +778,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [880, 240.0]
+    coordinate: [896, 248.0]
     rotation: 0
     state: enabled
+- name: tx_power_to_msg
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: value
+    target: tx_power
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 60.0]
+    rotation: 0
+    state: true
 - name: tx_to_complex
   id: blocks_float_to_complex
   parameters:
@@ -727,7 +811,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 232.0]
+    coordinate: [280, 232.0]
     rotation: 0
     state: enabled
 - name: tx_vfo_signal_source
@@ -736,7 +820,7 @@ blocks:
     affinity: ''
     alias: ''
     amp: mag
-    comment: ''
+    comment: TX VFO
     freq: tx_vfo - 250e3
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -749,7 +833,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [560, 364.0]
+    coordinate: [600, 364.0]
     rotation: 0
     state: enabled
 - name: vfo0_audio_sink
@@ -757,7 +841,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: Main audio output
     device_name: pulse
     num_inputs: '1'
     ok_to_block: 'False'
@@ -809,88 +893,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 864.0]
-    rotation: 0
-    state: enabled
-- name: vfo0_scope
-  id: qtgui_freq_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    average: '0.2'
-    axislabels: 'True'
-    bw: 24e3
-    color1: '"blue"'
-    color10: '"dark blue"'
-    color2: '"red"'
-    color3: '"green"'
-    color4: '"black"'
-    color5: '"cyan"'
-    color6: '"magenta"'
-    color7: '"yellow"'
-    color8: '"dark red"'
-    color9: '"dark green"'
-    comment: ''
-    ctrlpanel: 'True'
-    fc: '0'
-    fftsize: '1024'
-    freqhalf: 'True'
-    grid: 'True'
-    gui_hint: 15,0,14,1
-    label: Relative Gain
-    label1: ''
-    label10: ''''''
-    label2: ''''''
-    label3: ''''''
-    label4: ''''''
-    label5: ''''''
-    label6: ''''''
-    label7: ''''''
-    label8: ''''''
-    label9: ''''''
-    legend: 'False'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    name: ''
-    nconnections: '1'
-    norm_window: 'True'
-    showports: 'False'
-    tr_chan: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_tag: '""'
-    type: complex
-    units: dB
-    update_time: '0.01'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    wintype: window.WIN_HAMMING
-    ymax: '-40'
-    ymin: '-86'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [880, 676.0]
+    coordinate: [312, 872.0]
     rotation: 0
     state: enabled
 - name: vfo0_scope_bandpass
@@ -924,7 +927,7 @@ blocks:
     affinity: ''
     alias: ''
     amp: mag
-    comment: ''
+    comment: 'VFO 0: main receiver'
     freq: 250e3-vfo
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -940,6 +943,87 @@ blocks:
     coordinate: [40, 724.0]
     rotation: 0
     state: enabled
+- name: vfo0_spectrum
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '0.2'
+    axislabels: 'True'
+    bw: 24e3
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    ctrlpanel: 'True'
+    fc: 40e3
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'True'
+    gui_hint: 15,0,14,1
+    label: Relative Gain
+    label1: ''
+    label10: ''''''
+    label2: ''''''
+    label3: ''''''
+    label4: ''''''
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: ''
+    nconnections: '1'
+    norm_window: 'True'
+    showports: 'True'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.01'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: window.WIN_HAMMING
+    ymax: '-40'
+    ymin: '-86'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [896, 708.0]
+    rotation: 0
+    state: enabled
 - name: vfo0_to_float
   id: blocks_complex_to_float
   parameters:
@@ -953,7 +1037,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 864.0]
+    coordinate: [736, 872.0]
     rotation: 0
     state: true
 - name: vfo0_waterfall_add
@@ -971,7 +1055,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 544.0]
+    coordinate: [688, 528.0]
     rotation: 0
     state: true
 - name: vfo0_waterfall_atten
@@ -997,7 +1081,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: FT8/FT4 audio output
     device_name: pulse:rx2
     num_inputs: '1'
     ok_to_block: 'False'
@@ -1049,7 +1133,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 1040.0]
+    coordinate: [312, 1048.0]
     rotation: 0
     state: enabled
 - name: vfo2_signal_source
@@ -1058,7 +1142,7 @@ blocks:
     affinity: ''
     alias: ''
     amp: mag
-    comment: ''
+    comment: 'VFO 2: FT8/FT4 receiver'
     freq: 250e3-40e3
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -1087,41 +1171,45 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 1040.0]
+    coordinate: [736, 1048.0]
     rotation: 0
     state: true
 
 connections:
 - [blocks_swapiq_0, '0', vfo0_waterfall_atten, '0']
 - [control, midi_out, midi_block, midi_in]
-- [control, rx0_high_cutoff, high_cutoff_gauge, value]
-- [control, rx0_high_cutoff, rx0_high_cutoff_setter, inpair]
-- [control, rx0_low_cutoff, low_cutoff_gauge, value]
-- [control, rx0_low_cutoff, rx0_low_cutoff_setter, inpair]
-- [control, rx_freq_out, vfo, valuein]
-- [control, tx_freq_out, tx_vfo, valuein]
 - [limesdr_source, '0', rx_freq_sink, '0']
 - [limesdr_source, '0', vfo0_mixer, '0']
 - [limesdr_source, '0', vfo0_waterfall_add, '0']
 - [limesdr_source, '0', vfo2_mixer, '0']
+- [midi_block, midi_out, blocks_message_debug_0, print]
 - [midi_block, midi_out, control, midi_in]
+- [rx0_high_cutoff_to_msg, msgout, high_cutoff_gauge, value]
+- [rx0_low_cutoff_to_msg, msgout, low_cutoff_gauge, value]
 - [rx_resampler, '0', tx_mixer, '0']
+- [rx_waterfall, freq, control, rx_freq_in]
+- [rx_waterfall, freq, vfo, valuein]
+- [rx_waterfall, freq, vfo0_spectrum, freq]
 - [tx_audio_source, '0', tx_to_complex, '0']
 - [tx_bandpass, '0', rx_resampler, '0']
 - [tx_mixer, '0', limesdr_sink, '0']
+- [tx_power_to_msg, msgout, tx_power_gauge, value]
 - [tx_to_complex, '0', tx_bandpass, '0']
 - [tx_vfo, valueout, control, tx_freq_in]
 - [tx_vfo_signal_source, '0', tx_mixer, '1']
-- [vfo, valueout, blocks_message_debug_0, print]
 - [vfo, valueout, control, rx_freq_in]
+- [vfo, valueout, vfo0_spectrum, freq]
 - [vfo0_bandpass, '0', vfo0_to_float, '0']
 - [vfo0_mixer, '0', vfo0_bandpass, '0']
 - [vfo0_mixer, '0', vfo0_scope_bandpass, '0']
-- [vfo0_scope_bandpass, '0', vfo0_scope, '0']
+- [vfo0_scope_bandpass, '0', vfo0_spectrum, '0']
 - [vfo0_signal_source, '0', blocks_swapiq_0, '0']
 - [vfo0_signal_source, '0', vfo0_mixer, '1']
+- [vfo0_spectrum, freq, control, rx_freq_in]
+- [vfo0_spectrum, freq, vfo, valuein]
+- [vfo0_spectrum, freq, vfo0_spectrum, freq]
 - [vfo0_to_float, '0', vfo0_audio_sink, '0']
-- [vfo0_waterfall_add, '0', qtgui_waterfall_sink_x_0, '0']
+- [vfo0_waterfall_add, '0', rx_waterfall, '0']
 - [vfo0_waterfall_atten, '0', vfo0_waterfall_add, '1']
 - [vfo2_bandpass, '0', vfo2_to_float, '0']
 - [vfo2_mixer, '0', vfo2_bandpass, '0']
