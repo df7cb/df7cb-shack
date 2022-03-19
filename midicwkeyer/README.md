@@ -48,12 +48,12 @@ read is conveniently scaled to wpm speed values between 8 and 40.
 
 ```
     if (dit)
-      midi.sendNoteOn(NOTE_DIT, 0);
+      midi.sendNoteOn(NOTE_DIT, 1);
     else
       midi.sendNoteOff(NOTE_DIT, 0);
 
     if (dah)
-      midi.sendNoteOn(NOTE_DAH, 0);
+      midi.sendNoteOn(NOTE_DAH, 1);
     else
       midi.sendNoteOff(NOTE_DAH, 0);
 
@@ -74,6 +74,16 @@ IO  hw:2,0,0  MidiStomp MIDI 1
 $ aseqdump -l
  Port    Client name                      Port name
  28:0    DJControl Compact                DJControl Compact DJControl Com
+
+$ aseqdump --port MidiStomp
+Source  Event                  Ch  Data
+ 24:0   Control change          0, controller 3, value 24
+ 24:0   Note on                 0, note 1, velocity 1
+ 24:0   Note on                 0, note 2, velocity 1
+ 24:0   Note off                0, note 1, velocity 0
+ 24:0   Note off                0, note 2, velocity 0
+ 24:0   Control change          0, controller 3, value 25
+ 24:0   Control change          0, controller 3, value 26
 ```
 
 ## Python and PulseAudio software

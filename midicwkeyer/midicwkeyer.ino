@@ -73,14 +73,14 @@ void loop() {
 
   if (dit != dit_pressed) {
     if (dit)
-      midi.sendNoteOn(NOTE_DIT, 0);
+      midi.sendNoteOn(NOTE_DIT, 1);
     else
       midi.sendNoteOff(NOTE_DIT, 0);
     dit_pressed = dit;
   }
   if (dah != dah_pressed) {
     if (dah)
-      midi.sendNoteOn(NOTE_DAH, 0);
+      midi.sendNoteOn(NOTE_DAH, 1);
     else
       midi.sendNoteOff(NOTE_DAH, 0);
     dah_pressed = dah;
