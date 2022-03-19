@@ -1,5 +1,6 @@
 Iambic CW keyer based on DigiSpark, MIDI, and PulseAudio on Linux
 =================================================================
+Christoph Berg DF7CB, March 2022
 
 Classic ham radio transceivers have physical connectors for morse keys and
 microphones. When the transceiver is a software defined radio (SDR) device,
@@ -89,16 +90,17 @@ Source  Event                  Ch  Data
 ## Python and PulseAudio software
 
 On the Linux host side, a [Python program](midicwkeyer.py) is listening for
-MIDI events that converts the stream of note on/off into CW signals. Instead of
-providing a full audio stream, dit and dah "samples" are uploaded to
+MIDI events and acts as a iambic CW keyer that converts the stream of note
+on/off into CW signals.
+
+Instead of providing a full audio stream, dit and dah "samples" are uploaded to
 PulseAudio, and triggered via the
 [pulsectl library](https://github.com/mk-fg/python-pulse-control).
-
-![24 wpm dit (50 ms)](cw050.png)
-
 On speed changes, new samples are uploaded.
 The samples are played on two channels, one for the sidetone on the operator
 headphones, and one on the audio input device for the SDR transmitter.
+
+![24 wpm dit (50 ms)](cw050.png)
 
 The virtual "tx0" audio device can be created on boot using this systemd config
 snippet:
@@ -118,3 +120,8 @@ Sidetone port is Plantronics Blackwire 3225 Series Analog Stereo (7)
  CQ CQ DF7CB
 ```
 
+## Author
+
+Copyright (C) 2022 Christoph Berg DF7CB <cb@df7cb.de>
+
+MIT licensed.
