@@ -40,11 +40,16 @@ from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
 import limesdr
 import qo100_control as control  # embedded python block
+import qo100_ft84_cron as ft84_cron  # embedded python block
+import qo100_ft84_rotate as ft84_rotate  # embedded python block
 import qo100_midi_block as midi_block  # embedded python block
 
 
 def snipfcn_inject_tb(self):
+    # make top block accessible in control block
     self.control.tb = self
+    # make top block accessible in ft84_rotate block
+    self.ft84_rotate.tb = self
 
 
 def snippets_main_after_init(tb):
@@ -283,6 +288,11 @@ class qo100(gr.top_block, Qt.QWidget):
                 fractional_bw=0)
         self.rx0_low_cutoff_to_msg = blocks.var_to_msg_pair('value')
         self.rx0_high_cutoff_to_msg = blocks.var_to_msg_pair('value')
+        self.rational_resampler_4 = filter.rational_resampler_fff(
+                interpolation=1,
+                decimation=4,
+                taps=[],
+                fractional_bw=0)
         self.midi_block = midi_block.blk(midi_port='DJControl Compact:DJControl Compact DJControl Com')
         if "int" == "int":
         	isFloat = False
@@ -322,6 +332,24 @@ class qo100(gr.top_block, Qt.QWidget):
         self.high_cutoff_gauge = _high_cutoff_gauge_lg_win
 
         self.top_layout.addWidget(_high_cutoff_gauge_lg_win)
+        self.ft8_sink = blocks.wavfile_sink(
+            '/dev/null',
+            1,
+            12000,
+            blocks.FORMAT_WAV,
+            blocks.FORMAT_PCM_16,
+            False
+            )
+        self.ft84_rotate = ft84_rotate.blk(tmp_path='/run/user/1000/gnuradio')
+        self.ft84_cron = ft84_cron.blk()
+        self.ft4_sink = blocks.wavfile_sink(
+            '/dev/null',
+            1,
+            12000,
+            blocks.FORMAT_WAV,
+            blocks.FORMAT_PCM_16,
+            False
+            )
         self.control = control.blk()
         self.blocks_swapiq_0 = blocks.swap_iq(1, gr.sizeof_gr_complex)
 
@@ -332,6 +360,8 @@ class qo100(gr.top_block, Qt.QWidget):
         self.msg_connect((self.control, 'midi_out'), (self.midi_block, 'midi_in'))
         self.msg_connect((self.control, 'tx_freq_out'), (self.tx_vfo, 'valuein'))
         self.msg_connect((self.control, 'rx_freq_out'), (self.vfo, 'valuein'))
+        self.msg_connect((self.ft84_cron, 'cron_ft8'), (self.ft84_rotate, 'rotate_ft8'))
+        self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
         self.msg_connect((self.midi_block, 'midi_out'), (self.control, 'midi_in'))
         self.msg_connect((self.rx0_high_cutoff_to_msg, 'msgout'), (self.high_cutoff_gauge, 'value'))
         self.msg_connect((self.rx0_low_cutoff_to_msg, 'msgout'), (self.low_cutoff_gauge, 'value'))
@@ -346,6 +376,8 @@ class qo100(gr.top_block, Qt.QWidget):
         self.connect((self.limesdr_source, 0), (self.vfo0_mixer, 0))
         self.connect((self.limesdr_source, 0), (self.vfo0_waterfall_add, 0))
         self.connect((self.limesdr_source, 0), (self.vfo2_mixer, 0))
+        self.connect((self.rational_resampler_4, 0), (self.ft4_sink, 0))
+        self.connect((self.rational_resampler_4, 0), (self.ft8_sink, 0))
         self.connect((self.rx_resampler, 0), (self.tx_mixer, 0))
         self.connect((self.tx_audio_source, 0), (self.tx_to_complex, 0))
         self.connect((self.tx_bandpass, 0), (self.rx_resampler, 0))
@@ -364,6 +396,7 @@ class qo100(gr.top_block, Qt.QWidget):
         self.connect((self.vfo2_bandpass, 0), (self.vfo2_to_float, 0))
         self.connect((self.vfo2_mixer, 0), (self.vfo2_bandpass, 0))
         self.connect((self.vfo2_signal_source, 0), (self.vfo2_mixer, 1))
+        self.connect((self.vfo2_to_float, 0), (self.rational_resampler_4, 0))
         self.connect((self.vfo2_to_float, 0), (self.vfo2_audio_sink, 0))
 
 

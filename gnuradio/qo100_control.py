@@ -83,13 +83,16 @@ class blk(gr.sync_block):
         # without this, the spectrum display updates only once per second (GR bug?)
         self.tb.vfo0_spectrum.set_fft_size(2048)
 
+        # create temp directory
+        try: os.mkdir("/run/user/1000/gnuradio")
+        except: pass
+
     def set_audio_volume(self, new_volume):
         try:
             rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description == 'rx2'][0]
             # the rx0 sink is the one not connected to rx2
             rx0_sink = [self.pulse.sink_info(x.sink) for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink != rx2_sink_index][0]
             rx0_sink.volume.value_flat = new_volume
-            print(f"Setting volume on {rx0_sink.index} to {new_volume}")
             self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)
         except Exception as e:
             print(e)
@@ -102,7 +105,6 @@ class blk(gr.sync_block):
 
             for sink in self.pulse.sink_list():
                 if sink_name in sink.description:
-                    print(f"Moving {rx0_audio} to {sink.index}")
                     self.pulse.sink_input_move(rx0_audio, sink.index)
                     break
 
@@ -118,7 +120,6 @@ class blk(gr.sync_block):
 
             for source in self.pulse.source_list():
                 if source.description.startswith(source_name):
-                    print(f"Moving {tx_audio} to {source.index}")
                     self.pulse.source_output_move(tx_audio, source.index)
                     break
         except Exception as e:

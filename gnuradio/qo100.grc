@@ -349,32 +349,31 @@ blocks:
       midi_out\"),\n                pmt.cons(pmt.intern('control_change'),\n     \
       \               pmt.cons(pmt.from_long(MIDI_REPORT_ALL_CONTROLS), pmt.from_long(127))))\n\
       \n        # without this, the spectrum display updates only once per second\
-      \ (GR bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n    def set_audio_volume(self,\
-      \ new_volume):\n        try:\n            rx2_sink_index = [x.index for x in\
-      \ self.pulse.sink_list() if x.description == 'rx2'][0]\n            # the rx0\
-      \ sink is the one not connected to rx2\n            rx0_sink = [self.pulse.sink_info(x.sink)\
-      \ for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id'))\
-      \ == os.getpid() and x.sink != rx2_sink_index][0]\n            rx0_sink.volume.value_flat\
-      \ = new_volume\n            print(f\"Setting volume on {rx0_sink.index} to {new_volume}\"\
-      )\n            self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)\n\
-      \        except Exception as e:\n            print(e)\n\n    def set_audio_output(self,\
+      \ (GR bug?)\n        self.tb.vfo0_spectrum.set_fft_size(2048)\n\n        # create\
+      \ temp directory\n        try: os.mkdir(\"/run/user/1000/gnuradio\")\n     \
+      \   except: pass\n\n    def set_audio_volume(self, new_volume):\n        try:\n\
+      \            rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description\
+      \ == 'rx2'][0]\n            # the rx0 sink is the one not connected to rx2\n\
+      \            rx0_sink = [self.pulse.sink_info(x.sink) for x in self.pulse.sink_input_list()\
+      \ if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink\
+      \ != rx2_sink_index][0]\n            rx0_sink.volume.value_flat = new_volume\n\
+      \            self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)\n \
+      \       except Exception as e:\n            print(e)\n\n    def set_audio_output(self,\
       \ midi_key, sink_name):\n        try:\n            rx2_sink_index = [x.index\
       \ for x in self.pulse.sink_list() if x.description == 'rx2'][0]\n          \
       \  # the rx0 sink is the one not connected to rx2\n            rx0_audio = [x.index\
       \ for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id'))\
       \ == os.getpid() and x.sink != rx2_sink_index][0]\n\n            for sink in\
       \ self.pulse.sink_list():\n                if sink_name in sink.description:\n\
-      \                    print(f\"Moving {rx0_audio} to {sink.index}\")\n      \
-      \              self.pulse.sink_input_move(rx0_audio, sink.index)\n         \
-      \           break\n\n            for key in MIDI_AUDIOS:\n                self.note_on(key,\
-      \ 127 if key == midi_key else 0)\n\n        except Exception as e:\n       \
-      \     print(e)\n\n    def set_audio_input(self, source_name):\n        try:\n\
-      \            tx_audio = [x.index for x in self.pulse.source_output_list() if\
-      \ int(x.proplist.get('application.process.id')) == os.getpid()][0]\n\n     \
-      \       for source in self.pulse.source_list():\n                if source.description.startswith(source_name):\n\
-      \                    print(f\"Moving {tx_audio} to {source.index}\")\n     \
-      \               self.pulse.source_output_move(tx_audio, source.index)\n    \
-      \                break\n        except Exception as e:\n            print(e)\n\
+      \                    self.pulse.sink_input_move(rx0_audio, sink.index)\n   \
+      \                 break\n\n            for key in MIDI_AUDIOS:\n           \
+      \     self.note_on(key, 127 if key == midi_key else 0)\n\n        except Exception\
+      \ as e:\n            print(e)\n\n    def set_audio_input(self, source_name):\n\
+      \        try:\n            tx_audio = [x.index for x in self.pulse.source_output_list()\
+      \ if int(x.proplist.get('application.process.id')) == os.getpid()][0]\n\n  \
+      \          for source in self.pulse.source_list():\n                if source.description.startswith(source_name):\n\
+      \                    self.pulse.source_output_move(tx_audio, source.index)\n\
+      \                    break\n        except Exception as e:\n            print(e)\n\
       \n    def set_record(self, record):\n        self.record = record\n        self.note_on(MIDI_RECORD,\
       \ 127 if self.record else 0)\n        if self.record:\n            self.set_audio_input('Plantronics')\n\
       \        else:\n            self.set_audio_input('Monitor of tx0')\n\n    def\
@@ -444,7 +443,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('rx_freq_in',
+    _io_cache: ('Control', 'blk', [], [('rx_freq_in', 'message', 1), ('tx_freq_in',
       'message', 1), ('midi_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
       'message', 1), ('midi_out', 'message', 1)], 'TRX Control block', [])
     bus_sink: false
@@ -453,11 +452,148 @@ blocks:
     coordinate: [1304, 576.0]
     rotation: 180
     state: true
+- name: ft4_sink
+  id: blocks_wavfile_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    bits_per_sample1: FORMAT_PCM_16
+    bits_per_sample2: FORMAT_PCM_16
+    bits_per_sample3: FORMAT_VORBIS
+    bits_per_sample4: FORMAT_PCM_16
+    comment: FT4 file output
+    file: /dev/null
+    format: FORMAT_WAV
+    nchan: '1'
+    samp_rate: '12000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1240, 1132.0]
+    rotation: 0
+    state: enabled
+- name: ft84_cron
+  id: epy_block
+  parameters:
+    _source_code: "from gnuradio import gr\nimport pmt\nimport time\nimport threading\n\
+      \nclass blk(gr.basic_block):\n    \"\"\"Send Timed Msgs\"\"\"\n\n    def __init__(self):\n\
+      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
+      \n        gr.sync_block.__init__(\n            self,\n            name='Send\
+      \ Timed Msgs',   # will show up in GRC\n            in_sig=None,\n         \
+      \   out_sig=None,\n        )\n        self.message_port_register_out(pmt.intern(\"\
+      cron_ft8\"))\n        self.message_port_register_out(pmt.intern(\"cron_ft4\"\
+      ))\n\n    def start(self):\n        self.cron_thread = threading.Thread(target=self.cron_ft8,\
+      \ daemon=True)\n        self.cron_thread.start()\n        self.cron_thread =\
+      \ threading.Thread(target=self.cron_ft4, daemon=True)\n        self.cron_thread.start()\n\
+      \n    def sleep(self, interval):\n        time.sleep(interval - (time.time()\
+      \ % interval))\n        return True\n\n    def cron_ft8(self):\n        while\
+      \ self.sleep(15):\n            self.message_port_pub(pmt.intern(\"cron_ft8\"\
+      ), pmt.intern(\"rotate_ft8\"))\n\n    def cron_ft4(self):\n        while self.sleep(7.5):\n\
+      \            self.message_port_pub(pmt.intern(\"cron_ft4\"), pmt.intern(\"rotate_ft4\"\
+      ))\n\nif __name__ == \"__main__\":\n    b = blk()\n    b.cron_ft8()\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Send Timed Msgs', 'blk', [], [], [('cron_ft4', 'message', 1), ('cron_ft8',
+      'message', 1)], 'Send Timed Msgs', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [648, 1240.0]
+    rotation: 0
+    state: true
+- name: ft84_rotate
+  id: epy_block
+  parameters:
+    _source_code: "from gnuradio import gr\nimport pmt\nimport os\nimport subprocess\n\
+      import time\n\nclass blk(gr.basic_block):\n    \"\"\"Rotate wav files and feed\
+      \ them to jt9 for FT8 and FT4 decoding\"\"\"\n\n    def __init__(self, tmp_path='.'):\n\
+      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
+      \n        gr.sync_block.__init__(\n            self,\n            name='Rotate\
+      \ and Decode Wav File',   # will show up in GRC\n            in_sig=None,\n\
+      \            out_sig=None,\n        )\n        self.tmp_path = tmp_path\n\n\
+      \        self.message_port_register_in(pmt.intern(\"rotate_ft8\"))\n       \
+      \ self.set_msg_handler(pmt.intern(\"rotate_ft8\"), self.rotate_ft8)\n      \
+      \  self.message_port_register_in(pmt.intern(\"rotate_ft4\"))\n        self.set_msg_handler(pmt.intern(\"\
+      rotate_ft4\"), self.rotate_ft4)\n\n    def start(self):\n        # store all\
+      \ decodes in file in PWD\n        self.all_txt = open(\"ft84.txt\", \"a\")\n\
+      \        self.conn = None\n        self.cur = None\n\n        # change to tmp_path\
+      \ (jt9 leaves a few temp files around there)\n        try: os.mkdir(self.tmp_path)\n\
+      \        except: pass\n        os.chdir(self.tmp_path)\n\n    def handle_line(self,\
+      \ mode, stamp, line):\n        # jt9 out: 000000   3  0.3 1743 ~  CQ DF7CB JO31\n\
+      \        # ALL.TXT: 220321_131530  2400.040 Rx FT8      1  0.5  523 ES2KO LY1FX\
+      \ 73\n        fields = line.split(None, 5)\n        if len(fields) > 5 and fields[0]\
+      \ == \"000000\":\n            try:\n                db = int(fields[1])\n  \
+      \              dt = float(fields[2])\n                freq = int(fields[3])\n\
+      \                out = f\"{stamp} 2400.040 Rx {mode.upper()} {db:+3} {dt:+4}\
+      \ {freq:4} {fields[5]}\\n\"\n                self.all_txt.write(out)\n     \
+      \           self.all_txt.flush()\n            except:\n                pass\n\
+      \n    def rotate_and_decode(self, mode, sink, interval):\n        tmp_file =\
+      \ f\"{mode}-tmp.wav\"\n        decode_file = f\"{mode}.wav\"\n\n        # rotate\
+      \ file\n        try: os.unlink(decode_file)\n        except: pass\n        try:\
+      \ os.rename(tmp_file, decode_file)\n        except: pass\n\n        # ask sink\
+      \ to re-open file\n        sink.open(tmp_file)\n\n        stamp = time.strftime('%F_%H%M%S',\
+      \ time.gmtime(time.time() - interval))\n\n        # decode it\n        res =\
+      \ subprocess.run([\"jt9\", \"--\" + mode, decode_file], capture_output=True)\n\
+      \        out = res.stdout.decode()\n\n        for line in out.split(\"\\n\"\
+      ):\n            self.handle_line(mode, stamp, line)\n\n    def rotate_ft8(self,\
+      \ msg):\n        self.rotate_and_decode(\"ft8\", self.tb.ft8_sink, 15)\n\n \
+      \   def rotate_ft4(self, msg):\n        self.rotate_and_decode(\"ft4\", self.tb.ft4_sink,\
+      \ 7.5)\n"
+    affinity: ''
+    alias: ''
+    comment: FT8/FT4 decoder control logic
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tmp_path: '''/run/user/1000/gnuradio'''
+  states:
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft8',
+      'message', 1), ('rotate_ft4', 'message', 1)], [], 'Rotate wav files and feed
+      them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [936, 1272.0]
+    rotation: 0
+    state: enabled
+- name: ft8_sink
+  id: blocks_wavfile_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    bits_per_sample1: FORMAT_PCM_16
+    bits_per_sample2: FORMAT_PCM_16
+    bits_per_sample3: FORMAT_VORBIS
+    bits_per_sample4: FORMAT_PCM_16
+    comment: FT8 file output
+    file: /dev/null
+    format: FORMAT_WAV
+    nchan: '1'
+    samp_rate: '12000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1240, 980.0]
+    rotation: 0
+    state: true
 - name: inject_tb
   id: snippet
   parameters:
     alias: ''
-    code: self.control.tb = self
+    code: '# make top block accessible in control block
+
+      self.control.tb = self
+
+      # make top block accessible in ft84_rotate block
+
+      self.ft84_rotate.tb = self'
     comment: ''
     priority: '0'
     section: main_after_init
@@ -583,6 +719,26 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1240, 716.0]
+    rotation: 0
+    state: true
+- name: rational_resampler_4
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: '4'
+    fbw: '0'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [936, 1140.0]
     rotation: 0
     state: true
 - name: rx0_high_cutoff_to_msg
@@ -1242,12 +1398,16 @@ connections:
 - [control, midi_out, midi_block, midi_in]
 - [control, rx_freq_out, vfo, valuein]
 - [control, tx_freq_out, tx_vfo, valuein]
+- [ft84_cron, cron_ft4, ft84_rotate, rotate_ft4]
+- [ft84_cron, cron_ft8, ft84_rotate, rotate_ft8]
 - [limesdr_source, '0', rx_freq_sink, '0']
 - [limesdr_source, '0', vfo0_mixer, '0']
 - [limesdr_source, '0', vfo0_waterfall_add, '0']
 - [limesdr_source, '0', vfo2_mixer, '0']
 - [midi_block, midi_out, blocks_message_debug_0, print]
 - [midi_block, midi_out, control, midi_in]
+- [rational_resampler_4, '0', ft4_sink, '0']
+- [rational_resampler_4, '0', ft8_sink, '0']
 - [rx0_high_cutoff_to_msg, msgout, high_cutoff_gauge, value]
 - [rx0_low_cutoff_to_msg, msgout, low_cutoff_gauge, value]
 - [rx_resampler, '0', tx_mixer, '0']
@@ -1275,6 +1435,7 @@ connections:
 - [vfo2_bandpass, '0', vfo2_to_float, '0']
 - [vfo2_mixer, '0', vfo2_bandpass, '0']
 - [vfo2_signal_source, '0', vfo2_mixer, '1']
+- [vfo2_to_float, '0', rational_resampler_4, '0']
 - [vfo2_to_float, '0', vfo2_audio_sink, '0']
 
 metadata:
