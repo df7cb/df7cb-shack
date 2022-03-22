@@ -443,8 +443,8 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('Control', 'blk', [], [('rx_freq_in', 'message', 1), ('tx_freq_in',
-      'message', 1), ('midi_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
+    _io_cache: ('Control', 'blk', [], [('midi_in', 'message', 1), ('tx_freq_in', 'message',
+      1), ('rx_freq_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
       'message', 1), ('midi_out', 'message', 1)], 'TRX Control block', [])
     bus_sink: false
     bus_source: false
@@ -520,28 +520,47 @@ blocks:
       \        self.message_port_register_in(pmt.intern(\"rotate_ft8\"))\n       \
       \ self.set_msg_handler(pmt.intern(\"rotate_ft8\"), self.rotate_ft8)\n      \
       \  self.message_port_register_in(pmt.intern(\"rotate_ft4\"))\n        self.set_msg_handler(pmt.intern(\"\
-      rotate_ft4\"), self.rotate_ft4)\n\n    def start(self):\n        # store all\
-      \ decodes in file in PWD\n        self.all_txt = open(\"ft84.txt\", \"a\")\n\
-      \        self.conn = None\n        self.cur = None\n\n        # change to tmp_path\
-      \ (jt9 leaves a few temp files around there)\n        try: os.mkdir(self.tmp_path)\n\
-      \        except: pass\n        os.chdir(self.tmp_path)\n\n    def handle_line(self,\
-      \ mode, stamp, line):\n        # jt9 out: 000000   3  0.3 1743 ~  CQ DF7CB JO31\n\
-      \        # ALL.TXT: 220321_131530  2400.040 Rx FT8      1  0.5  523 ES2KO LY1FX\
-      \ 73\n        fields = line.split(None, 5)\n        if len(fields) > 5 and fields[0]\
-      \ == \"000000\":\n            try:\n                db = int(fields[1])\n  \
-      \              dt = float(fields[2])\n                freq = int(fields[3])\n\
-      \                out = f\"{stamp} 2400.040 Rx {mode.upper()} {db:+3} {dt:+4}\
-      \ {freq:4} {fields[5]}\\n\"\n                self.all_txt.write(out)\n     \
-      \           self.all_txt.flush()\n            except:\n                pass\n\
-      \n    def rotate_and_decode(self, mode, sink, interval):\n        tmp_file =\
-      \ f\"{mode}-tmp.wav\"\n        decode_file = f\"{mode}.wav\"\n\n        # rotate\
-      \ file\n        try: os.unlink(decode_file)\n        except: pass\n        try:\
-      \ os.rename(tmp_file, decode_file)\n        except: pass\n\n        # ask sink\
-      \ to re-open file\n        sink.open(tmp_file)\n\n        stamp = time.strftime('%F_%H%M%S',\
-      \ time.gmtime(time.time() - interval))\n\n        # decode it\n        res =\
-      \ subprocess.run([\"jt9\", \"--\" + mode, decode_file], capture_output=True)\n\
-      \        out = res.stdout.decode()\n\n        for line in out.split(\"\\n\"\
-      ):\n            self.handle_line(mode, stamp, line)\n\n    def rotate_ft8(self,\
+      rotate_ft4\"), self.rotate_ft4)\n\n        # remember if we saw decodes in the\
+      \ last cycle\n        self.decode = { 'ft8': False, 'ft4': False }\n\n    def\
+      \ start(self):\n        # store all decodes in file in PWD\n        self.all_txt\
+      \ = open(\"ft84.txt\", \"a\")\n        self.conn = None\n        self.cur =\
+      \ None\n\n        # change to tmp_path (jt9 leaves a few temp files around there)\n\
+      \        try: os.mkdir(self.tmp_path)\n        except: pass\n        os.chdir(self.tmp_path)\n\
+      \n    def handle_line(self, mode, stamp, line):\n        # jt9 out: 000000 \
+      \  3  0.3 1743 ~  CQ DF7CB JO31\n        # ALL.TXT: 220321_131530  2400.040\
+      \ Rx FT8      1  0.5  523 ES2KO LY1FX 73\n        fields = line.split(None,\
+      \ 5)\n        if len(fields) > 5 and fields[0] == \"000000\":\n            try:\n\
+      \                db = int(fields[1])\n                dt = float(fields[2])\n\
+      \                freq = int(fields[3])\n                prefix = f\"{stamp}\
+      \ 2400.040 Rx {mode.upper()}\"\n                data = f\" {db:+3} {dt:+4} {freq:4}\
+      \ \"\n                msg = fields[5].rstrip()\n\n                # file output\n\
+      \                self.all_txt.write(prefix + data + msg + \"\\n\")\n       \
+      \         self.all_txt.flush()\n\n                # terminal output\n      \
+      \          if mode == 'ft8':\n                    if stamp[-2:] in ('00', '30'):\n\
+      \                        stampcolor = \"\\033[48;5;39m\"\n                 \
+      \   else:\n                        stampcolor = \"\\033[48;5;42m\"\n       \
+      \         elif mode == 'ft4':\n                    if stamp[-2:] in ('00', '15',\
+      \ '30', '45'):\n                        stampcolor = \"\\033[48;5;208m\"\n \
+      \                   else:\n                        stampcolor = \"\\033[48;5;220m\"\
+      \n                if msg.startswith(\"DF7CB \"): # received my call\n      \
+      \              start, end = \"\\033[48;5;226m\", \"\\033[0m\"\n            \
+      \    elif \"DF7CB\" in msg: # sent by myself\n                    start, end\
+      \ = \"\\033[41m\", \"\\033[0m\"\n                else:\n                   \
+      \ start, end = \"\", \"\"\n                print(f\"{stampcolor}{prefix}\\033[0m{data}{start}{msg}{end}\"\
+      , flush=True)\n\n                return True # successful decode\n         \
+      \   except:\n                pass\n        return False\n\n    def rotate_and_decode(self,\
+      \ mode, sink, interval):\n        tmp_file = f\"{mode}-tmp.wav\"\n        decode_file\
+      \ = f\"{mode}.wav\"\n\n        # rotate file\n        try: os.unlink(decode_file)\n\
+      \        except: pass\n        try: os.rename(tmp_file, decode_file)\n     \
+      \   except: pass\n\n        # ask sink to re-open file\n        sink.open(tmp_file)\n\
+      \n        stamp = time.strftime('%F_%H%M%S', time.gmtime(time.time() - interval))\n\
+      \n        # decode it\n        res = subprocess.run([\"jt9\", \"--\" + mode,\
+      \ decode_file], capture_output=True)\n        out = res.stdout.decode()\n\n\
+      \        decode = False\n        for line in out.split(\"\\n\"):\n         \
+      \   # decode a line\n            decode |= self.handle_line(mode, stamp, line)\n\
+      \n        # insert a separator line if we saw something in the last cycle, but\
+      \ this cycle was empty\n        if not decode and self.decode[mode]:\n     \
+      \       print(flush=True)\n        self.decode[mode] = decode\n\n    def rotate_ft8(self,\
       \ msg):\n        self.rotate_and_decode(\"ft8\", self.tb.ft8_sink, 15)\n\n \
       \   def rotate_ft4(self, msg):\n        self.rotate_and_decode(\"ft4\", self.tb.ft4_sink,\
       \ 7.5)\n"

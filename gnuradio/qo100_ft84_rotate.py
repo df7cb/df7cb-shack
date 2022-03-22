@@ -22,6 +22,9 @@ class blk(gr.basic_block):
         self.message_port_register_in(pmt.intern("rotate_ft4"))
         self.set_msg_handler(pmt.intern("rotate_ft4"), self.rotate_ft4)
 
+        # remember if we saw decodes in the last cycle
+        self.decode = { 'ft8': False, 'ft4': False }
+
     def start(self):
         # store all decodes in file in PWD
         self.all_txt = open("ft84.txt", "a")
@@ -42,11 +45,37 @@ class blk(gr.basic_block):
                 db = int(fields[1])
                 dt = float(fields[2])
                 freq = int(fields[3])
-                out = f"{stamp} 2400.040 Rx {mode.upper()} {db:+3} {dt:+4} {freq:4} {fields[5]}\n"
-                self.all_txt.write(out)
+                prefix = f"{stamp} 2400.040 Rx {mode.upper()}"
+                data = f" {db:+3} {dt:+4} {freq:4} "
+                msg = fields[5].rstrip()
+
+                # file output
+                self.all_txt.write(prefix + data + msg + "\n")
                 self.all_txt.flush()
+
+                # terminal output
+                if mode == 'ft8':
+                    if stamp[-2:] in ('00', '30'):
+                        stampcolor = "\033[48;5;39m"
+                    else:
+                        stampcolor = "\033[48;5;42m"
+                elif mode == 'ft4':
+                    if stamp[-2:] in ('00', '15', '30', '45'):
+                        stampcolor = "\033[48;5;208m"
+                    else:
+                        stampcolor = "\033[48;5;220m"
+                if msg.startswith("DF7CB "): # received my call
+                    start, end = "\033[48;5;226m", "\033[0m"
+                elif "DF7CB" in msg: # sent by myself
+                    start, end = "\033[41m", "\033[0m"
+                else:
+                    start, end = "", ""
+                print(f"{stampcolor}{prefix}\033[0m{data}{start}{msg}{end}", flush=True)
+
+                return True # successful decode
             except:
                 pass
+        return False
 
     def rotate_and_decode(self, mode, sink, interval):
         tmp_file = f"{mode}-tmp.wav"
@@ -67,8 +96,15 @@ class blk(gr.basic_block):
         res = subprocess.run(["jt9", "--" + mode, decode_file], capture_output=True)
         out = res.stdout.decode()
 
+        decode = False
         for line in out.split("\n"):
-            self.handle_line(mode, stamp, line)
+            # decode a line
+            decode |= self.handle_line(mode, stamp, line)
+
+        # insert a separator line if we saw something in the last cycle, but this cycle was empty
+        if not decode and self.decode[mode]:
+            print(flush=True)
+        self.decode[mode] = decode
 
     def rotate_ft8(self, msg):
         self.rotate_and_decode("ft8", self.tb.ft8_sink, 15)
