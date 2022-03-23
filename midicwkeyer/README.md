@@ -9,9 +9,31 @@ morse key, be it a straight key or paddles, to a modern PC are rare. In the old
 times, machines had serial ports with RTS/DTR lines, but these do not exist
 anymore, so a new interface is needed.
 
-This is a solution based on a tiny DigiSpark board that presents itself as a
-MIDI device over USB. On the Linux host side, Python and PulseAudio are used to
-create a high-quality CW signal.
+I am using a LimeSDR as ground station for the QO-100 satellite, and naturally
+also wanted to do CW operation there. I started with SDRangel which has a
+built-in morse generator, but naturally wanted to connect a CW key. At first
+sight, all the bits are there, there's a tune button that could be used as a
+straight key, as well as keyboard bindings for dots and dashes. But the delay
+key->local audio is almost a full second, so that's a no-go. I then went to
+hack my K3NG keyer to output ^ (high) _ (low) signals on the USB interface, and
+have a smallish Python program read that and send SDRangel REST API requests.
+Works, but that solution always felt "too big" to me, plus the sidetone from
+the buzzer inside the Arduino case could be heard in the whole house. And the
+total TX-RX delay was well over a second.
+
+Next I tried building some GNU Radio flowcharts to solve the same problem but
+which all had the same trouble that the buffers grew way too big to allow the
+sidetone to be used for keying. At the same time, I switched the transceiver
+from SDRangel to another GR flowchart which reduced the overall TX-RX delay to
+something much shorter, but the local audio delay was still too slow for CW.
+
+So after some back and forth, I came up with this solution: the external
+interface from the CW paddles to the PC is a small DigiSpark board programmed
+to output MIDI signals, and on the (Linux) PC side, there is a Python program
+listening for MIDI and acting as a iambic CW keyer. The morse dots and dashes
+are uploaded as "samples" to PulseAudio, where they are played both on the
+local sidetone channel (usually headphones) and on the audio channel driving
+the SDR transceiver. There is no delay. :)
 
 ## DigiSpark hardware
 
