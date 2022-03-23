@@ -1,5 +1,6 @@
 # 1a86:7523 QinHeng Electronics CH340 serial converter (K3NG keyer, az-delivery arduino clone)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="ttyUSBK3NG"ENV{SYSTEMD_USER_WANTS}+="cwangel.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="ttyUSBK3NG"
+#, ENV{SYSTEMD_USER_WANTS}+="cwangel.service"
 
 # 1a86:7523 QinHeng Electronics CH340 serial converter (ICOM CAT interface)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ttyUSBICOM", ENV{SYSTEMD_USER_WANTS}+="rigctld.service"
@@ -12,15 +13,18 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{seria
 # 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ttyUSBPTT", ENV{SYSTEMD_USER_WANTS}+="rigctld.service"
 
+# 16d0:0753 Digispark bootloader
+# http://digistump.com/wiki/digispark/tutorials/linuxtroubleshooting#ubuntu_troubleshooting
+SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0753", SYMLINK+="ttyACM%n", MODE="0666", GROUP="plugdev"
+KERNEL=="ttyACM*", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0753", MODE:="0666", ENV{ID_MM_DEVICE_IGNORE}="1"
 # 16d0:087e MCS Digispark Serial
-#SUBSYSTEM=="usb", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="0753", SYMLINK+="ttyACM%n", MODE="0666", GROUP="plugdev"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="16d0", ATTRS{idProduct}=="087e", SYMLINK+="ttyUSBdigikeyer", ENV{SYSTEMD_USER_WANTS}+="cwdaemon.service"
 
 # 1d50:6108 OpenMoko, Inc. Myriad-RF LimeSDR
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="6108", MODE="0660", GROUP="plugdev"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="6108", MODE="0660", GROUP="plugdev", ENV{SYSTEMD_USER_WANTS}+="limeutil.service"
 
 # 06f8:b11e Guillemot Corp. DJControl Compact
-SUBSYSTEMS=="usb", ATTRS{idVendor}=="06f8", ATTRS{idProduct}=="b11e", ENV{SYSTEMD_USER_WANTS}+="midiangel.service"
+#SUBSYSTEMS=="usb", ATTRS{idVendor}=="06f8", ATTRS{idProduct}=="b11e", ENV{SYSTEMD_USER_WANTS}+="midiangel.service"
 
 # NanoVNA
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uaccess", MODE="0660", GROUP="plugdev"
