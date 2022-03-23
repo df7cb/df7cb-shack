@@ -74,7 +74,7 @@ IO  hw:2,0,0  MidiStomp MIDI 1
 
 $ aseqdump -l
  Port    Client name                      Port name
- 28:0    DJControl Compact                DJControl Compact DJControl Com
+ 28:0    MidiStomp                        MidiStomp MIDI 1
 
 $ aseqdump --port MidiStomp
 Source  Event                  Ch  Data
