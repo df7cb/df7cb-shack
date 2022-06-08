@@ -50,9 +50,9 @@ for keying a physical transceiver. (The onboard LED uses the this pin.)
             |            P5 o  -- 10k potentiometer middle pin
         =====  Attiny85  P4 o  -- USB (internal)
    USB  -----            P3 o  -- USB (internal)
-        -----            P2 o  -- dah paddle
+        -----            P2 o  -- dit paddle
         =====   78M05    P1 o  -- (LED/TRX)
-            |            P0 o  -- dit paddle
+            |            P0 o  -- dah paddle
             +---o-o-o-------+
 ```
 

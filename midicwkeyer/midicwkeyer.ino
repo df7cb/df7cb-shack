@@ -31,9 +31,9 @@
 
 DigiMIDIDevice midi;
 
-#define PIN_DIT 0 // P0 dit input from paddle
-#define PIN_LED 1  // Digispark model A onboard LED
-#define PIN_DAH 2 // P2 dah input from paddle
+#define PIN_DAH 0 // P0 dah input from paddle
+#define PIN_LED 1 // Digispark model A onboard LED
+#define PIN_DIT 2 // P2 dit input from paddle
 //#define PIN_KEY 1 // P1 output to rig (also on-board LED)
 #define PIN_SPEED 0 // P5 analog input from 10k potentiometer as voltage divider; extra 27k series resistor to restrict input to >> 2.5V (otherwise digispark resets)
 
