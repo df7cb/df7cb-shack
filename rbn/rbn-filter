@@ -1,20 +1,23 @@
 #!/usr/bin/python3
 
 """
-Connect to reversebeacon.net and print only the DL spots
+Connect to reversebeacon.net and print only the DL/ON/PA spots
 
 Copyright (C) 2021 Christoph Berg DF7CB
 License: MIT
 """
 
-import psycopg2
 import socket
 import select
 import re
 
+#host = "arcluster.reversebeacon.net"
+host = "telnet.reversebeacon.net"
+port = 7000
+
+print(f"Connecting to {host}:{port} ...", flush=True)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#s.connect(("arcluster.reversebeacon.net", 7000))
-s.connect(("telnet.reversebeacon.net", 7000))
+s.connect((host, port))
 
 s.send(b"DF7CB\r\n")
 
@@ -27,19 +30,17 @@ re2 = re.compile('DX de (D[A-R]|P[A-I]|O[N-T])')
 
 def dx(msg):
     line = msg.decode(encoding='UTF-8', errors='replace')
-    #print("Got", line)
     if re.match(re1, line):
         if re.match(re2, line):
             print(line, flush=True)
     else:
         print(line, flush=True)
 
+buf = b""
 while True:
     r, w, x = select.select([s], [], [], None)
-    buf = b""
     if s in r:
         buf += s.recv(1024)
         while b"\r\n" in buf:
-            pos = buf.index(b"\r\n")
-            dx(buf[:pos])
-            buf = buf[pos+2:]
+            line, sep, buf = buf.partition(b"\r\n")
+            dx(line)
