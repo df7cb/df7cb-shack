@@ -1,0 +1,5 @@
+[Service]
+Type=exec
+ExecStart=-/home/myon/shack/rbn/rbn-filter
+#StandardInput=socket
+StandardOutput=socket
