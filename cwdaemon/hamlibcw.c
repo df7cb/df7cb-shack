@@ -57,9 +57,10 @@ void error(char *msg)
 void
 send_cw(int sockfd)
 {
-	char buf[BUFSIZE];	/* message buf */
-	char buf2[BUFSIZE];	/* message buf */
-	int n;			/* message byte size */
+	#define RIGCTL_STR "rigctl -m 2 b '%s'"	/* rigctl template */
+	int n;					/* message byte size */
+	char buf[BUFSIZE];			/* message buf */
+	char buf2[BUFSIZE+sizeof(RIGCTL_STR)];	/* message buf */
 
 	if (sockfd == 0)
 		n = read(sockfd, buf, BUFSIZE-1);
@@ -88,7 +89,7 @@ send_cw(int sockfd)
 		buf[n-1] = '\0';
 	if (DEBUG) printf("Sending '%s'\n", buf);
 
-	snprintf(buf2, sizeof(buf2), "rigctl -m 2 b '%s'", buf);
+	snprintf(buf2, sizeof(buf2), RIGCTL_STR, buf);
 	system(buf2);
 }
 
