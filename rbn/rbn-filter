@@ -26,7 +26,8 @@ s.send(b"DF7CB\r\n")
 # DX de LZ7AA-#:   14070.8  IZ4ISM         PSK31 19 dB  31 BPS  CQ      0936Z
 # DX de G4ZFE-#:   14071.0  IZ5GUB         PSK31 20 dB  31 BPS  CQ      0942Z
 re1 = re.compile('DX de ')
-re2 = re.compile('DX de (D[A-R]|P[A-I]|O[N-T])')
+#re2 = re.compile('DX de (D[A-R]|P[A-I]|O[N-T])')
+re2 = re.compile('DX de (DE1LON|P[A-I]|O[N-T])')
 
 def dx(msg):
     line = msg.decode(encoding='UTF-8', errors='replace')
@@ -40,7 +41,10 @@ buf = b""
 while True:
     r, w, x = select.select([s], [], [], None)
     if s in r:
-        buf += s.recv(1024)
+        data = s.recv(1024)
+        if not data:
+            exit(0)
+        buf += data
         while b"\r\n" in buf:
             line, sep, buf = buf.partition(b"\r\n")
             dx(line)
