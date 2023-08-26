@@ -2,6 +2,9 @@
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="ttyUSBK3NG"
 #, ENV{SYSTEMD_USER_WANTS}+="cwangel.service"
 
+# 1a86:7523 QinHeng Electronics CH340 serial converter (K3NG rotator, az-delivery arduino clone)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Ser!", SYMLINK+="ttyUSBrotor"
+
 # 1a86:7523 QinHeng Electronics CH340 serial converter (ICOM CAT interface)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ttyUSBICOM", ENV{SYSTEMD_USER_WANTS}+="rigctld.service"
 
@@ -17,6 +20,9 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{produ
 # 10c4:ea60 Silicon Labs CP210x UART Bridge (IC-7610)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * A", SYMLINK+="ttyUSB7610", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * B", SYMLINK+="ttyUSB7610B", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
+
+# 0c26:0029 Prolific Technology Inc. IC-7610 SuperSpeed-FIFO Bridge (IQ port)
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c26", ATTRS{idProduct}=="0029", TAG+="uaccess", MODE="0660", GROUP="plugdev"
 
 # 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ttyUSBPTT", ENV{SYSTEMD_USER_WANTS}+="rigctld.service"
