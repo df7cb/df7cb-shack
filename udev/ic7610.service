@@ -1,0 +1,8 @@
+[Unit]
+Description=TCP radio control daemon
+
+[Service]
+ExecStart=/usr/bin/rigctld -m 3078 -r /dev/ttyUSB7610
+
+[Install]
+WantedBy=default.target
