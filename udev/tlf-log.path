@@ -1,0 +1,5 @@
+[Path]
+PathChanged=/home/myon/log/tlf/contest.log
+
+[Install]
+WantedBy=default.target

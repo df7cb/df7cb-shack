@@ -1,0 +1,7 @@
+[Service]
+Type=oneshot
+WorkingDirectory=/home/myon/log/tlf
+ExecStart=/home/myon/log/tlf/import-tlf -l -m DF7C Livelog contest.log
+
+[Unit]
+OnFailure=notify-send@tlf-log.service
