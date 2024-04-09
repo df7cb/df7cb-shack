@@ -6,7 +6,6 @@ install: /etc/udev/rules.d/shack.rules $(INSTALL_UNITS)
 
 /etc/udev/rules.d/shack.rules: shack.rules
 	sudo install -m644 $< $@
-	#sudo systemctl restart systemd-udevd
 	sudo udevadm control --reload-rules
 
 $(HOME)/.config/systemd/user/%: %
