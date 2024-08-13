@@ -1,5 +1,6 @@
 [Unit]
 Description=TCP radio control daemon
+StopWhenUnneeded=true
 
 [Service]
 ExecStart=/usr/bin/rigctld -m 3078 -r /dev/ttyUSB7610
