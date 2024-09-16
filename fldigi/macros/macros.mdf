@@ -18,14 +18,16 @@ CQ CQ CQ de <MYCALL> <MYCALL> <MYCALL> pse k\n
 //
 // Macro # 2
 /$ 1 ANS @>|
-<TX><CALL> <CALL> de <MYCALL> <MYCALL> <MYCALL> kn\n
+<TX>\n
+<CALL> <CALL> de <MYCALL> <MYCALL> <MYCALL> k\n
 <RX>
 
 //
 // Macro # 3
 /$ 2 QSO @>>
 <TX>\n
-<CALL> de <MYCALL> 
+<CALL> de <MYCALL>\n
+
 
 //
 // Macro # 4
@@ -36,134 +38,148 @@ btu <NAME> <CALL> de <MYCALL> k\n
 //
 // Macro # 5
 /$ 4 SK @||
-\n
-tnx fer QSO <NAME>, <CALL> de <MYCALL> sk\n
+<CALL> de <MYCALL> sk\n
 <RX>
 
 //
 // Macro # 6
 /$ 5 Me+QTH
-Op: <MYNAME> <MYNAME>\n
-QTH: <MYQTH> <MYQTH> in <MYLOC> <MYLOC>\n
+Name <MYNAME> <MYNAME>, age 43, since 1994\n
+QTH <MYQTH> <MYQTH>, Loc <MYLOC> <MYLOC>\n
 
 
 //
 // Macro # 7
 /$ 6 My 13cm Rig
-Age: 43, licensed since 1994\n
-Rig: LimeSDR and SDRAngel+fldigi running on Debian Linux\n
-Pwr: 1W\n
-Ant: 1m Dish with POTY feed\n
-Web: https://www.df7cb.de/
+Rig: LimeSDR @ 1W, 10 MHz OCXO (10 ppb)\n
+Software: SDRangel+Fldigi on Debian Linux\n
+Ant: 1m dish with POTY feed\n
+Web: https://www.df7cb.de/\n
+
 
 //
 // Macro # 8
 /$ 7 My SW Rig
-Age: 43, licensed since 1994\n
-Rig: IC706 and fldigi running on Debian Linux\n
-Pwr: 100W\n
+Rig: IC706 @ 100W\n
+Software: Fldigi on Debian Linux\n
 Ant: FD4 windom 8m up\n
-Web: https://www.df7cb.de/
+Web: https://www.df7cb.de/\n
+
 
 //
 // Macro # 9
-/$ 8 T/R
-<TX/RX>
-
-//
-// Macro # 10
-/$ 9 Tx @>>
-<TX>
-
-//
-// Macro # 11
-/$ 10 Rx @||
+/$ 8 DE DF7CB
+<TX>\n
+<CALL> DE <MYCALL> <MYCALL> <MYCALL> \n
 <RX>
 
 //
-// Macro # 12
-/$ 11 de DF7CB @>|
+// Macro # 10
+/$ 9 TU
 <TX>\n
-   de <MYCALL> k\n
+TU 599 <MYCALL><LOG>\n
+<RX>
+
+//
+// Macro # 11
+/$ 10 TU JO31
+<TX>\n
+<CALL> TU JO31 JO31 <MYCALL>\n
+<LOG><RX>
+
+//
+// Macro # 12
+/$ 11 RPT
+<TX>\n
+<CALL> 599 14 14 <CALL>\n
 <RX>
 
 //
 // Macro # 13
-/$ 12 C Ans @>|
-<TX>de <MYCALL> <MYCALL><RX>
+/$ 12 CQ TEST
+<TX> CQ TEST <MYCALL> <MYCALL> CQ\n
+<RX>
 
 //
 // Macro # 14
-/$ 13 C rpt @>|
-<TX><CNTR> <CNTR> QSL DE <MYCALL> K\n
+/$ 13 CALL 599
+<INCR><TX>\n
+ <CALL> 599-<CNTR>-<CNTR> <CALL> \n
 <RX>
 
 //
 // Macro # 15
-/$ 14 C Rep @>|
-<TX>\n
-<CALL> RR NBR <CNTR> <CNTR> TU DE <MYCALL> K\n
+/$ 14 TU CQ
+<LOG><TX>\n
+ <CALL> TU <MYCALL> CQ\n
 <RX>
 
 //
 // Macro # 16
-/$ 15 C Incr
-<INCR>
+/$ 15 599 agn
+<TX>\n
+ <CALL> 599 <CNTR> <CNTR> <CALL> \n
+<RX>
 
 //
 // Macro # 17
-/$ 16 C Decr
-<DECR>
+/$ 16 MYCALL
+<TX>\n
+ <MYCALL> <MYCALL> \n
+<RX>
 
 //
 // Macro # 18
 /$ 17 Log QSO
-<LOG><INCR>
-
-//
-// Macro # 19
-/$ 18 CW-CQ @>|
-<TX>CQ CQ CQ DE <MYCALL> <MYCALL>  CQ CQ CQ DE <MYCALL> K<RX>
-
-//
-// Macro # 20
-/$ 19 
-
-
-//
-// Macro # 21
-/$ 20 CQ @-3+
-<TX>\n
-<IDLE:5>CQ CQ CQ de <MYCALL> <MYCALL>\n
-CQ CQ CQ de <MYCALL> k<RX><TIMER:15>
-
-//
-// Macro # 22
-/$ 21 CQ-ID @>|
-<TX><ID>\n
-CQ CQ CQ de <MYCALL> <MYCALL>\n
-CQ CQ CQ de <MYCALL> <MYCALL> K\n
+<INCR><LNW><TX>\n
+ TU 599-<CNTR>-<CNTR> <MYCALL> \n
 <RX>
 
 //
-// Macro # 23
-/$ 22 
+// Macro # 19
+/$ 18 599 agn
+<TX>\n
+ DE <MYCALL> 599 <CNTR> <CNTR> <MYCALL> \n
+<RX>
 
+//
+// Macro # 20
+/$ 19 NR?
+<TX>\n
+ <CALL> NR? NR? \n
+<RX>
+
+//
+// Macro # 21
+/$ 20 AGN
+<TX>\n
+AGN AGN\n
+<RX>
+
+//
+// Macro # 22
+/$ 21 QSY
+<QSYTO>
+
+//
+// Macro # 23
+/$ 22 DECR
+<DECR>
 
 //
 // Macro # 24
-/$ 23 
-
+/$ 23 QSY+1
+<QSY+:+1>
 
 //
 // Macro # 25
-/$ 24 
-
+/$ 24 Mycall x3
+<TX> <MYCALL> <MYCALL> <MYCALL> <RX>
 
 //
 // Macro # 26
-/$ 25 
-
+/$ 25 599 TU
+<TX> 599 TU <MYCALL> <RX>
 
 //
 // Macro # 27
@@ -207,8 +223,8 @@ CQ CQ CQ de <MYCALL> <MYCALL> K\n
 
 //
 // Macro # 35
-/$ 34 
-
+/$ 34 INCR
+<INCR>
 
 //
 // Macro # 36
