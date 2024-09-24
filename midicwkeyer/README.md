@@ -109,6 +109,16 @@ Source  Event                  Ch  Data
  24:0   Control change          0, controller 3, value 26
 ```
 
+## Setting up the Arduino IDE
+
+* Install MIDI library:
+  cd ~/Arduino/libraries/;
+  git clone https://github.com/heartscrytech/DigisparkMIDI
+* In settings, add new board manager URL:
+  https://raw.githubusercontent.com/digistump/arduino-boards-index/refs/heads/master/package_digistump_index.json
+* In the board manager, enable "Digistump AVR Boards"
+* Select board "Digistump (Default - 16.5mhz)"
+
 ## Python and PulseAudio software
 
 On the Linux host side, a [Python program](midicwkeyer.py) is listening for
