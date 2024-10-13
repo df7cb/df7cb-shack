@@ -1,9 +1,9 @@
 [Unit]
-Description=TCP radio control daemon
+Description=TCP radio control daemon (IC-7610)
 StopWhenUnneeded=true
 
 [Service]
-ExecStart=/usr/bin/rigctld -m 3078 -r /dev/ttyUSB7610
+ExecStart=/usr/bin/rigctld -m 3078 -r /dev/ic7610
 
 [Install]
 WantedBy=default.target

@@ -11,15 +11,15 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{produ
 # 0c26:0036 Prolific Technology Inc. IC-705
 # https://www.florian-wolters.de/posts/ic705-serial-device-symlinks/
 KERNEL=="ttyACM[0-9]*", SUBSYSTEM=="tty", ATTRS{product}=="IC-705", ENV{PROD}="IC-705"
-ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="00", SYMLINK+="IC705", ENV{SYSTEMD_USER_WANTS}+="ic705.service"
-ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="02", SYMLINK+="IC705B"
+ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="00", SYMLINK+="ic705", ENV{SYSTEMD_USER_WANTS}+="ic705.service"
+ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="02", SYMLINK+="ic705b"
 
 # Bus 001 Device 095: ID 10c4:ea60 Silicon Labs CP210x UART Bridge (IC7300)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ttyUSBICOM", ENV{SYSTEMD_USER_WANTS}+="ic7300.service"
 
 # 10c4:ea60 Silicon Labs CP210x UART Bridge (IC-7610)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * A", SYMLINK+="ttyUSB7610", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * B", SYMLINK+="ttyUSB7610B", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * A", SYMLINK+="ic7610", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * B", SYMLINK+="ic7610b", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
 
 # 0c26:001e Prolific Technology Inc. Icom RC-28 REMOTE ENCODER
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c26", ATTRS{idProduct}=="001e", TAG+="uaccess", MODE="0660", GROUP="plugdev"

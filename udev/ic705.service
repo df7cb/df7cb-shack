@@ -1,0 +1,9 @@
+[Unit]
+Description=TCP radio control daemon (IC-705)
+StopWhenUnneeded=true
+
+[Service]
+ExecStart=/usr/bin/rigctld -m 3085 -r /dev/ic705
+
+[Install]
+WantedBy=default.target
