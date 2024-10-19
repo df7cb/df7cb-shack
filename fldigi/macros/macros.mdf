@@ -110,7 +110,7 @@ TU 599 <MYCALL><LOG>\n
 //
 // Macro # 15
 /$ 14 TU CQ
-<LOG><TX>\n
+<LOG><GOHOME><TX>\n
  <CALL> TU <MYCALL> CQ\n
 <RX>
 

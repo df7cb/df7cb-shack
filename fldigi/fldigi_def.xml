@@ -32,9 +32,17 @@ RSID detector searches the entire passband -->
 RSID detection opens squelch for nn seconds -->
 <RSIDSQUELCH>5</RSIDSQUELCH>
 
+<!-- type: int; default: 200
+RSID minimum search bandwidth in Hertz -->
+<RSID_MIN_BW>200</RSID_MIN_BW>
+
 <!-- type: bool; default: false
 Enable Reed Soloman ID decoding -->
 <RECEIVERSID>0</RECEIVERSID>
+
+<!-- type: RGBI; default: {255, 255, 255, 255}
+Color of RsID detection markers (RGBI) -->
+<RSIDCOLORS>255 255 255</RSIDCOLORS>
 
 <!-- type: bool; default: false
 Send RSID at beginning and end of transmission -->
@@ -48,6 +56,10 @@ widget before changing to the new modem and/or frequency -->
 <!-- type: bool; default: false
 Trigger RSID notifications but do not change modem and frequency -->
 <RSIDNOTIFYONLY>0</RSIDNOTIFYONLY>
+
+<!-- type: bool; default: false
+restore squelch upon decode of RSID_EOT signal -->
+<RSIDEOTSQUELCH>0</RSIDEOTSQUELCH>
 
 <!-- type: bool; default: false
 Disable RSID detection when RsID signal is detected -->
@@ -85,19 +97,35 @@ disable changing frequency on rsid modem change/reset -->
 retain frequency lock on rsid modem change/reset -->
 <RETAINFREQLOCK>1</RETAINFREQLOCK>
 
+<!-- type: double; default: -60.0
+Input signal level transition (dB); -90 to 0 -->
+<normal_signal_level>-60</normal_signal_level>
+
+<!-- type: double; default: -6.0
+Input signal level transition (dB); -90 to 0 -->
+<high_signal_level>-6</high_signal_level>
+
+<!-- type: double; default: -3.0
+Input signal level transition (dB); -90 to 0 -->
+<over_signal_level>-3</over_signal_level>
+
+<!-- type: bool; default: false
+Enable if WSJTX metering desired -->
+<use_wsjtx_vumeter_scale>0</use_wsjtx_vumeter_scale>
+
 <!-- type: double; default: 0.0
 Waterfall reference level (dB) -->
-<WFREFLEVEL>0</WFREFLEVEL>
+<WFREFLEVEL>-20</WFREFLEVEL>
 
 <!-- type: double; default: 60.0
 Waterfall amplitude span (dB) -->
-<WFAMPSPAN>60</WFAMPSPAN>
+<WFAMPSPAN>70</WFAMPSPAN>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable reverse button -->
 <WF_UIREV>1</WF_UIREV>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable scale multiplication button -->
 <WF_UIX1>0</WF_UIX1>
 
@@ -105,39 +133,39 @@ WF_UI - enable scale multiplication button -->
 DROP_SPEED - slow rate waterfall drop speed -->
 <DROP_SPEED>8</DROP_SPEED>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf carrier button -->
 <WF_UIWFCARRIER>0</WF_UIWFCARRIER>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf shift buttons -->
-<WF_UIWFSHIFT>0</WF_UIWFSHIFT>
+<WF_UIWFSHIFT>1</WF_UIWFSHIFT>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable rf level and range controls -->
 <WF_UIWFREFLEVEL>0</WF_UIWFREFLEVEL>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf drop rate control -->
 <WF_UIWFDROP>0</WF_UIWFDROP>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf amp span control -->
 <WF_UIWFAMPSPAN>0</WF_UIWFAMPSPAN>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf memory store button -->
 <WF_UIWFSTORE>0</WF_UIWFSTORE>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf mode control -->
 <WF_UIWFMODE>0</WF_UIWFMODE>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf qsy button -->
 <WF_UIQSY>0</WF_UIQSY>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 WF_UI - enable wf transmit lock button -->
 <WF_UIXMTLOCK>0</WF_UIXMTLOCK>
 
@@ -173,6 +201,54 @@ Select if waterfall should compensate for BFO offset in CW -->
 Select if BFO is injected as LSB instead of USB -->
 <CWISLSB>1</CWISLSB>
 
+<!-- type: bool; default: true
+encode/decode backslash character -->
+<CW_blackslash>1</CW_blackslash>
+
+<!-- type: bool; default: true
+encode/decode apostrophe character -->
+<CW_apostrophe>1</CW_apostrophe>
+
+<!-- type: bool; default: true
+encode/decode quote character -->
+<CW_quote>1</CW_quote>
+
+<!-- type: bool; default: true
+encode/decode dollar_sign character -->
+<CW_dollar_sign>1</CW_dollar_sign>
+
+<!-- type: bool; default: true
+encode/decode open_paren character -->
+<CW_open_paren>1</CW_open_paren>
+
+<!-- type: bool; default: true
+encode/decode close_paren character -->
+<CW_close_paren>1</CW_close_paren>
+
+<!-- type: bool; default: true
+encode/decode colon character -->
+<CW_colon>1</CW_colon>
+
+<!-- type: bool; default: true
+encode/decode semi_colon character -->
+<CW_semi_colon>1</CW_semi_colon>
+
+<!-- type: bool; default: true
+encode/decode underscore character -->
+<CW_underscore>1</CW_underscore>
+
+<!-- type: bool; default: true
+encode/decode at_symbol character -->
+<CW_at_symbol>1</CW_at_symbol>
+
+<!-- type: bool; default: true
+encode/decode exclamation character -->
+<CW_exclamation>1</CW_exclamation>
+
+<!-- type: int; default: '*'
+use CW_noise character to display invalid CW decodes -->
+<CW_noise>42</CW_noise>
+
 <!-- type: std::string; default: &quot;&quot;
 Independent serial port used for keying DTR or RTS as keyline -->
 <CW_KEYLINE_SERIAL_PORT_NAME></CW_KEYLINE_SERIAL_PORT_NAME>
@@ -181,11 +257,43 @@ Independent serial port used for keying DTR or RTS as keyline -->
 0 - none, 1 - RTS, 2 - DTR -->
 <CWKEYLINE>0</CWKEYLINE>
 
+<!-- type: bool; default: 0
+0 - false, 1 - true; Kenwood xcvrs -->
+<USE_KYWDKEYING>0</USE_KYWDKEYING>
+
+<!-- type: bool; default: 0
+0 - false, 1 - true; Elecraft xcvrs -->
+<USE_ELCTKEYING>0</USE_ELCTKEYING>
+
+<!-- type: bool; default: 0
+0 - false, 1 - true -->
+<USE_ICOMKEYING>0</USE_ICOMKEYING>
+
+<!-- type: std::string; default: &quot;&quot;
+Icom transceiver CIV address -->
+<ICOMcivaddr></ICOMcivaddr>
+
+<!-- type: bool; default: 0
+0 - false, 1 - true -->
+<USE_YAESUKEYING>0</USE_YAESUKEYING>
+
+<!-- type: int; default: 0
+compensate delays in CW CAT keying (msecs) -->
+<CATKEYINGCOMP>0</CATKEYINGCOMP>
+
+<!-- type: bool; default: 0
+disable CAT ptt for text string CW -->
+<CATKEYING_disable_ptt>0</CATKEYING_disable_ptt>
+
 <!-- type: int; default: 0
 compensate delays in set/clr DTR/RTS serial line
 most likely required for Windows operating system
 compensation value in msec -->
 <cwio_comp>0</cwio_comp>
+
+<!-- type: int; default: 0
+flrig DTR/RTS keying -->
+<use_FLRIGkeying>0</use_FLRIGkeying>
 
 <!-- type: int; default: 0
 0 - none, 1 - RTS, 2 - DTR -->
@@ -205,6 +313,12 @@ Note: ptt on DTR, keying on RTS or
       ptt on RTS, keying on DTR -->
 <CW_KEYLINE_on_ptt_port>0</CW_KEYLINE_on_ptt_port>
 
+<!-- type: double; default: 0.0
+Dot to Space ratio compensate for transceiver keying delays
+in millisecond. (-) decrease dot, (+) increase dot
+limited to 1/2 default dot / space interval -->
+<CWkeycomp>0</CWkeycomp>
+
 <!-- type: bool; default: false
 Replay audio history when changing frequency by clicking on
 the waterfall -->
@@ -218,7 +332,7 @@ frequency scale area -->
 <!-- type: bool; default: false
 Insert text to the RX text widget when changing frequency by left
 clicking on the waterfall -->
-<WATERFALLCLICKINSERT>0</WATERFALLCLICKINSERT>
+<WATERFALLCLICKINSERT>1</WATERFALLCLICKINSERT>
 
 <!-- type: std::string; default: &quot;\n&lt;FREQ&gt;\n&quot;
 Waterfall left click text for WATERFALLCLICKINSERT -->
@@ -235,7 +349,7 @@ Describes how waterfall mouse wheel events are handled
 
 <!-- type: bool; default: false
 Print Rx in lowercase for CW, RTTY, CONTESTIA and THROB -->
-<RX_LOWERCASE>1</RX_LOWERCASE>
+<RX_LOWERCASE>0</RX_LOWERCASE>
 
 <!-- type: bool; default: false
 Transmit all text in lowercase -->
@@ -302,6 +416,30 @@ Limit AFC movement to this range (Hz) -->
 Acquisition S/N (dB) -->
 <PSKSERVERACGSN>9</PSKSERVERACGSN>
 
+<!-- type: Fl_Color; default: FL_BLACK
+Color for digi_scope background -->
+<digi_background>56</digi_background>
+
+<!-- type: Fl_Color; default: FL_WHITE
+Color for digi_scope axis -->
+<digi_axis_color>255</digi_axis_color>
+
+<!-- type: Fl_Color; default: FL_GREEN
+Color for digi_scope color 1 -->
+<digi_color_1>63</digi_color_1>
+
+<!-- type: Fl_Color; default: FL_YELLOW
+Color for digi_scope color 2 -->
+<digi_color_2>95</digi_color_2>
+
+<!-- type: Fl_Color; default: FL_CYAN
+Color for digi_scope color 3 -->
+<digi_color_3>223</digi_color_3>
+
+<!-- type: Fl_Color; default: FL_MAGENTA
+Color for digi_scope color 4 -->
+<digi_color_4>248</digi_color_4>
+
 <!-- type: int; default: 1
 1 - use Kahn power demodulator
 0 - use ATC (Kok Chen) demodulator -->
@@ -310,7 +448,7 @@ Acquisition S/N (dB) -->
 <!-- type: bool; default: true
 Enabled  - XY scope displays Mark/Space channel signals
 Disabled - XY scope displays pseudo M/S signals -->
-<TRUESCOPE>1</TRUESCOPE>
+<TRUESCOPE>0</TRUESCOPE>
 
 <!-- type: int; default: 3
 Carrier shift (Hz). Values are as follows:
@@ -388,20 +526,48 @@ AFC tracking speed. Values are as follows:
 <RTTYAFCSPEED>1</RTTYAFCSPEED>
 
 <!-- type: bool; default: false
-TRUE if DTR/RTS keying for RTTY EXPERIMENTAL - NOT USED -->
-<USEFSK>0</USEFSK>
-
-<!-- type: std::string; default: &quot;&quot;
-Independent serial port EXPERIMENTAL - NOT USED -->
-<RTTY_SERIAL_PORT_NAME></RTTY_SERIAL_PORT_NAME>
-
-<!-- type: bool; default: false
 Default to crosshair digiscope -->
-<PREFERXHAIRSCOPE>0</PREFERXHAIRSCOPE>
+<PREFERXHAIRSCOPE>1</PREFERXHAIRSCOPE>
 
 <!-- type: bool; default: false
 Generate Pseudo-FSK signal on right audio channel -->
 <PSEUDOFSK>0</PSEUDOFSK>
+
+<!-- type: bool; default: false
+TRUE if DTR/RTS keying for RTTY -->
+<USEFSK>0</USEFSK>
+
+<!-- type: bool; default: false
+FSK signal generator shares rigio serial port for DTR/RTS control -->
+<FSK_SHARES_PORT>0</FSK_SHARES_PORT>
+
+<!-- type: std::string; default: &quot;&quot;
+FSK serial port device name -->
+<FSK_PORT></FSK_PORT>
+
+<!-- type: bool; default: false
+Reverse Mark/Space signaling -->
+<FSK_REVERSE>0</FSK_REVERSE>
+
+<!-- type: bool; default: false
+Use DTR signal line for FSK control -->
+<FSK_ON_DTR>0</FSK_ON_DTR>
+
+<!-- type: bool; default: false
+Always send shift char before space -->
+<FSK_SHIFT_ON_SPACE>0</FSK_SHIFT_ON_SPACE>
+
+<!-- type: bool; default: true
+True - 1.5 stop bits; False - 2 stop bits -->
+<FSK_STOPBITS>1</FSK_STOPBITS>
+
+<!-- type: bool; default: false
+True - enable; False - disable -->
+<FLRIG_FSK>0</FLRIG_FSK>
+
+<!-- type: double; default: 200
+range 50 to 5000 msecs -->
+<FLRIG_POLL>200</FLRIG_POLL>
 
 <!-- type: bool; default: true
 Enable kml server threads -->
@@ -437,19 +603,27 @@ Show <BEL> in Rx panel when  decoded -->
 
 <!-- type: bool; default: true
 Ring TTY bell tone when  decoded -->
-<audibleBELL>1</audibleBELL>
+<audibleBELL>0</audibleBELL>
 
 <!-- type: double; default: 18
 Transmit speed (WPM) -->
 <CWSPEED>18</CWSPEED>
 
-<!-- type: double; default: 18
+<!-- type: double; default: 15
 Speed for Farnsworth timing (WPM) -->
 <CWFARNSWORTH>18</CWFARNSWORTH>
 
 <!-- type: bool; default: false
 Use Farnsworth timing -->
 <CWUSEFARNSWORTH>0</CWUSEFARNSWORTH>
+
+<!-- type: double; default: 15
+Speed for wordsworth timing (WPM) -->
+<CWWORDSWORTH>15</CWWORDSWORTH>
+
+<!-- type: bool; default: false
+Use Wordsworth timing -->
+<CWUSEWORDSWORTH>0</CWUSEWORDSWORTH>
 
 <!-- type: double; default: 24
 Default speed (WPM) -->
@@ -461,11 +635,11 @@ Filter bandwidth (Hz) -->
 
 <!-- type: double; default: 0.4
 Detector hysterisis, lower threshold -->
-<CWLOWER>0.498565</CWLOWER>
+<CWLOWER>0.712567</CWLOWER>
 
 <!-- type: double; default: 0.6
 Detector hysterisis, upper threshold -->
-<CWUPPER>0.524138</CWUPPER>
+<CWUPPER>0.739879</CWUPPER>
 
 <!-- type: int; default: 100
 Matched Filter length -->
@@ -591,6 +765,10 @@ CW prosigns BT AA AS AR SK KN INT HM VE -->
 Display decoded prosign as assigned short cut key -->
 <CW_prosign_display>0</CW_prosign_display>
 
+<!-- type: int; default: 20
+CW calibrate speed in WPM -->
+<CWCALSPEED>20</CWCALSPEED>
+
 <!-- type: bool; default: true
 Use Ä extended CW character -->
 <A_umlaut>1</A_umlaut>
@@ -645,11 +823,11 @@ Mortty loaded with K3NG WinKeyer emulator sketch -->
 
 <!-- type: double; default: 245.0
 Feld Hell working bandwidth -->
-<HELL_BW0>245</HELL_BW0>
+<HELL_BW0>295</HELL_BW0>
 
 <!-- type: double; default: 245.0
 FH bandwidth -->
-<HELL_BW1>245</HELL_BW1>
+<HELL_BW1>295</HELL_BW1>
 
 <!-- type: double; default: 30.0
 Slow Hell bandwidth -->
@@ -714,12 +892,12 @@ Raised cosine pulse shape factor. Values are as follows:
 <!-- type: int; default: 2
 Number of tones. Values are as follows:
   0: 2; 1: 4; 2: 8; 3: 16; 4: 32; 5: 64; 6: 128; 7: 256 -->
-<OLIVIATONES>2</OLIVIATONES>
+<OLIVIATONES>5</OLIVIATONES>
 
 <!-- type: int; default: 2
 Bandwidth (Hz). Values are as follows:
   0: 125; 1: 250; 2: 500; 3: 1000; 4: 2000. -->
-<OLIVIABW>2</OLIVIABW>
+<OLIVIABW>4</OLIVIABW>
 
 <!-- type: int; default: 8
 Tune margin (tone frequency spacing) -->
@@ -826,6 +1004,10 @@ display decoded data in SI units -->
 <!-- type: bool; default: false
 display decoded data in English units -->
 <PKTUNITSENGLISH>0</PKTUNITSENGLISH>
+
+<!-- type: std::string; default: &quot;&quot;
+THOR avatar image to transmit -->
+<THOR_AVATAR_IMAGE_FILE></THOR_AVATAR_IMAGE_FILE>
 
 <!-- type: double; default: 2.0
 Filter bandwidth factor (bandwidth relative to signal width) -->
@@ -1012,12 +1194,16 @@ convert other CALLSIGN to lower case for all IFKP macros -->
 Always t/r at 1500 Hz -->
 <IFKPFREQLOCK>1</IFKPFREQLOCK>
 
+<!-- type: std::string; default: &quot;&quot;
+IFKP avatar image to transmit -->
+<IFKP_AVATAR_IMAGE_FILE></IFKP_AVATAR_IMAGE_FILE>
+
 <!-- type: int; default: 1
 Waterfal FFT prefilter window function. Values are as follows:
   0: Rectangular; 1: Blackman; 2: Hamming; 3: Hanning; 4: Triangular -->
 <WFPREFILTER>1</WFPREFILTER>
 
-<!-- type: bool; default: false
+<!-- type: bool; default: true
 Use FFT averaging to decrease waterfall noise -->
 <WFAVERAGING>0</WFAVERAGING>
 
@@ -1038,16 +1224,16 @@ Draw bandwidth marker with vertical lines -->
 <USEBWTRACKS>1</USEBWTRACKS>
 
 <!-- type: bool; default: false
-Draw bandwidth marker with 3x vertical lines -->
-<USEWIDETRACKS>0</USEWIDETRACKS>
-
-<!-- type: bool; default: false
 Draw cursor with 3x vertical lines -->
 <USEWIDECURSOR>0</USEWIDECURSOR>
 
 <!-- type: bool; default: false
 Draw center line marker with 3x vertical lines -->
 <USEWIDECENTER>0</USEWIDECENTER>
+
+<!-- type: bool; default: false
+Draw bandwidth marker with 3x vertical lines -->
+<USEWIDETRACKS>0</USEWIDETRACKS>
 
 <!-- type: RGBI; default: {255, 255, 0, 255}
 Color of cursor lines (RGBI) -->
@@ -1069,9 +1255,17 @@ Color of notch marker (RGBI) -->
 Color of RTTY MARK freq marker (RGBI) -->
 <RTTYMARKRGBI>255 120 0</RTTYMARKRGBI>
 
+<!-- type: RGBI; default: {0, 255, 0, 255}
+Color of audio filter bandwidth (RGBI) -->
+<MONITORRGBI>0 255 0</MONITORRGBI>
+
+<!-- type: bool; default: false
+Draw bandwidth lines with 3x vertical lines -->
+<USEWIDEMONITOR>0</USEWIDEMONITOR>
+
 <!-- type: int; default: 4
 Index of raster font used for transmission -->
-<FELDFONTNBR>4</FELDFONTNBR>
+<FELDFONTNBR>3</FELDFONTNBR>
 
 <!-- type: bool; default: true
 Show transmit signal on waterfall -->
@@ -1127,7 +1321,7 @@ Docked rig control -->
 
 <!-- type: int; default: 125
 Waterfall height (pixels) -->
-<WFHEIGHT>125</WFHEIGHT>
+<WFHEIGHT>300</WFHEIGHT>
 
 <!-- type: bool; default: true
 Show tooltips -->
@@ -1136,6 +1330,22 @@ Show tooltips -->
 <!-- type: bool; default: true
 Prompt to save log -->
 <NAGME>1</NAGME>
+
+<!-- type: bool; default: false
+Enable Cloudlog -->
+<ENCLOUDLOG>0</ENCLOUDLOG>
+
+<!-- type: std::string; default: &quot;&quot;
+Cloudlog API URL -->
+<CLOUDLOG_API_URL></CLOUDLOG_API_URL>
+
+<!-- type: std::string; default: &quot;&quot;
+Cloudlog API Key -->
+<CLOUDLOG_API_KEY></CLOUDLOG_API_KEY>
+
+<!-- type: int; default: 1
+Cloudlog Station ID -->
+<CLOUDLOG_STATION_ID>1</CLOUDLOG_STATION_ID>
 
 <!-- type: bool; default: false
 Clear log fields on save -->
@@ -1291,9 +1501,29 @@ monitor transceiver audio on alert audio device -->
 monitor dsp filter output for selected modem @ waterfall frequency -->
 <mon_dsp_audio>0</mon_dsp_audio>
 
+<!-- type: bool; default: true
+Display monitor filter -->
+<MON_WF_DISPLAY>1</MON_WF_DISPLAY>
+
+<!-- type: bool; default: false
+Draw bandwidth lines with 3x vertical lines -->
+<WIDEMONITORTRACKS>0</WIDEMONITORTRACKS>
+
+<!-- type: int; default: true
+monitor transmit audio on alert audio device -->
+<mon_xmt_audio>1</mon_xmt_audio>
+
+<!-- type: double; default: 25.0
+monitor transmit monitor volume level -->
+<mon_tx_vol>25</mon_tx_vol>
+
 <!-- type: int; default: 50
 Audio stream volume -->
 <RxFilt_vol>50</RxFilt_vol>
+
+<!-- type: int; default: false
+Rx monitor audio gain boost -->
+<rxgain_x10>0</rxgain_x10>
 
 <!-- type: int; default: 500
 DSP audio stream filter bandwidth -->
@@ -1317,7 +1547,7 @@ Rx filter tracks waterfall cursor movement -->
 
 <!-- type: std::string; default: &quot;&quot;
 Full pathname to the cty.dat data file -->
-<CTYDAT_PATHNAME>/home/myon/.fldigi/</CTYDAT_PATHNAME>
+<CTYDAT_PATHNAME>/usr/share/hamradio-files/</CTYDAT_PATHNAME>
 
 <!-- type: bool; default: false
 Capture text to file 'talk/textout.txt' -->
@@ -1563,11 +1793,11 @@ Use XML-RPC rig control -->
 
 <!-- type: std::string; default: DEFAULT_PTTDEV
 PTT device -->
-<PTTDEV>/dev/ttyUSB0</PTTDEV>
+<PTTDEV>/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_IC-7610_23001123_B-if00-port0</PTTDEV>
 
 <!-- type: std::string; default: DEFAULT_HAMRIGDEVICE
 Hamlib rig device -->
-<HAMRIGDEVICE>localhost:4532</HAMRIGDEVICE>
+<HAMRIGDEVICE>localhost</HAMRIGDEVICE>
 
 <!-- type: std::string; default: &quot;&quot;
 Hamlib rig name -->
@@ -1585,7 +1815,7 @@ Hamlib configuration (param=val, ...) -->
 Hamlib rig baud rate. Values are as follows:
   0: 300; 1: 600; 2: 1200; 3: 2400; 4: 4800; 5: 9600; 6: 19200;
   7: 38400; 8: 57600; 9: 115200; 10: 230400; 11: 460800. -->
-<HAMRIGBAUDRATE>6</HAMRIGBAUDRATE>
+<HAMRIGBAUDRATE>9</HAMRIGBAUDRATE>
 
 <!-- type: int; default: 2
 Hamlib stopbits <1/2>. -->
@@ -1597,7 +1827,7 @@ Hamlib stopbits <1/2>. -->
 
 <!-- type: int; default: 1
 Hamlib PTT for xmt audio on data port -->
-<HAMLIBPTTONDATA>1</HAMLIBPTTONDATA>
+<HAMLIBPTTONDATA>0</HAMLIBPTTONDATA>
 
 <!-- type: bool; default: false
 Hamlib xcvr uses LSB for CW -->
@@ -1611,7 +1841,7 @@ Hamlib xcvr uses USB for RTTY -->
 wait NN msec after sending mode change
 before next transceiver CAT query
 0 - 2000 in 100 msec increments -->
-<HAMRIG_MODE_DELAY>200</HAMRIG_MODE_DELAY>
+<HAMRIG_MODE_DELAY>500</HAMRIG_MODE_DELAY>
 
 <!-- type: std::string; default: &quot;&quot;
 RigCAT XML file name -->
@@ -1635,7 +1865,7 @@ Use separate device for PTT -->
 
 <!-- type: bool; default: false
 PTT via Hamlib command -->
-<HAMLIBCMDPTT>0</HAMLIBCMDPTT>
+<HAMLIBCMDPTT>1</HAMLIBCMDPTT>
 
 <!-- type: bool; default: false
 PTT via RigCAT command -->
@@ -1648,6 +1878,10 @@ Use uHRouter PTT (OS X only) -->
 <!-- type: bool; default: false
 Use parallel port PTT -->
 <USEPPORTPTT>0</USEPPORTPTT>
+
+<!-- type: bool; default: false
+use GPIO for ptt (pi3/4) -->
+<USE_GPIO_PTT>0</USE_GPIO_PTT>
 
 <!-- type: long; default: 0
 GPIO enable
@@ -1662,6 +1896,18 @@ bits 0 - 16; bit 0 : PTT ON state on pin N -->
 <!-- type: int; default: 0
 GPIO pulse width setting for PiHpSDR PTT -->
 <GPIO_PULSE_WIDTH>0</GPIO_PULSE_WIDTH>
+
+<!-- type: std::string; default: &quot;NONE&quot;
+DRA-xx device name -->
+<CMEDIA_DEVICE>NONE</CMEDIA_DEVICE>
+
+<!-- type: bool; default: false
+Use cmedia PTT -->
+<CMEDIA-PTT>0</CMEDIA-PTT>
+
+<!-- type: std::string; default: &quot;GPIO-3&quot;
+cmedia GPIO pin assignment for PTT -->
+<CMEDIA_GPIO_LINE>GPIO-3</CMEDIA_GPIO_LINE>
 
 <!-- type: bool; default: false
 Initial state of RTS -->
@@ -1729,11 +1975,11 @@ XON/XOFF flow control -->
 
 <!-- type: int; default: 2
 Number of times to resend command before giving up -->
-<HAMLIBRETRIES>3</HAMLIBRETRIES>
+<HAMLIBRETRIES>5</HAMLIBRETRIES>
 
-<!-- type: int; default: 10
+<!-- type: int; default: 200
 Retry interval (milliseconds) -->
-<HAMLIBTIMEOUT>1000</HAMLIBTIMEOUT>
+<HAMLIBTIMEOUT>10000</HAMLIBTIMEOUT>
 
 <!-- type: int; default: 5
 Wait interval before reading response (milliseconds) -->
@@ -1784,6 +2030,10 @@ Disable CAT PTT signal during CW ops with expernal h/w -->
 <!-- type: int; default: 1
 Enable speed pot in nanoIO circuit / script -->
 <nanoIO_speed_pot>1</nanoIO_speed_pot>
+
+<!-- type: int; default: 24
+test wpm setting -->
+<nanoCW_test_wpm>24</nanoCW_test_wpm>
 
 <!-- type: int; default: 0
 Correct CW unit timing by this amount in usec -->
@@ -1871,11 +2121,11 @@ Operator Maidenhead locator -->
 
 <!-- type: std::string; default: &quot;&quot;
 Antenna description (keep short!) -->
-<MYANTENNA></MYANTENNA>
+<MYANTENNA>Spiderbeam, Windom</MYANTENNA>
 
 <!-- type: std::string; default: &quot;&quot;
 Operator call sign, if distinct from the station call MYCALL -->
-<OPERCALL></OPERCALL>
+<OPERCALL>DF7CB</OPERCALL>
 
 <!-- type: int; default: SND_IDX_NULL
 Audio subsystem.  Values are as follows:
@@ -1884,7 +2134,7 @@ Audio subsystem.  Values are as follows:
 
 <!-- type: std::string; default: &quot;&quot;
 OSS device name -->
-<OSSDEVICE></OSSDEVICE>
+<OSSDEVICE>/dev/dsp</OSSDEVICE>
 
 <!-- type: std::string; default: &quot;&quot;
 For compatibility with older versions -->
@@ -2003,11 +2253,11 @@ minimum -10.0, maximum + 10.0 -->
 
 <!-- type: std::string; default: &quot;&quot;
 Logbook file name -->
-<LOGBOOKFILENAME>/home/myon/.fldigi/logs/logbook.adif</LOGBOOKFILENAME>
+<LOGBOOKFILENAME>/home/myon/.fldigi/logs/2024-10-16-rsgb-80m-df7c.adif</LOGBOOKFILENAME>
 
 <!-- type: bool; default: 0
 Display read # recs and logbook name on program start -->
-<LOGBOOKREADDISPLAY>0</LOGBOOKREADDISPLAY>
+<LOGBOOKREADDISPLAY>1</LOGBOOKREADDISPLAY>
 
 <!-- type: bool; default: true
 Force RST in/out to 599 -->
@@ -2109,6 +2359,10 @@ Free form exchange -->
 TX power used for logbook entries -->
 <TXPOWER></TXPOWER>
 
+<!-- type: bool; default: true
+Use power meter reading for logged TX power -->
+<LOG_POWER_METER>1</LOG_POWER_METER>
+
 <!-- type: std::string; default: &quot;&quot;
 Field Day call sign -->
 <FD_CALL></FD_CALL>
@@ -2164,7 +2418,7 @@ Logging for:
   18 - Africa All Mode
   19 - VHF
   20 - Worked All Europe -->
-<LOGGING>0</LOGGING>
+<LOGGING>1</LOGGING>
 
 <!-- type: int; default: 0
 SQSO contest -->
@@ -2172,7 +2426,7 @@ SQSO contest -->
 
 <!-- type: std::string; default: &quot;CALL if (RSTr), if (LOCATOR), NAME, QTH&quot;
 Notes for specfied contest -->
-<CONTESTnotes>CALL if (RSTr), if (LOCATOR), NAME, QTH</CONTESTnotes>
+<CONTESTnotes>CALL EXCHANGE</CONTESTnotes>
 
 <!-- type: int; default: 0
 SQSO in-state -->
@@ -2422,7 +2676,7 @@ expand ^! macro tags in Rx panel when executed -->
 
 <!-- type: double; default: -3.0
 TX attenuator (db) -30 .. 0 -->
-<TXATTEN>-10</TXATTEN>
+<TXATTEN>-18.6</TXATTEN>
 
 <!-- type: double; default: 0.2
 Level for monitored (on waterfall) transmit signal -->
@@ -2430,7 +2684,7 @@ Level for monitored (on waterfall) transmit signal -->
 
 <!-- type: std::string; default: &quot;default.pal&quot;
 Waterfall color palette file name -->
-<PALETTENAME>default.pal</PALETTENAME>
+<PALETTENAME>Palette: digipan.pal</PALETTENAME>
 
 <!-- type: RGB; default: { 0,0,0 }
 Custom palette 0 -->
@@ -2438,35 +2692,35 @@ Custom palette 0 -->
 
 <!-- type: RGB; default: { 0,0,136 }
 Custom palette 1 -->
-<PALETTE1>0 255 245</PALETTE1>
+<PALETTE1>0 0 64</PALETTE1>
 
 <!-- type: RGB; default: { 0,19,198 }
 Custom palette 2 -->
-<PALETTE2>0 255 168</PALETTE2>
+<PALETTE2>0 0 128</PALETTE2>
 
 <!-- type: RGB; default: { 0,32,239 }
 Custom palette 3 -->
-<PALETTE3>120 239 30</PALETTE3>
+<PALETTE3>0 0 217</PALETTE3>
 
 <!-- type: RGB; default: { 172,167,105 }
 Custom palette 4 -->
-<PALETTE4>217 255 12</PALETTE4>
+<PALETTE4>150 147 92</PALETTE4>
 
 <!-- type: RGB; default: { 194,198,49 }
 Custom palette 5 -->
-<PALETTE5>255 208 0</PALETTE5>
+<PALETTE5>183 186 46</PALETTE5>
 
 <!-- type: RGB; default: { 225,228,107 }
 Custom palette 6 -->
-<PALETTE6>255 120 0</PALETTE6>
+<PALETTE6>225 228 107</PALETTE6>
 
 <!-- type: RGB; default: { 255,255,0 }
 Custom palette 7 -->
-<PALETTE7>255 69 0</PALETTE7>
+<PALETTE7>255 255 0</PALETTE7>
 
 <!-- type: RGB; default: { 251,51,0 }
 Custom palette 8 -->
-<PALETTE8>255 255 255</PALETTE8>
+<PALETTE8>255 51 0</PALETTE8>
 
 <!-- type: bool; default: true
 Use macro group colors -->
@@ -2492,17 +2746,25 @@ Macro button foreground  -->
 Default character set -->
 <CHARSET_NAME>UTF-8</CHARSET_NAME>
 
+<!-- type: Fl_Font; default: FL_HELVETICA
+Menu text font index -->
+<MENUFONTNBR>0</MENUFONTNBR>
+
+<!-- type: int; default: 16
+Menu text font size -->
+<MENUFONTSIZE>16</MENUFONTSIZE>
+
 <!-- type: bool; default: true
 Enable RX font warnings -->
 <RXFONTWARN>1</RXFONTWARN>
 
 <!-- type: std::string; default: &quot;&quot;
 RX text font name -->
-<RXFONTNAME>sans</RXFONTNAME>
+<RXFONTNAME>DejaVu Sans</RXFONTNAME>
 
 <!-- type: Fl_Font; default: FL_HELVETICA
 RX text font index -->
-<RXFONTNBR>0</RXFONTNBR>
+<RXFONTNBR>51</RXFONTNBR>
 
 <!-- type: int; default: 16
 RX text font size -->
@@ -2538,11 +2800,11 @@ Enable TX font warnings -->
 
 <!-- type: std::string; default: &quot;&quot;
 TX text font name -->
-<TXFONTNAME>sans</TXFONTNAME>
+<TXFONTNAME>DejaVu Sans</TXFONTNAME>
 
 <!-- type: Fl_Font; default: FL_HELVETICA
 TX text font index -->
-<TXFONTNBR>0</TXFONTNBR>
+<TXFONTNBR>51</TXFONTNBR>
 
 <!-- type: int; default: 16
 TX text font size -->
@@ -2798,9 +3060,17 @@ UI TxID select color -->
 UI Tune select color -->
 <TUNECOLOR>88</TUNECOLOR>
 
-<!-- type: Fl_Color; default: FL_YELLOW
+<!-- type: Fl_Color; default: FL_GREEN
 Default color of lighted buttons -->
 <DEFAULTBTNCOLOR>95</DEFAULTBTNCOLOR>
+
+<!-- type: Fl_Color; default: FL_YELLOW
+Default color of check buttons -->
+<DEFAULTCHECKBTNCOLOR>95</DEFAULTCHECKBTNCOLOR>
+
+<!-- type: Fl_Color; default: FL_GREEN
+Default color of round buttons -->
+<DEFAULTROUNDBTNCOLOR>63</DEFAULTROUNDBTNCOLOR>
 
 <!-- type: bool; default: false
 Try to open remote xml logbook -->
@@ -2952,7 +3222,7 @@ Display all rx char's using ascii3 table -->
 
 <!-- type: bool; default: false
 Enable to start pskrep interface when starting fldigi -->
-<PSKREP_AUTOSTART>0</PSKREP_AUTOSTART>
+<PSKREP_AUTOSTART>1</PSKREP_AUTOSTART>
 
 <!-- type: bool; default: false
 (Set by fldigi) -->
@@ -2984,11 +3254,11 @@ Reception report server port -->
 
 <!-- type: double; default: 0.0
 Slant correction for wefax Rx -->
-<WEFAXSLANT>0</WEFAXSLANT>
+<WEFAXSLANT>0.008</WEFAXSLANT>
 
 <!-- type: std::string; default: &quot;&quot;
 Target directory for storing automatically received images storage -->
-<WEFAXSAVEDIR></WEFAXSAVEDIR>
+<WEFAXSAVEDIR>/home/myon/fax/</WEFAXSAVEDIR>
 
 <!-- type: std::string; default: &quot;&quot;
 Source directory for sending images -->
@@ -3008,7 +3278,7 @@ Hide transmission window -->
 
 <!-- type: int; default: 800
 Shift (Standard 800Hz) -->
-<WEFAXSHIFT>800</WEFAXSHIFT>
+<WEFAXSHIFT>850</WEFAXSHIFT>
 
 <!-- type: int; default: 1900
 Signal centered on freq (Standard 1900Hz) -->
@@ -3029,7 +3299,7 @@ Threshold level for noise detection and removal -->
 
 <!-- type: double; default: 0.05
 Threshold level for signal detection -->
-<WEFAX_CORRELATION>0.05</WEFAX_CORRELATION>
+<WEFAX_CORRELATION>0.01</WEFAX_CORRELATION>
 
 <!-- type: int; default: 15
 Compute correlation on NN (2 ... 25) -->
@@ -3111,6 +3381,10 @@ Use complete METAR report -->
 <!-- type: bool; default: true
 Report station noun name -->
 <WX_STATION_NAME>1</WX_STATION_NAME>
+
+<!-- type: bool; default: true
+Unparsed METAR report -->
+<WX_RAW>1</WX_RAW>
 
 <!-- type: bool; default: false
 Purge KML data at startup -->
@@ -3217,7 +3491,7 @@ Least significant digit are left/right keys
 <!-- type: int; default: 22
 Height of macro bar
 22 .. 66, default = 22, step size 2 -->
-<MACRO_HEIGHT>23</MACRO_HEIGHT>
+<MACRO_HEIGHT>25</MACRO_HEIGHT>
 
 <!-- type: bool; default: false
 Enabled, Tx above Rx panel
@@ -3255,11 +3529,11 @@ Allow dockable macros -->
 
 <!-- type: double; default: 0.0
 Upper axis in dB for spectrum viewer -->
-<fftviewer_maxdb>0</fftviewer_maxdb>
+<fftviewer_maxdb>-20</fftviewer_maxdb>
 
 <!-- type: double; default: 60.0
 Display range in dB for spectrum viewer -->
-<fftviewer_range>60</fftviewer_range>
+<fftviewer_range>70</fftviewer_range>
 
 <!-- type: int; default: 100
 Number of scans over which the average signal level is measured. -->
@@ -3267,11 +3541,11 @@ Number of scans over which the average signal level is measured. -->
 
 <!-- type: double; default: 2000.0
 Scan center frequency in Hertz -->
-<fftviewer_fcenter>2000</fftviewer_fcenter>
+<fftviewer_fcenter>1500</fftviewer_fcenter>
 
 <!-- type: double; default: 4000.0
 Frequency scan range in Hertz -->
-<fftviewer_frng>4000</fftviewer_frng>
+<fftviewer_frng>850</fftviewer_frng>
 
 <!-- type: int; default: 500
 Initial spectrum range -->
@@ -3292,5 +3566,138 @@ scale factor for spectrum display linked to modem bandwidth -->
 <!-- type: bool; default: true
 use waterfall db range and offset values for spectrum scope -->
 <wf_spectrum_dbvals>1</wf_spectrum_dbvals>
+
+<!-- type: int; default: 1
+FMT sample rate
+0:8000, 1:11025, 2:12000, 3:16000, 4:22050, 5:32000, 6:44100, 7:48000 -->
+<FMT_sr>1</FMT_sr>
+
+<!-- type: int; default: 3
+FMT DFT conversions per second -->
+<FMT_dft_rate>3</FMT_dft_rate>
+
+<!-- type: bool; default: false
+Reverse time axis -->
+<FMT_reverse>0</FMT_reverse>
+
+<!-- type: bool; default: false
+Plot axis/lines with 2 pixel width -->
+<FMT_thick_lines>0</FMT_thick_lines>
+
+<!-- type: bool; default: false
+Plot points lie on top of axis graticule -->
+<FMT_plot_over_axis>0</FMT_plot_over_axis>
+
+<!-- type: double; default: 0.0
+FMT freq track correction in Hertz -->
+<FMT_freq_corr>0</FMT_freq_corr>
+
+<!-- type: double; default: 4.0
+FMT FIR lpf 3db cutoff in Hertz -->
+<FMT_filter>4</FMT_filter>
+
+<!-- type: double; default: 20.0
+FMT FIR bpf 3db cutoff in Hertz -->
+<FMT_bpf_width>20</FMT_bpf_width>
+
+<!-- type: bool; default: false
+Enable unknown bandpass filter -->
+<FMT_unk_bpf_on>0</FMT_unk_bpf_on>
+
+<!-- type: bool; default: false
+Enable reference bandpass filter -->
+<FMT_ref_bpf_on>0</FMT_ref_bpf_on>
+
+<!-- type: double; default: 4.0
+FMT moving average filter length in seconds -->
+<FMT_movavg_len>4</FMT_movavg_len>
+
+<!-- type: double; default: 0.95
+Experimental first-order prefilter -->
+<FMT_prefilter>0.95</FMT_prefilter>
+
+<!-- type: bool; default: false
+Enable FMT prefilter -->
+<FMT_prefilter_on>0</FMT_prefilter_on>
+
+<!-- type: double; default: 10.0
+Experimental data culling -->
+<FMT_cull_level>10</FMT_cull_level>
+
+<!-- type: bool; default: false
+Enable data culling -->
+<FMT_cull_on>0</FMT_cull_on>
+
+<!-- type: double; default: 1.0
+Experimental DFT hardlimit level -->
+<FMT_HL_level>1</FMT_HL_level>
+
+<!-- type: bool; default: false
+Enable DFT hardlimiter -->
+<FMT_HL_on>0</FMT_HL_on>
+
+<!-- type: bool; default: false
+Enable DFT culling -->
+<FMT_dft_cull_on>0</FMT_dft_cull_on>
+
+<!-- type: Fl_Color; default: FL_BACKGROUND2_COLOR
+Color for FMT plot background -->
+<FMT_background>7</FMT_background>
+
+<!-- type: Fl_Color; default: FL_DARK_BLUE
+Color for FMT unknown data plot -->
+<FMT_unk_color>136</FMT_unk_color>
+
+<!-- type: Fl_Color; default: FL_GREEN
+Color for FMT reference data plot -->
+<FMT_ref_color>63</FMT_ref_color>
+
+<!-- type: Fl_Color; default: FL_BLACK
+Color for FMT legends -->
+<FMT_legend_color>56</FMT_legend_color>
+
+<!-- type: Fl_Color; default: FL_BLACK
+Color for FMT plot axis -->
+<FMT_axis_color>56</FMT_axis_color>
+
+<!-- type: bool; default: false
+Use TAB delimiters in exported csv file -->
+<fmt_use_tabs>0</fmt_use_tabs>
+
+<!-- type: bool; default: false
+Waterfall centered on unknown -->
+<fmt_center_on_unknown>0</fmt_center_on_unknown>
+
+<!-- type: bool; default: false
+Waterfall centered on reference -->
+<fmt_center_on_reference>0</fmt_center_on_reference>
+
+<!-- type: bool; default: true
+Waterfall centered on median -->
+<fmt_center_on_median>1</fmt_center_on_median>
+
+<!-- type: bool; default: false
+Sound wav file record sync'd to csv file -->
+<fmt_sync_wav_file>0</fmt_sync_wav_file>
+
+<!-- type: double; default: 2.0
+limit to frequency error before automatic reset -->
+<FMT_freq_err>2</FMT_freq_err>
+
+<!-- type: bool; default: true
+Save/restore SQUELCH on per mode basis -->
+<SQLCH_BY_MODE>0</SQLCH_BY_MODE>
+
+<!-- type: bool; default: true
+Save/restore TXLEVEL on per mode basis -->
+<TXLEVEL_BY_MODE>0</TXLEVEL_BY_MODE>
+
+<!-- type: bool; default: true
+Save/restore AFC on per mode basis -->
+<AFC_BY_MODE>0</AFC_BY_MODE>
+
+<!-- type: bool; default: true
+Save/restore REVERSE on per mode basis -->
+<REVERSE_BY_MODE>0</REVERSE_BY_MODE>
 
 </FLDIGI_DEFS>
