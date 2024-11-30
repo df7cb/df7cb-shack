@@ -17,9 +17,11 @@ ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="02", SYMLINK+=
 # Bus 001 Device 095: ID 10c4:ea60 Silicon Labs CP210x UART Bridge (IC7300)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ttyUSBICOM", ENV{SYSTEMD_USER_WANTS}+="ic7300.service"
 
-# 10c4:ea60 Silicon Labs CP210x UART Bridge (IC-7610)
+# 10c4:ea60 Silicon Labs CP210x UART Bridge (IC-7610, IC-9700)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * A", SYMLINK+="ic7610", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * B", SYMLINK+="ic7610b", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-9700 * A", SYMLINK+="ic9700", ENV{SYSTEMD_USER_WANTS}+="ic9700.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-9700 * B", SYMLINK+="ic9700b", ENV{SYSTEMD_USER_WANTS}+="ic9700.service"
 
 # 0c26:001e Prolific Technology Inc. Icom RC-28 REMOTE ENCODER
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c26", ATTRS{idProduct}=="001e", TAG+="uaccess", MODE="0660", GROUP="plugdev"
@@ -48,3 +50,6 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", TAG+="uacc
 
 # 091e:0003 Garmin International GPS (various models)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="091e", ATTRS{idProduct}=="0003", SYMLINK+="ttyUSBGarmin"
+
+# 1a86:7523 QinHeng Electronics HL-340 USB-Serial adapter
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="ttyUSBrotor"
