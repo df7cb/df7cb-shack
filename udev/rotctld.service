@@ -1,0 +1,9 @@
+[Unit]
+Description=Rotator control daemon
+StopWhenUnneeded=true
+
+[Service]
+ExecStart=/usr/bin/rotctld -m 603 -r /dev/rotor
+
+[Install]
+WantedBy=default.target
