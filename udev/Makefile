@@ -12,6 +12,8 @@ $(HOME)/.config/systemd/user/%: %
 	install -m644 $< $@
 
 # https://unix.stackexchange.com/a/772584/137160
+# wpctl status
+# wpctl inspect ##
 $(HOME)/.config/wireplumber/wireplumber.conf.d/%: %
 	mkdir -p $(basename $@)
 	install -m644 $< $@

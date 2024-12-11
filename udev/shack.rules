@@ -9,7 +9,9 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{produ
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="rotor", ENV{SYSTEMD_USER_WANTS}+="rotctld.service"
 
 # 1a86:7523 QinHeng Electronics CH340 serial converter (ICOM CAT interface)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ttyUSBICOM", ENV{SYSTEMD_USER_WANTS}+="rigctld.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ic706", ENV{SYSTEMD_USER_WANTS}+="ic706.service"
+# 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ptt706", ENV{SYSTEMD_USER_WANTS}+="ic706.service"
 
 # 0c26:0036 Prolific Technology Inc. IC-705
 # https://www.florian-wolters.de/posts/ic705-serial-device-symlinks/
@@ -18,7 +20,7 @@ ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="00", SYMLINK+=
 ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="02", SYMLINK+="ic705b"
 
 # Bus 001 Device 095: ID 10c4:ea60 Silicon Labs CP210x UART Bridge (IC7300)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ttyUSBICOM", ENV{SYSTEMD_USER_WANTS}+="ic7300.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ic7300", ENV{SYSTEMD_USER_WANTS}+="ic7300.service"
 
 # 10c4:ea60 Silicon Labs CP210x UART Bridge (IC-7610, IC-9700)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * A", SYMLINK+="ic7610", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
@@ -31,9 +33,6 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c26", ATTRS{idProduct}=="001e", TAG+="uacc
 
 # 0c26:0029 Prolific Technology Inc. IC-7610 SuperSpeed-FIFO Bridge (IQ port)
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c26", ATTRS{idProduct}=="0029", TAG+="uaccess", MODE="0660", GROUP="plugdev"
-
-# 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ttyUSBPTT", ENV{SYSTEMD_USER_WANTS}+="rigctld.service"
 
 # 16d0:0753 Digispark bootloader
 # http://digistump.com/wiki/digispark/tutorials/linuxtroubleshooting#ubuntu_troubleshooting

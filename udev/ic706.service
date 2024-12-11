@@ -1,0 +1,9 @@
+[Unit]
+Description=TCP radio control daemon (IC-706)
+StopWhenUnneeded=true
+
+[Service]
+ExecStart=/usr/bin/rigctld -m 3009 -r /dev/ic706 --ptt-file=/dev/ptt706 --ptt-type=RTS --port=4506
+
+[Install]
+WantedBy=default.target
