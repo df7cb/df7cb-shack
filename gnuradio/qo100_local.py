@@ -7,7 +7,7 @@
 # GNU Radio Python Flow Graph
 # Title: qo100
 # Author: DM6AS, DF7CB
-# GNU Radio version: 3.10.9.2
+# GNU Radio version: 3.10.12.0
 
 from PyQt5 import Qt
 from gnuradio import qtgui
@@ -25,12 +25,13 @@ from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-import limesdr
-import qo100_control as control  # embedded python block
-import qo100_ft84_cron as ft84_cron  # embedded python block
-import qo100_ft84_rotate as ft84_rotate  # embedded python block
-import qo100_midi_block as midi_block  # embedded python block
+from gnuradio import zeromq
+import qo100_local_control as control  # embedded python block
+import qo100_local_ft84_cron as ft84_cron  # embedded python block
+import qo100_local_ft84_rotate as ft84_rotate  # embedded python block
+import qo100_local_midi_block as midi_block  # embedded python block
 import sip
+import threading
 
 
 def snipfcn_inject_tb(self):
@@ -43,7 +44,7 @@ def snipfcn_inject_tb(self):
 def snippets_main_after_init(tb):
     snipfcn_inject_tb(tb)
 
-class qo100(gr.top_block, Qt.QWidget):
+class qo100_local(gr.top_block, Qt.QWidget):
 
     def __init__(self):
         gr.top_block.__init__(self, "qo100", catch_exceptions=True)
@@ -66,7 +67,7 @@ class qo100(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "qo100")
+        self.settings = Qt.QSettings("gnuradio/flowgraphs", "qo100_local")
 
         try:
             geometry = self.settings.value("geometry")
@@ -74,11 +75,13 @@ class qo100(gr.top_block, Qt.QWidget):
                 self.restoreGeometry(geometry)
         except BaseException as exc:
             print(f"Qt GUI: Could not restore geometry: {str(exc)}", file=sys.stderr)
+        self.flowgraph_started = threading.Event()
 
         ##################################################
         # Variables
         ##################################################
         self.decim = decim = 11
+        self.zmq_watermark = zmq_watermark = 4
         self.vfo = vfo = 40e3
         self.tx_vfo = tx_vfo = 40e3
 
@@ -114,6 +117,8 @@ class qo100(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.zeromq_push_sink_0 = zeromq.push_sink(gr.sizeof_gr_complex, 1, 'tcp://0.0.0.0:10024', 100, False, zmq_watermark, True)
+        self.zeromq_pull_source_0 = zeromq.pull_source(gr.sizeof_gr_complex, 1, 'tcp://192.168.0.11:10010', 100, False, zmq_watermark, False)
         self.vfo2_to_float = blocks.complex_to_float(1)
         self.vfo2_signal_source = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (250e3-40e3), mag, 0, 0)
         self.vfo2_mixer = blocks.multiply_vcc(1)
@@ -127,7 +132,7 @@ class qo100(gr.top_block, Qt.QWidget):
                 1000,
                 window.WIN_HAMMING,
                 6.76))
-        self.vfo2_audio_sink = audio.sink(48000, '', False)
+        self.vfo2_audio_sink = audio.sink(48000, 'pipewire', False)
         self.vfo0_waterfall_atten = blocks.multiply_const_cc(0.01)
         self.vfo0_waterfall_add = blocks.add_vcc(1)
         self.vfo0_to_float = blocks.complex_to_float(1)
@@ -141,7 +146,7 @@ class qo100(gr.top_block, Qt.QWidget):
             None # parent
         )
         self.vfo0_spectrum.set_update_time(0.01)
-        self.vfo0_spectrum.set_y_axis((-86), (-40))
+        self.vfo0_spectrum.set_y_axis((-90), (-40))
         self.vfo0_spectrum.set_y_label('Relative Gain', 'dB')
         self.vfo0_spectrum.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
         self.vfo0_spectrum.enable_autoscale(False)
@@ -197,7 +202,7 @@ class qo100(gr.top_block, Qt.QWidget):
                 samp_rate,
                 rx0_low_cutoff,
                 rx0_high_cutoff,
-                1000,
+                100,
                 window.WIN_HAMMING,
                 6.76))
         self.vfo0_audio_sink = audio.sink(48000, '', False)
@@ -224,7 +229,7 @@ class qo100(gr.top_block, Qt.QWidget):
                 48e3,
                 0,
                 3000,
-                1000,
+                200,
                 window.WIN_HAMMING,
                 6.76))
         self.tx_audio_source = audio.source(48000, '', False)
@@ -292,46 +297,6 @@ class qo100(gr.top_block, Qt.QWidget):
         self.low_cutoff_gauge = _low_cutoff_gauge_lg_win
 
         self.top_layout.addWidget(_low_cutoff_gauge_lg_win)
-        self.limesdr_source = limesdr.source('', 0, '', False)
-
-
-        self.limesdr_source.set_sample_rate(samp_rate)
-
-
-        self.limesdr_source.set_center_freq(739.75e6, 0)
-
-        self.limesdr_source.set_bandwidth(1.5e6, 0)
-
-
-
-
-        self.limesdr_source.set_gain(30, 0)
-
-
-        self.limesdr_source.set_antenna(2, 0)
-
-
-        self.limesdr_source.calibrate(5e6, 0)
-        self.limesdr_sink = limesdr.sink('', 0, '', '')
-
-
-        self.limesdr_sink.set_sample_rate(samp_rate)
-
-
-        self.limesdr_sink.set_center_freq(2400.250e6, 0)
-
-        self.limesdr_sink.set_bandwidth(5e6, 0)
-
-
-
-
-        self.limesdr_sink.set_gain(73, 0)
-
-
-        self.limesdr_sink.set_antenna(2, 0)
-
-
-        self.limesdr_sink.calibrate(2.5e6, 0)
         if "int" == "int":
         	isFloat = False
         	scaleFactor = 1
@@ -372,8 +337,8 @@ class qo100(gr.top_block, Qt.QWidget):
         self.msg_connect((self.control, 'midi_out'), (self.midi_block, 'midi_in'))
         self.msg_connect((self.control, 'tx_freq_out'), (self.tx_vfo, 'valuein'))
         self.msg_connect((self.control, 'rx_freq_out'), (self.vfo, 'valuein'))
-        self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
         self.msg_connect((self.ft84_cron, 'cron_ft8'), (self.ft84_rotate, 'rotate_ft8'))
+        self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
         self.msg_connect((self.midi_block, 'midi_out'), (self.control, 'midi_in'))
         self.msg_connect((self.rx0_high_cutoff_to_msg, 'msgout'), (self.high_cutoff_gauge, 'value'))
         self.msg_connect((self.rx0_low_cutoff_to_msg, 'msgout'), (self.low_cutoff_gauge, 'value'))
@@ -385,15 +350,12 @@ class qo100(gr.top_block, Qt.QWidget):
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo, 'valuein'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo0_spectrum, 'freq'))
         self.connect((self.blocks_swapiq_0, 0), (self.vfo0_waterfall_atten, 0))
-        self.connect((self.limesdr_source, 0), (self.vfo0_mixer, 0))
-        self.connect((self.limesdr_source, 0), (self.vfo0_waterfall_add, 0))
-        self.connect((self.limesdr_source, 0), (self.vfo2_mixer, 0))
         self.connect((self.rational_resampler_4, 0), (self.ft4_sink, 0))
         self.connect((self.rational_resampler_4, 0), (self.ft8_sink, 0))
         self.connect((self.rx_resampler, 0), (self.tx_mixer, 0))
         self.connect((self.tx_audio_source, 0), (self.tx_to_complex, 0))
         self.connect((self.tx_bandpass, 0), (self.rx_resampler, 0))
-        self.connect((self.tx_mixer, 0), (self.limesdr_sink, 0))
+        self.connect((self.tx_mixer, 0), (self.zeromq_push_sink_0, 0))
         self.connect((self.tx_to_complex, 0), (self.tx_bandpass, 0))
         self.connect((self.tx_vfo_signal_source, 0), (self.tx_mixer, 1))
         self.connect((self.vfo0_bandpass, 0), (self.vfo0_to_float, 0))
@@ -410,10 +372,13 @@ class qo100(gr.top_block, Qt.QWidget):
         self.connect((self.vfo2_signal_source, 0), (self.vfo2_mixer, 1))
         self.connect((self.vfo2_to_float, 0), (self.rational_resampler_4, 0))
         self.connect((self.vfo2_to_float, 0), (self.vfo2_audio_sink, 0))
+        self.connect((self.zeromq_pull_source_0, 0), (self.vfo0_mixer, 0))
+        self.connect((self.zeromq_pull_source_0, 0), (self.vfo0_waterfall_add, 0))
+        self.connect((self.zeromq_pull_source_0, 0), (self.vfo2_mixer, 0))
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "qo100")
+        self.settings = Qt.QSettings("gnuradio/flowgraphs", "qo100_local")
         self.settings.setValue("geometry", self.saveGeometry())
         self.stop()
         self.wait()
@@ -426,6 +391,12 @@ class qo100(gr.top_block, Qt.QWidget):
     def set_decim(self, decim):
         self.decim = decim
         self.set_samp_rate(self.decim*48e3)
+
+    def get_zmq_watermark(self):
+        return self.zmq_watermark
+
+    def set_zmq_watermark(self, zmq_watermark):
+        self.zmq_watermark = zmq_watermark
 
     def get_vfo(self):
         return self.vfo
@@ -453,7 +424,7 @@ class qo100(gr.top_block, Qt.QWidget):
 
     def set_tx_power(self, tx_power):
         self.tx_power = tx_power
-        self.tx_bandpass.set_taps(firdes.complex_band_pass(self.tx_power, 48e3, 0, 3000, 1000, window.WIN_HAMMING, 6.76))
+        self.tx_bandpass.set_taps(firdes.complex_band_pass(self.tx_power, 48e3, 0, 3000, 200, window.WIN_HAMMING, 6.76))
         self.tx_power_to_msg.variable_changed(self.tx_power)
 
     def get_samp_rate(self):
@@ -463,7 +434,7 @@ class qo100(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.rx_waterfall.set_frequency_range(250e3, self.samp_rate)
         self.tx_vfo_signal_source.set_sampling_freq(self.samp_rate)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 1000, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
         self.vfo0_scope_bandpass.set_taps(firdes.complex_band_pass(1, self.samp_rate, (-12e3), 12e3, 1000, window.WIN_HAMMING, 6.76))
         self.vfo0_signal_source.set_sampling_freq(self.samp_rate)
         self.vfo2_bandpass.set_taps(firdes.complex_band_pass(10, self.samp_rate, 0, 5000, 1000, window.WIN_HAMMING, 6.76))
@@ -475,7 +446,7 @@ class qo100(gr.top_block, Qt.QWidget):
     def set_rx0_low_cutoff(self, rx0_low_cutoff):
         self.rx0_low_cutoff = rx0_low_cutoff
         self.rx0_low_cutoff_to_msg.variable_changed(self.rx0_low_cutoff)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 1000, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
 
     def get_rx0_high_cutoff(self):
         return self.rx0_high_cutoff
@@ -483,7 +454,7 @@ class qo100(gr.top_block, Qt.QWidget):
     def set_rx0_high_cutoff(self, rx0_high_cutoff):
         self.rx0_high_cutoff = rx0_high_cutoff
         self.rx0_high_cutoff_to_msg.variable_changed(self.rx0_high_cutoff)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 1000, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
 
     def get_mag(self):
         return self.mag
@@ -513,18 +484,19 @@ class qo100(gr.top_block, Qt.QWidget):
 
     def set_af_gain(self, af_gain):
         self.af_gain = af_gain
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 1000, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
 
 
 
 
-def main(top_block_cls=qo100, options=None):
+def main(top_block_cls=qo100_local, options=None):
 
     qapp = Qt.QApplication(sys.argv)
 
     tb = top_block_cls()
     snippets_main_after_init(tb)
     tb.start()
+    tb.flowgraph_started.set()
 
     tb.show()
 

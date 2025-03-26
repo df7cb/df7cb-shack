@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: qo100
+    id: qo100_local
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -63,9 +63,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [224, 116.0]
+    coordinate: [40, 124.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: high_cutoff_gauge
   id: qtgui_levelgauge
   parameters:
@@ -129,7 +129,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 36.0]
+    coordinate: [376, 36.0]
     rotation: 0
     state: true
 - name: rx0_high_cutoff
@@ -282,6 +282,18 @@ blocks:
     coordinate: [1240, 812.0]
     rotation: 0
     state: true
+- name: zmq_watermark
+  id: variable
+  parameters:
+    comment: ''
+    value: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [120, 124.0]
+    rotation: 0
+    state: enabled
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -359,24 +371,26 @@ blocks:
       \ if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink\
       \ != rx2_sink_index][0]\n            rx0_sink.volume.value_flat = new_volume\n\
       \            self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)\n \
-      \       except Exception as e:\n            print(e)\n\n    def set_audio_output(self,\
-      \ midi_key, sink_name):\n        try:\n            rx2_sink_index = [x.index\
-      \ for x in self.pulse.sink_list() if x.description == 'rx2'][0]\n          \
-      \  # the rx0 sink is the one not connected to rx2\n            rx0_audio = [x.index\
-      \ for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id'))\
+      \       except Exception as e:\n            print(\"Error setting volume:\"\
+      , e)\n\n    def set_audio_output(self, midi_key, sink_name):\n        try:\n\
+      \            rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description\
+      \ == 'rx2'][0]\n            # the rx0 sink is the one not connected to rx2\n\
+      \            rx0_audio = [x.index for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id'))\
       \ == os.getpid() and x.sink != rx2_sink_index][0]\n\n            for sink in\
       \ self.pulse.sink_list():\n                if sink_name in sink.description:\n\
       \                    self.pulse.sink_input_move(rx0_audio, sink.index)\n   \
       \                 break\n\n            for key in MIDI_AUDIOS:\n           \
       \     self.note_on(key, 127 if key == midi_key else 0)\n\n        except Exception\
-      \ as e:\n            print(e)\n\n    def set_audio_input(self, source_name):\n\
-      \        try:\n            tx_audio = [x.index for x in self.pulse.source_output_list()\
-      \ if int(x.proplist.get('application.process.id')) == os.getpid()][0]\n\n  \
-      \          for source in self.pulse.source_list():\n                if source.description.startswith(source_name):\n\
-      \                    self.pulse.source_output_move(tx_audio, source.index)\n\
-      \                    break\n        except Exception as e:\n            print(e)\n\
-      \n    def set_record(self, record):\n        self.record = record\n        self.note_on(MIDI_RECORD,\
-      \ 127 if self.record else 0)\n        if self.record:\n            self.set_audio_input('Plantronics')\n\
+      \ as e:\n            print(f\"Error setting audio output to {sink_name}:\",\
+      \ e)\n\n    def set_audio_input(self, source_name):\n        try:\n        \
+      \    tx_audio = [x.index for x in self.pulse.source_output_list() if int(x.proplist.get('application.process.id'))\
+      \ == os.getpid()][0]\n\n            for source in self.pulse.source_list():\n\
+      \                if source.description.startswith(source_name):\n          \
+      \          self.pulse.source_output_move(tx_audio, source.index)\n         \
+      \           break\n        except Exception as e:\n            print(f\"Error\
+      \ setting audio input to {source_name}:\", e)\n\n    def set_record(self, record):\n\
+      \        self.record = record\n        self.note_on(MIDI_RECORD, 127 if self.record\
+      \ else 0)\n        if self.record:\n            self.set_audio_input('Plantronics')\n\
       \        else:\n            self.set_audio_input('Monitor of tx0')\n\n    def\
       \ set_rx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"rx_freq_out\"\
       ),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n\
@@ -444,8 +458,8 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('midi_in', 'message',
-      1), ('rx_freq_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
+    _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('rx_freq_in',
+      'message', 1), ('midi_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
       'message', 1), ('midi_out', 'message', 1)], 'TRX Control block', [])
     bus_sink: false
     bus_source: false
@@ -572,8 +586,8 @@ blocks:
     minoutbuf: '0'
     tmp_path: '''/run/user/1000/gnuradio'''
   states:
-    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft8',
-      'message', 1), ('rotate_ft4', 'message', 1)], [], 'Rotate wav files and feed
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft4',
+      'message', 1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed
       them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
     bus_sink: false
     bus_source: false
@@ -624,40 +638,6 @@ blocks:
     coordinate: [768, 28.0]
     rotation: 0
     state: true
-- name: limesdr_sink
-  id: limesdr_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    allow_tcxo_dac: '0'
-    analog_bandw_ch0: 5e6
-    analog_bandw_ch1: 5e6
-    calibr_bandw_ch0: 2.5e6
-    calibr_bandw_ch1: 5e6
-    channel_mode: '0'
-    comment: Transmitter
-    dacVal: '125'
-    digital_bandw_ch0: '0'
-    digital_bandw_ch1: '0'
-    filename: ''
-    gain_dB_ch0: '73'
-    gain_dB_ch1: '30'
-    length_tag_name: ''
-    nco_freq_ch0: '0'
-    nco_freq_ch1: '0'
-    oversample: '0'
-    pa_path_ch0: '2'
-    pa_path_ch1: '1'
-    rf_freq: 2400.250e6
-    samp_rate: samp_rate
-    serial: ''
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1048, 164.0]
-    rotation: 0
-    state: enabled
 - name: limesdr_source
   id: limesdr_source
   parameters:
@@ -693,7 +673,7 @@ blocks:
     bus_structure: null
     coordinate: [40, 436.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: midi_block
   id: epy_block
   parameters:
@@ -874,7 +854,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 428.0]
+    coordinate: [288, 396.0]
     rotation: 0
     state: disabled
 - name: rx_resampler
@@ -896,7 +876,7 @@ blocks:
     bus_structure: null
     coordinate: [704, 212.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: rx_waterfall
   id: qtgui_waterfall_sink_x
   parameters:
@@ -993,7 +973,7 @@ blocks:
     minoutbuf: '0'
     samp_rate: 48e3
     type: interp_fir_filter_ccc
-    width: '1000'
+    width: '200'
     win: window.WIN_HAMMING
   states:
     bus_sink: false
@@ -1090,7 +1070,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 852.0]
+    coordinate: [952, 868.0]
     rotation: 0
     state: true
 - name: vfo0_bandpass
@@ -1109,13 +1089,13 @@ blocks:
     minoutbuf: '0'
     samp_rate: samp_rate
     type: fir_filter_ccc
-    width: '1000'
+    width: '100'
     win: window.WIN_HAMMING
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 820.0]
+    coordinate: [480, 836.0]
     rotation: 0
     state: true
 - name: vfo0_mixer
@@ -1257,7 +1237,7 @@ blocks:
     width9: '1'
     wintype: window.WIN_HAMMING
     ymax: '-40'
-    ymin: '-86'
+    ymin: '-90'
   states:
     bus_sink: false
     bus_source: false
@@ -1278,7 +1258,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [736, 872.0]
+    coordinate: [752, 872.0]
     rotation: 0
     state: true
 - name: vfo0_waterfall_add
@@ -1323,7 +1303,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: FT8/FT4 audio output
-    device_name: ''
+    device_name: pipewire
     num_inputs: '1'
     ok_to_block: 'False'
     samp_rate: '48000'
@@ -1331,7 +1311,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 1028.0]
+    coordinate: [936, 1036.0]
     rotation: 0
     state: true
 - name: vfo2_bandpass
@@ -1356,7 +1336,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 996.0]
+    coordinate: [480, 1012.0]
     rotation: 0
     state: true
 - name: vfo2_mixer
@@ -1416,6 +1396,48 @@ blocks:
     coordinate: [736, 1048.0]
     rotation: 0
     state: true
+- name: zeromq_pull_source_0
+  id: zeromq_pull_source
+  parameters:
+    address: tcp://192.168.0.11:10010
+    affinity: ''
+    alias: ''
+    bind: 'False'
+    comment: ''
+    hwm: zmq_watermark
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    pass_tags: 'False'
+    timeout: '100'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 620.0]
+    rotation: 0
+    state: enabled
+- name: zeromq_push_sink_0
+  id: zeromq_push_sink
+  parameters:
+    address: tcp://0.0.0.0:10024
+    affinity: ''
+    alias: ''
+    bind: 'True'
+    comment: ''
+    hwm: zmq_watermark
+    pass_tags: 'False'
+    timeout: '100'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 364.0]
+    rotation: 0
+    state: enabled
 
 connections:
 - [blocks_swapiq_0, '0', vfo0_waterfall_atten, '0']
@@ -1438,7 +1460,7 @@ connections:
 - [rx_waterfall, freq, vfo, valuein]
 - [tx_audio_source, '0', tx_to_complex, '0']
 - [tx_bandpass, '0', rx_resampler, '0']
-- [tx_mixer, '0', limesdr_sink, '0']
+- [tx_mixer, '0', zeromq_push_sink_0, '0']
 - [tx_power_to_msg, msgout, tx_power_gauge, value]
 - [tx_to_complex, '0', tx_bandpass, '0']
 - [tx_vfo, valueout, control, tx_freq_in]
@@ -1461,7 +1483,10 @@ connections:
 - [vfo2_signal_source, '0', vfo2_mixer, '1']
 - [vfo2_to_float, '0', rational_resampler_4, '0']
 - [vfo2_to_float, '0', vfo2_audio_sink, '0']
+- [zeromq_pull_source_0, '0', vfo0_mixer, '0']
+- [zeromq_pull_source_0, '0', vfo0_waterfall_add, '0']
+- [zeromq_pull_source_0, '0', vfo2_mixer, '0']
 
 metadata:
   file_format: 1
-  grc_version: 3.10.9.2
+  grc_version: 3.10.12.0
