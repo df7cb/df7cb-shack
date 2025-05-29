@@ -36,12 +36,13 @@ sample_rate = 48000.0
 ramp = 12 # at least 6ms ramp up/down (CWops recommendation)
 freq = 850.0
 volume = 100
-default_wpm = 24
 
 # global variables
+wpm = 24
 dah_sample = None
 dit_sample = None
 dot_duration = None
+controlport = None
 
 morse = {
     ".-":     'A',
@@ -136,6 +137,8 @@ def play_samples(pa, sample):
         device.write(sample)
 
 def poll(midiport, paddles, blocking=False):
+    global wpm
+
     dit, dah = paddles[1], paddles[2]
 
     if blocking:
@@ -143,6 +146,7 @@ def poll(midiport, paddles, blocking=False):
     else:
         msgs = midiport.iter_pending()
 
+    wpm2 = None
     for msg in msgs:
         #print(msg)
         if msg.type == 'note_on':
@@ -153,9 +157,19 @@ def poll(midiport, paddles, blocking=False):
         if msg.type in ('note_on', 'note_off') and msg.note in (1, 2):
             paddles[msg.note] = msg.type == 'note_on'
 
+        continue
         if msg.type == 'control_change' and msg.control == 3:
-            print(f"<{msg.value}>", end='', flush=True)
-            upload_samples(msg.value)
+            wpm2 = msg.value
+
+    if controlport:
+        for msg in controlport.iter_pending():
+            if msg.type == 'control_change' and msg.control == 0x3D: # VOLUME_B
+                wpm2 = round(6.0 + 42.0 * (msg.value / 127.0))
+
+    if wpm2 and wpm2 != wpm:
+        wpm = wpm2
+        print(f"<{wpm}>", end='', flush=True)
+        upload_samples(wpm)
 
     # return True if paddle was pressed or held during this polling period
     return dit, dah
@@ -263,6 +277,9 @@ def main():
     midiport = mido.open_input('MidiStomp MIDI 1')
     midiport.iter_pending() # drain pending notes
 
+    global controlport
+    controlport = mido.open_input('DJControl Compact:DJControl Compact DJControl Com')
+
     pa = [
             # side tone channel (default device)
             pasimple.PaSimple(pasimple.PA_STREAM_PLAYBACK,
@@ -283,7 +300,7 @@ def main():
 
     paddles = { 1: False, 2: False }
 
-    upload_samples(default_wpm)
+    upload_samples(wpm)
 
     try:
         loop(midiport, pa, paddles)
