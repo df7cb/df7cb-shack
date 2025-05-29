@@ -34,26 +34,17 @@ options:
 
 blocks:
 - name: af_gain
-  id: variable_qtgui_range
+  id: variable
   parameters:
-    comment: ''
-    gui_hint: 29,0,1,1
-    label: af_gain
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '0'
-    step: '5'
-    stop: '200'
+    comment: AF gain
     value: '20'
-    widget: counter_slider
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [608, 28.0]
+    coordinate: [712, 60.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: decim
   id: variable
   parameters:
@@ -132,6 +123,81 @@ blocks:
     coordinate: [376, 36.0]
     rotation: 0
     state: true
+- name: qtgui_dialgauge_0
+  id: qtgui_dialgauge
+  parameters:
+    affinity: ''
+    alias: ''
+    backgroundColor: white
+    barColor: blue
+    comment: WPM
+    fontColor: black
+    gui_hint: 39,4,1,1
+    label: ''
+    maximum: '56'
+    minimum: '0'
+    msize: '100'
+    position: '1'
+    showValue: 'True'
+    type: int
+    value: '24'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1584, 484.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_dialgauge_1
+  id: qtgui_dialgauge
+  parameters:
+    affinity: ''
+    alias: ''
+    backgroundColor: white
+    barColor: blue
+    comment: TX power
+    fontColor: black
+    gui_hint: 39,3,1,1
+    label: ''
+    maximum: '1.0'
+    minimum: '0.0'
+    msize: '100'
+    position: '1'
+    showValue: 'True'
+    type: real
+    value: '0.1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1696, 44.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_dialgauge_2
+  id: qtgui_dialgauge
+  parameters:
+    affinity: ''
+    alias: ''
+    backgroundColor: white
+    barColor: blue
+    comment: AF gain
+    fontColor: black
+    gui_hint: 39,2,1,1
+    label: ''
+    maximum: '200'
+    minimum: '0'
+    msize: '100'
+    position: '1'
+    showValue: 'True'
+    type: int
+    value: '20'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1112, 44.0]
+    rotation: 0
+    state: enabled
 - name: rx0_high_cutoff
   id: variable
   parameters:
@@ -184,33 +250,6 @@ blocks:
     coordinate: [1272, 60.0]
     rotation: 0
     state: true
-- name: tx_power_gauge
-  id: qtgui_levelgauge
-  parameters:
-    affinity: ''
-    alias: ''
-    backgroundColor: default
-    barColor: default
-    comment: ''
-    fontColor: default
-    gui_hint: ''
-    isVertical: 'False'
-    label: TX Power
-    maximum: '100'
-    minimum: '0'
-    msize: '100'
-    position: '1'
-    scaleFactor: '100'
-    showValue: 'True'
-    type: real
-    value: '1.0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1696, 36.0]
-    rotation: 0
-    state: true
 - name: tx_vfo
   id: qtgui_msgdigitalnumbercontrol
   parameters:
@@ -218,7 +257,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: TX VFO frequency display
-    gui_hint: ''
+    gui_hint: 39,1,1,1
     lbl: TX
     maxFreqHz: 510e3
     maxoutbuf: '0'
@@ -237,34 +276,13 @@ blocks:
     rotation: 0
     state: true
 - name: vfo
-  id: variable_qtgui_range
-  parameters:
-    comment: ''
-    gui_hint: 14,0,1,1
-    label: vfo
-    min_len: '150'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '-10'
-    step: '0.1'
-    stop: '510'
-    value: '40'
-    widget: counter_slider
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [464, 28.0]
-    rotation: 0
-    state: disabled
-- name: vfo
   id: qtgui_msgdigitalnumbercontrol
   parameters:
     ThousandsSeparator: .
     affinity: ''
     alias: ''
     comment: RX VFO frequency display
-    gui_hint: ''
+    gui_hint: 39,0,1,1
     lbl: RX
     maxFreqHz: 510e3
     maxoutbuf: '0'
@@ -325,6 +343,23 @@ blocks:
     coordinate: [296, 580.0]
     rotation: 0
     state: true
+- name: blocks_var_to_msg_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: value
+    target: af_gain
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 60.0]
+    rotation: 0
+    state: enabled
 - name: control
   id: epy_block
   parameters:
@@ -336,7 +371,7 @@ blocks:
       \ MIDI_AUDIO_STEREO, MIDI_AUDIO_SPEAKER]\n\n# controls\nMIDI_VFO_A = 48 # Jog\
       \ A\nMIDI_SHIFT_VFO_A = 55 # Shift-Jog A\nMIDI_POWER = 54 # Sync A\nMIDI_VOLUME\
       \ = 57 # Volume A\nMIDI_BANDPASS_CENTER = 59 # Medium A\nMIDI_BANDPASS_WIDTH\
-      \ = 60 # Bass A\nMIDI_REPORT_ALL_CONTROLS = 0x7f\n\nclass blk(gr.sync_block):\n\
+      \ = 60 # Bass A\nMIDI_WPM = 0x3D\nMIDI_REPORT_ALL_CONTROLS = 0x7f\n\nclass blk(gr.sync_block):\n\
       \    \"\"\"TRX Control block\"\"\"\n\n    def __init__(self):  # only default\
       \ arguments here\n        \"\"\"arguments to this function show up as parameters\
       \ in GRC\"\"\"\n        gr.sync_block.__init__(\n            self,\n       \
@@ -348,8 +383,9 @@ blocks:
       tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"tx_freq_in\"), self.tx_freq_in)\n\
       \n        self.message_port_register_out(pmt.intern(\"midi_out\"))\n       \
       \ self.message_port_register_out(pmt.intern(\"rx_freq_out\"))\n        self.message_port_register_out(pmt.intern(\"\
-      tx_freq_out\"))\n\n        self.rx0_freq = 40000.0\n        self.tx_freq = 40000.0\n\
-      \        self.filter_center = 850\n        self.filter_bw = 3000\n        self.record\
+      tx_freq_out\"))\n        self.message_port_register_out(pmt.intern(\"wpm_out\"\
+      ))\n\n        self.rx0_freq = 40000.0\n        self.tx_freq = 40000.0\n    \
+      \    self.filter_center = 850\n        self.filter_bw = 3000\n        self.record\
       \ = False\n        self.sync_a = False # start false so set_sync_a sets the\
       \ LEDs\n\n        self.pulse = None\n\n    def note_on(self, note, velocity):\n\
       \        self.message_port_pub(pmt.intern(\"midi_out\"),\n                pmt.cons(pmt.intern('note_on'),\n\
@@ -396,8 +432,10 @@ blocks:
       ),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n\
       \    def set_tx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"\
       tx_freq_out\"),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\
-      \n    def set_sync_a(self, sync_a):\n        if self.sync_a != sync_a:\n   \
-      \         self.sync_a = sync_a\n            self.note_on(MIDI_SYNC_A, 127 if\
+      \n    def set_wpm(self, wpm):\n        self.message_port_pub(pmt.intern(\"wpm_out\"\
+      ),\n                pmt.cons(pmt.intern('value'), pmt.from_double(wpm)));\n\n\
+      \    def set_sync_a(self, sync_a):\n        if self.sync_a != sync_a:\n    \
+      \        self.sync_a = sync_a\n            self.note_on(MIDI_SYNC_A, 127 if\
       \ sync_a else 0)\n            self.note_on(MIDI_SHIFT_SYNC_A, 127 if sync_a\
       \ else 0)\n            if sync_a:\n                self.set_tx_freq(self.rx0_freq)\n\
       \n    def rx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
@@ -424,34 +462,37 @@ blocks:
       \            delta = value if value < 64 else value - 128\n                self.set_sync_a(False)\n\
       \                self.set_tx_freq(self.tx_freq + delta * 20)\n\n           \
       \ elif control == MIDI_VOLUME:\n                self.set_audio_volume(value\
-      \ / 100.0) # 0 .. 127%\n\n            elif control in (MIDI_BANDPASS_CENTER,\
-      \ MIDI_BANDPASS_WIDTH): # medium A, bass A\n                if control == MIDI_BANDPASS_CENTER:\n\
-      \                    self.filter_center = 100 + int(2800 * (value / 127.0))\n\
+      \ / 100.0) # 0 .. 127%\n\n            elif control == MIDI_WPM:\n          \
+      \      self.set_wpm(6.0 + 42.0 * value / 127.0) # 0 .. 127% -> 6..48 wpm\n\n\
+      \            elif control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): #\
+      \ medium A, bass A\n                if control == MIDI_BANDPASS_CENTER:\n  \
+      \                  self.filter_center = 100 + int(2800 * (value / 127.0))\n\
       \                if control == MIDI_BANDPASS_WIDTH:\n                    self.filter_bw\
       \ = 100 + int(2900 * (value / 127.0))\n\n                low_cutoff = max(self.filter_center\
       \ - self.filter_bw // 2, 0)\n                high_cutoff = min(self.filter_center\
       \ + self.filter_bw // 2, 3000)\n                self.tb.set_rx0_low_cutoff(low_cutoff)\n\
-      \                self.tb.set_rx0_high_cutoff(high_cutoff)\n\n            if\
+      \                self.tb.set_rx0_high_cutoff(high_cutoff)\n\n            elif\
       \ control == MIDI_POWER:\n                power = 0.1 + 0.9 * (value/127.0)\n\
-      \                self.tb.set_tx_power(power)\n\n        elif msgtype == 'note_on':\n\
-      \            payload = pmt.cdr(msg)\n            note = pmt.to_long(pmt.car(payload))\n\
-      \            velocity = pmt.to_long(pmt.cdr(payload))\n\n            if note\
-      \ == MIDI_SYNC_A and velocity == 127: # Sync A\n                self.set_sync_a(not\
-      \ self.sync_a)\n\n            elif note == MIDI_SHIFT_SYNC_A and velocity ==\
-      \ 127: # Shift-Sync A\n                if not self.sync_a:\n               \
-      \     # set RX from TX\n                    self.set_rx_freq(self.tx_freq)\n\
-      \                self.set_sync_a(not self.sync_a)\n\n            elif note ==\
-      \ MIDI_FT8_QRG and velocity == 127: # KP 2 A\n                self.set_rx_freq(40000)\n\
-      \                self.set_sync_a(True)\n                self.set_record(False)\n\
-      \n            elif note == MIDI_AUDIO_HEADPHONES and velocity == 127: # KP 1\
-      \ A\n                self.set_audio_output(MIDI_AUDIO_HEADPHONES, 'Plantronics')\n\
-      \n            elif note == MIDI_AUDIO_STEREO and velocity == 127: # KP 3 A\n\
-      \                self.set_audio_output(MIDI_AUDIO_STEREO, 'Internes Audio Analog\
-      \ Stereo')\n\n            elif note == MIDI_AUDIO_SPEAKER and velocity == 127:\
+      \                self.tb.set_tx_power(power)\n\n            else:\n        \
+      \        print(\"Unknown MIDI control_change:\", control, value)\n\n       \
+      \ elif msgtype == 'note_on':\n            payload = pmt.cdr(msg)\n         \
+      \   note = pmt.to_long(pmt.car(payload))\n            velocity = pmt.to_long(pmt.cdr(payload))\n\
+      \n            if velocity != 127: # ignore key releases\n                return\n\
+      \n            if note == MIDI_SYNC_A: # Sync A\n                self.set_sync_a(not\
+      \ self.sync_a)\n\n            elif note == MIDI_SHIFT_SYNC_A: # Shift-Sync A\n\
+      \                if not self.sync_a:\n                    # set RX from TX\n\
+      \                    self.set_rx_freq(self.tx_freq)\n                self.set_sync_a(not\
+      \ self.sync_a)\n\n            elif note == MIDI_FT8_QRG: # KP 2 A\n        \
+      \        self.set_rx_freq(40000)\n                self.set_sync_a(True)\n  \
+      \              self.set_record(False)\n\n            elif note == MIDI_AUDIO_HEADPHONES:\
+      \ # KP 1 A\n                self.set_audio_output(MIDI_AUDIO_HEADPHONES, 'Plantronics')\n\
+      \n            elif note == MIDI_AUDIO_STEREO: # KP 3 A\n                self.set_audio_output(MIDI_AUDIO_STEREO,\
+      \ 'Internes Audio Analog Stereo')\n\n            elif note == MIDI_AUDIO_SPEAKER:\
       \ # KP 4 A\n                self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek\
-      \ Y')\n\n            if note == MIDI_RECORD and velocity == 127: # REC\n   \
-      \             self.set_record(not self.record)\n\nif __name__ == '__main__':\n\
-      \    blk()\n"
+      \ Y')\n\n            elif note == MIDI_RECORD: # REC\n                self.set_record(not\
+      \ self.record)\n\n            else:\n                print(\"Unknown MIDI note_on:\"\
+      , note, velocity)\n\n        else:\n            print(\"Unknown MIDI message\
+      \ type:\", msgtype)\n\nif __name__ == '__main__':\n    blk()\n"
     affinity: ''
     alias: ''
     comment: Control logic
@@ -459,8 +500,9 @@ blocks:
     minoutbuf: '0'
   states:
     _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('rx_freq_in',
-      'message', 1), ('midi_in', 'message', 1)], [('tx_freq_out', 'message', 1), ('rx_freq_out',
-      'message', 1), ('midi_out', 'message', 1)], 'TRX Control block', [])
+      'message', 1), ('midi_in', 'message', 1)], [('wpm_out', 'message', 1), ('tx_freq_out',
+      'message', 1), ('rx_freq_out', 'message', 1), ('midi_out', 'message', 1)], 'TRX
+      Control block', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
@@ -635,7 +677,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [768, 28.0]
+    coordinate: [464, 36.0]
     rotation: 0
     state: true
 - name: limesdr_source
@@ -909,9 +951,9 @@ blocks:
     fftsize: '2048'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 0,0,14,1
-    int_max: '-45'
-    int_min: '-75'
+    gui_hint: 0,0,14,5
+    int_max: '-50'
+    int_min: '-80'
     label1: ''
     label10: ''
     label2: ''
@@ -1199,7 +1241,7 @@ blocks:
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'True'
-    gui_hint: 15,0,14,1
+    gui_hint: 15,0,14,5
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -1236,8 +1278,8 @@ blocks:
     width8: '1'
     width9: '1'
     wintype: window.WIN_HAMMING
-    ymax: '-40'
-    ymin: '-90'
+    ymax: '-50'
+    ymin: '-94'
   states:
     bus_sink: false
     bus_source: false
@@ -1441,9 +1483,11 @@ blocks:
 
 connections:
 - [blocks_swapiq_0, '0', vfo0_waterfall_atten, '0']
+- [blocks_var_to_msg_0, msgout, qtgui_dialgauge_2, value]
 - [control, midi_out, midi_block, midi_in]
 - [control, rx_freq_out, vfo, valuein]
 - [control, tx_freq_out, tx_vfo, valuein]
+- [control, wpm_out, qtgui_dialgauge_0, value]
 - [ft84_cron, cron_ft4, ft84_rotate, rotate_ft4]
 - [ft84_cron, cron_ft8, ft84_rotate, rotate_ft8]
 - [limesdr_source, '0', rx_freq_sink, '0']
@@ -1461,7 +1505,7 @@ connections:
 - [tx_audio_source, '0', tx_to_complex, '0']
 - [tx_bandpass, '0', rx_resampler, '0']
 - [tx_mixer, '0', zeromq_push_sink_0, '0']
-- [tx_power_to_msg, msgout, tx_power_gauge, value]
+- [tx_power_to_msg, msgout, qtgui_dialgauge_1, value]
 - [tx_to_complex, '0', tx_bandpass, '0']
 - [tx_vfo, valueout, control, tx_freq_in]
 - [tx_vfo_signal_source, '0', tx_mixer, '1']

@@ -24,6 +24,7 @@ MIDI_POWER = 54 # Sync A
 MIDI_VOLUME = 57 # Volume A
 MIDI_BANDPASS_CENTER = 59 # Medium A
 MIDI_BANDPASS_WIDTH = 60 # Bass A
+MIDI_WPM = 0x3D
 MIDI_REPORT_ALL_CONTROLS = 0x7f
 
 class blk(gr.sync_block):
@@ -48,6 +49,7 @@ class blk(gr.sync_block):
         self.message_port_register_out(pmt.intern("midi_out"))
         self.message_port_register_out(pmt.intern("rx_freq_out"))
         self.message_port_register_out(pmt.intern("tx_freq_out"))
+        self.message_port_register_out(pmt.intern("wpm_out"))
 
         self.rx0_freq = 40000.0
         self.tx_freq = 40000.0
@@ -141,6 +143,10 @@ class blk(gr.sync_block):
         self.message_port_pub(pmt.intern("tx_freq_out"),
                 pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));
 
+    def set_wpm(self, wpm):
+        self.message_port_pub(pmt.intern("wpm_out"),
+                pmt.cons(pmt.intern('value'), pmt.from_double(wpm)));
+
     def set_sync_a(self, sync_a):
         if self.sync_a != sync_a:
             self.sync_a = sync_a
@@ -196,6 +202,9 @@ class blk(gr.sync_block):
             elif control == MIDI_VOLUME:
                 self.set_audio_volume(value / 100.0) # 0 .. 127%
 
+            elif control == MIDI_WPM:
+                self.set_wpm(6.0 + 42.0 * value / 127.0) # 0 .. 127% -> 6..48 wpm
+
             elif control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): # medium A, bass A
                 if control == MIDI_BANDPASS_CENTER:
                     self.filter_center = 100 + int(2800 * (value / 127.0))
@@ -207,40 +216,52 @@ class blk(gr.sync_block):
                 self.tb.set_rx0_low_cutoff(low_cutoff)
                 self.tb.set_rx0_high_cutoff(high_cutoff)
 
-            if control == MIDI_POWER:
+            elif control == MIDI_POWER:
                 power = 0.1 + 0.9 * (value/127.0)
                 self.tb.set_tx_power(power)
+
+            else:
+                print("Unknown MIDI control_change:", control, value)
 
         elif msgtype == 'note_on':
             payload = pmt.cdr(msg)
             note = pmt.to_long(pmt.car(payload))
             velocity = pmt.to_long(pmt.cdr(payload))
 
-            if note == MIDI_SYNC_A and velocity == 127: # Sync A
+            if velocity != 127: # ignore key releases
+                return
+
+            if note == MIDI_SYNC_A: # Sync A
                 self.set_sync_a(not self.sync_a)
 
-            elif note == MIDI_SHIFT_SYNC_A and velocity == 127: # Shift-Sync A
+            elif note == MIDI_SHIFT_SYNC_A: # Shift-Sync A
                 if not self.sync_a:
                     # set RX from TX
                     self.set_rx_freq(self.tx_freq)
                 self.set_sync_a(not self.sync_a)
 
-            elif note == MIDI_FT8_QRG and velocity == 127: # KP 2 A
+            elif note == MIDI_FT8_QRG: # KP 2 A
                 self.set_rx_freq(40000)
                 self.set_sync_a(True)
                 self.set_record(False)
 
-            elif note == MIDI_AUDIO_HEADPHONES and velocity == 127: # KP 1 A
+            elif note == MIDI_AUDIO_HEADPHONES: # KP 1 A
                 self.set_audio_output(MIDI_AUDIO_HEADPHONES, 'Plantronics')
 
-            elif note == MIDI_AUDIO_STEREO and velocity == 127: # KP 3 A
+            elif note == MIDI_AUDIO_STEREO: # KP 3 A
                 self.set_audio_output(MIDI_AUDIO_STEREO, 'Internes Audio Analog Stereo')
 
-            elif note == MIDI_AUDIO_SPEAKER and velocity == 127: # KP 4 A
+            elif note == MIDI_AUDIO_SPEAKER: # KP 4 A
                 self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek Y')
 
-            if note == MIDI_RECORD and velocity == 127: # REC
+            elif note == MIDI_RECORD: # REC
                 self.set_record(not self.record)
+
+            else:
+                print("Unknown MIDI note_on:", note, velocity)
+
+        else:
+            print("Unknown MIDI message type:", msgtype)
 
 if __name__ == '__main__':
     blk()

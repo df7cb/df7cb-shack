@@ -14,6 +14,7 @@ LimeUtil --refclk
 
 https://gitlab.freedesktop.org/pipewire/pipewire/-/wikis/Virtual-Devices
 
+# https://www.dm5wk.de/notes/posts/2024-0001-audio_devices_for_amateur_radio/
 pactl load-module module-null-sink media.class=Audio/Sink sink_name=tx0
 pactl load-module module-null-sink media.class=Audio/Sink sink_name=rx2
 
