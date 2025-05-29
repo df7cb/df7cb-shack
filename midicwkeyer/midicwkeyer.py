@@ -2,7 +2,7 @@
 
 # CW keyer with MIDI input, PulseAudio output
 #
-# Copyright (C) 2022 Christoph Berg DF7CB <cb@df7cb.de>
+# Copyright (C) 2022, 2025 Christoph Berg DF7CB <cb@df7cb.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the “Software”), to deal
@@ -24,18 +24,24 @@
 
 import mido
 import time
-import pulsectl
+import pasimple
 from itertools import chain
+from ctypes import c_uint8
 
 import math
 import os
-import struct
-import wave
 
-sample_rate = 8000.0
-ramp = 10 # 10ms ramp up/down
+# constants
+sample_rate = 48000.0
+ramp = 12 # at least 6ms ramp up/down (CWops recommendation)
 freq = 850.0
-volume = 0.8
+volume = 100
+default_wpm = 24
+
+# global variables
+dah_sample = None
+dit_sample = None
+dot_duration = None
 
 morse = {
     ".-":     'A',
@@ -94,60 +100,42 @@ morse = {
 def erase_chars(chars):
     print('\010' * chars + ' ' * chars + '\010' * chars, end='')
 
-def upload_sample(pulse, duration, sample_name):
-    """Upload a beep of 'duration' milliseconds to PulseAudio as 'sample_name'"""
+def generate_sample(duration):
+    """Generate a sine wave sample of duration+ramp ms"""
 
-    ramp_samples = int(ramp * (sample_rate / 1000.0))
-    num_samples = int((duration+ramp) * (sample_rate / 1000.0))
+    ramp_samples = int(ramp / 1000.0 * sample_rate)
+    num_samples = int((duration+ramp) / 1000.0 * sample_rate)
 
     audio = []
     for x in range(ramp_samples):
-        audio.append(volume
-                * 0.5 * (1 - math.cos(math.pi * x / ramp_samples))
-                * math.sin(2 * math.pi * freq * ( x / sample_rate )))
+        audio.append(128+int(volume
+                * 0.5 * (1 - math.cos(math.pi * x / ramp_samples)) # cosine ramp up
+                * math.sin(2 * math.pi * freq * ( x / sample_rate ))))
 
     for x in range(ramp_samples, num_samples):
-        audio.append(volume * math.sin(2 * math.pi * freq * ( x / sample_rate )))
+        audio.append(128+int(volume * math.sin(2 * math.pi * freq * ( x / sample_rate ))))
 
     for x in range(ramp_samples):
-        audio.append(volume
-                * 0.5 * (1 - math.cos(math.pi * (ramp_samples-x) / ramp_samples))
-                * math.sin(2 * math.pi * freq * ((x+num_samples) / sample_rate)))
+        audio.append(128+int(volume
+                * 0.5 * (1 + math.cos(math.pi * x / ramp_samples)) # cosine ramp down
+                * math.sin(2 * math.pi * freq * ((x+num_samples) / sample_rate))))
 
-    wav_file_name = f"/tmp/{sample_name}.wav"
-    wav_file = wave.open(wav_file_name, 'w')
+    return (c_uint8 * len(audio))(*audio)
 
-    # wav params
-    nchannels = 1
-    sampwidth = 2
-    nframes = len(audio)
-    comptype = "NONE"
-    compname = "not compressed"
-    wav_file.setparams((nchannels, sampwidth, sample_rate, nframes, comptype, compname))
+def upload_samples(speed):
+    dot_duration_ms = int(1200 / speed)
+    dah_duration_ms = 3 * dot_duration_ms
 
-    for sample in audio:
-        wav_file.writeframes(struct.pack('h', int(sample * 32767.0)))
+    global dot_duration, dit_sample, dah_sample
+    dot_duration = dot_duration_ms / 1000
+    dit_sample = generate_sample(dot_duration_ms)
+    dah_sample = generate_sample(dah_duration_ms)
 
-    wav_file.close()
+def play_samples(pa, sample):
+    for device in pa:
+        device.write(sample)
 
-    os.system(f"pactl upload-sample {wav_file_name} {sample_name}")
-
-def upload_samples(pulse, paddles, speed):
-    dot_duration = int(1200 / speed)
-    dah_duration = 3 * dot_duration
-
-    if dot_duration not in paddles['sample_durations']:
-        upload_sample(pulse, dot_duration, f"cw{dot_duration:03}")
-        paddles['sample_durations'].add(dot_duration)
-    paddles['dit_sample'] = f"cw{dot_duration:03}"
-    paddles['dot_duration'] = dot_duration / 1000
-
-    if dah_duration not in paddles['sample_durations']:
-        upload_sample(pulse, dah_duration, f"cw{dah_duration:03}")
-        paddles['sample_durations'].add(dah_duration)
-    paddles['dah_sample'] = f"cw{dah_duration:03}"
-
-def poll(midiport, pulse, paddles, blocking=False):
+def poll(midiport, paddles, blocking=False):
     dit, dah = paddles[1], paddles[2]
 
     if blocking:
@@ -167,12 +155,12 @@ def poll(midiport, pulse, paddles, blocking=False):
 
         if msg.type == 'control_change' and msg.control == 3:
             print(f"<{msg.value}>", end='', flush=True)
-            upload_samples(pulse, paddles, msg.value)
+            upload_samples(msg.value)
 
     # return True if paddle was pressed or held during this polling period
     return dit, dah
 
-def loop(midiport, pulse, paddles):
+def loop(midiport, pa, paddles):
     state = 'idle'
     sign = '' # character keyed
     sign_len = 0 # size of partial character printed so far
@@ -184,25 +172,23 @@ def loop(midiport, pulse, paddles):
             print('.', end='', flush=True)
             sign += '.'
             sign_len += 1
-            pulse.play_sample(paddles['dit_sample'], paddles['sidetoneport'])
-            pulse.play_sample(paddles['dit_sample'], paddles['txport'])
+            play_samples(pa, dit_sample)
         elif state == 'dah':
             print('-', end='', flush=True)
             sign += '-'
             sign_len += 1
-            pulse.play_sample(paddles['dah_sample'], paddles['sidetoneport'])
-            pulse.play_sample(paddles['dah_sample'], paddles['txport'])
+            play_samples(pa, dah_sample)
 
         # sleep for state
         if state == 'idle':
             pass
         elif state == 'dah':
-            time.sleep(3 * paddles['dot_duration'])
+            time.sleep(3 * dot_duration)
         else:
-            time.sleep(paddles['dot_duration'])
+            time.sleep(dot_duration)
 
         # read paddle input
-        dit, dah = poll(midiport, pulse, paddles, False)
+        dit, dah = poll(midiport, paddles, False)
 
         # compute next state
         if state == 'idle':
@@ -224,18 +210,18 @@ def loop(midiport, pulse, paddles):
 
                 # poll again for paddle input
                 ts = time.time()
-                dit, dah = poll(midiport, pulse, paddles, True)
+                dit, dah = poll(midiport, paddles, True)
                 delay = time.time() - ts
 
                 # if the delay was short enough, the last character was continued
-                if delay <= paddles['dot_duration'] and (dit or dah):
+                if delay <= dot_duration and (dit or dah):
                     # last character is continued
                     erase_chars(sign_len)
                     print(sign, end='', flush=True)
                     sign_len = len(sign)
                 # otherwise, start a new character or a new word
                 else:
-                    if delay >= 5 * paddles['dot_duration']:
+                    if delay >= 5 * dot_duration:
                         print(' ', end='', flush=True)
                     sign = ''
                     sign_len = 0
@@ -275,32 +261,32 @@ def loop(midiport, pulse, paddles):
 
 def main():
     midiport = mido.open_input('MidiStomp MIDI 1')
-    pulse = pulsectl.Pulse('cw-sidetone')
+    midiport.iter_pending() # drain pending notes
 
-    paddles = {
-            1: False,
-            2: False,
-            'dit_du': None,
-            'dah_sample': None,
-            'dit_sample': None,
-            'dot_duration': None,
-            'sample_durations': set(),
-            'txport': pulse.server_info().default_sink_name,
-            'sidetoneport': pulse.server_info().default_sink_name,
-    }
+    pa = [
+            # side tone channel (default device)
+            pasimple.PaSimple(pasimple.PA_STREAM_PLAYBACK,
+                              pasimple.PA_SAMPLE_U8,
+                              1,
+                              int(sample_rate),
+                              app_name='midicw',
+                              stream_name='sidetone'),
+            # TX tone channel (tx0)
+            pasimple.PaSimple(pasimple.PA_STREAM_PLAYBACK,
+                              pasimple.PA_SAMPLE_U8,
+                              1,
+                              int(sample_rate),
+                              app_name='midicw',
+                              stream_name='TX',
+                              device_name='tx0'),
+         ]
 
-    upload_samples(pulse, paddles, 24)
+    paddles = { 1: False, 2: False }
 
-    for sink in pulse.sink_list():
-        if sink.description.startswith('tx0'):
-            paddles['txport'] = sink.index
-            print(f"TX port is {sink.description} ({sink.index})")
-        elif sink.description.startswith('Plantronics'):
-            paddles['sidetoneport'] = sink.index
-            print(f"Sidetone port is {sink.description} ({sink.index})")
+    upload_samples(default_wpm)
 
     try:
-        loop(midiport, pulse, paddles)
+        loop(midiport, pa, paddles)
     except KeyboardInterrupt:
         pass
 
