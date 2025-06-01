@@ -42,7 +42,7 @@ class qo100_remote(gr.top_block):
         ##################################################
 
         self.zeromq_push_sink_0 = zeromq.push_sink(gr.sizeof_gr_complex, 1, 'tcp://0.0.0.0:10010', 100, False, zmq_watermark, True)
-        self.zeromq_pull_source_0 = zeromq.pull_source(gr.sizeof_gr_complex, 1, 'tcp://192.168.0.191:10024', 100, False, zmq_watermark, False)
+        self.zeromq_pull_source_0 = zeromq.pull_source(gr.sizeof_gr_complex, 1, 'tcp://192.168.0.12:10024', 100, False, zmq_watermark, False)
         self.limesdr_source = limesdr.source('', 0, '', False)
 
 

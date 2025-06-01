@@ -27,6 +27,14 @@ MIDI_BANDPASS_WIDTH = 60 # Bass A
 MIDI_WPM = 0x3D
 MIDI_REPORT_ALL_CONTROLS = 0x7f
 
+def sign(i):
+    if i < 0:
+        return -1
+    elif i > 0:
+        return 1
+    else:
+        return 0
+
 class blk(gr.sync_block):
     """TRX Control block"""
 
@@ -50,6 +58,9 @@ class blk(gr.sync_block):
         self.message_port_register_out(pmt.intern("rx_freq_out"))
         self.message_port_register_out(pmt.intern("tx_freq_out"))
         self.message_port_register_out(pmt.intern("wpm_out"))
+        self.message_port_register_out(pmt.intern("filter_center_out"))
+        self.message_port_register_out(pmt.intern("filter_bw_out"))
+        self.message_port_register_out(pmt.intern("af_gain_out"))
 
         self.rx0_freq = 40000.0
         self.tx_freq = 40000.0
@@ -57,8 +68,12 @@ class blk(gr.sync_block):
         self.filter_bw = 3000
         self.record = False
         self.sync_a = False # start false so set_sync_a sets the LEDs
+        self.vfo_a_dir = 0 # last tuning direction
 
         self.pulse = None
+        self.tx_audio_port = None
+        self.rx_audio_port = None
+        self.ft8_audio_port = None
 
     def note_on(self, note, velocity):
         self.message_port_pub(pmt.intern("midi_out"),
@@ -66,7 +81,38 @@ class blk(gr.sync_block):
                     pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))
 
     def start(self):
+
+        # Audio
         self.pulse = pulsectl.Pulse('qo100')
+
+        for port in self.pulse.source_output_list():
+            # device.description: ALSA Capture [python3.13]
+            desc = port.proplist.get('device.description')
+            if desc and desc.startswith("ALSA Capture [python"):
+                self.tx_audio_port = port
+                print("TX port:", self.tx_audio_port)
+                self.set_audio_input('tx0')
+                break
+
+        for port in self.pulse.sink_input_list():
+            # device.description: ALSA Playback [python3.13]
+            desc = port.proplist.get('device.description')
+            if desc and desc.startswith("ALSA Playback [python"):
+                if "remote.name" in port.proplist: # "pipewire-0" on the FT8 sink
+                    self.ft8_audio_port = port
+                    print("FT8 port:", self.ft8_audio_port)
+                    # need to restore volume since pipewire can't tell the ports apart and randomly remembers the last setting from either
+                    self.ft8_audio_port.volume.value_flat = 1.0
+                    self.pulse.sink_input_volume_set(self.ft8_audio_port.index, self.ft8_audio_port.volume)
+                    # connect to rx2
+                    rx2_sink = self.pulse.get_sink_by_name("rx2")
+                    self.pulse.sink_input_move(self.ft8_audio_port.index, rx2_sink.index)
+                elif self.rx_audio_port is None:
+                    self.rx_audio_port = port
+                    print("RX port:", self.rx_audio_port)
+                    # volume will be set by polling the current console settings
+                    # connect to sink
+                    self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Internes Audio')
 
         # MIDI
         self.set_sync_a(True)
@@ -74,16 +120,13 @@ class blk(gr.sync_block):
         self.set_tx_freq(40000.0)
         self.set_record(False)
 
-        # Audio output
-        self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek Y')
-
         # read out knobs and slider on startup
         self.message_port_pub(pmt.intern("midi_out"),
                 pmt.cons(pmt.intern('control_change'),
                     pmt.cons(pmt.from_long(MIDI_REPORT_ALL_CONTROLS), pmt.from_long(127))))
 
         # without this, the spectrum display updates only once per second (GR bug?)
-        self.tb.vfo0_spectrum.set_fft_size(2048)
+        #self.tb.vfo0_spectrum.set_fft_size(2048)
 
         # create temp directory
         try: os.mkdir("/run/user/1000/gnuradio")
@@ -91,23 +134,22 @@ class blk(gr.sync_block):
 
     def set_audio_volume(self, new_volume):
         try:
-            rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description == 'rx2'][0]
-            # the rx0 sink is the one not connected to rx2
-            rx0_sink = [self.pulse.sink_info(x.sink) for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink != rx2_sink_index][0]
-            rx0_sink.volume.value_flat = new_volume
-            self.pulse.sink_volume_set(rx0_sink.index, rx0_sink.volume)
+            #rx_sink = self.pulse.sink_default_get()
+            #rx_sink.volume.value_flat = new_volume
+            #self.pulse.sink_volume_set(rx_sink.index, rx_sink.volume)
+            self.rx_audio_port.volume.value_flat = new_volume
+            self.pulse.sink_input_volume_set(self.rx_audio_port.index, self.rx_audio_port.volume)
+            self.message_port_pub(pmt.intern("af_gain_out"),
+                pmt.cons(pmt.intern('value'), pmt.from_double(new_volume)))
+
         except Exception as e:
             print("Error setting volume:", e)
 
     def set_audio_output(self, midi_key, sink_name):
         try:
-            rx2_sink_index = [x.index for x in self.pulse.sink_list() if x.description == 'rx2'][0]
-            # the rx0 sink is the one not connected to rx2
-            rx0_audio = [x.index for x in self.pulse.sink_input_list() if int(x.proplist.get('application.process.id')) == os.getpid() and x.sink != rx2_sink_index][0]
-
             for sink in self.pulse.sink_list():
                 if sink_name in sink.description:
-                    self.pulse.sink_input_move(rx0_audio, sink.index)
+                    self.pulse.sink_input_move(self.rx_audio_port.index, sink.index)
                     break
 
             for key in MIDI_AUDIOS:
@@ -118,12 +160,11 @@ class blk(gr.sync_block):
 
     def set_audio_input(self, source_name):
         try:
-            tx_audio = [x.index for x in self.pulse.source_output_list() if int(x.proplist.get('application.process.id')) == os.getpid()][0]
-
             for source in self.pulse.source_list():
                 if source.description.startswith(source_name):
-                    self.pulse.source_output_move(tx_audio, source.index)
+                    self.pulse.source_output_move(self.tx_audio_port.index, source.index)
                     break
+
         except Exception as e:
             print(f"Error setting audio input to {source_name}:", e)
 
@@ -131,7 +172,7 @@ class blk(gr.sync_block):
         self.record = record
         self.note_on(MIDI_RECORD, 127 if self.record else 0)
         if self.record:
-            self.set_audio_input('Plantronics')
+            self.set_audio_input(self.pulse.source_default_get().description)
         else:
             self.set_audio_input('Monitor of tx0')
 
@@ -192,24 +233,38 @@ class blk(gr.sync_block):
 
             if control == MIDI_VFO_A: # jog A
                 delta = value if value < 64 else value - 128
-                self.set_rx_freq(self.rx0_freq + delta * 20)
+                if sign(delta) != self.vfo_a_dir: # compensate for 2 (or 126) output on direction change
+                    delta += self.vfo_a_dir
+                    self.vfo_a_dir = sign(delta)
+                self.set_rx_freq(self.rx0_freq + delta * 10)
 
             elif control == MIDI_SHIFT_VFO_A and value != 64: # shift-jog a (64 reported on all-buttons-readout, ignore that)
                 delta = value if value < 64 else value - 128
+                if sign(delta) != self.vfo_a_dir: # compensate for 2 (or 126) output on direction change
+                    delta += self.vfo_a_dir
+                    self.vfo_a_dir = sign(delta)
                 self.set_sync_a(False)
-                self.set_tx_freq(self.tx_freq + delta * 20)
+                self.set_tx_freq(self.tx_freq + delta * 10)
 
             elif control == MIDI_VOLUME:
                 self.set_audio_volume(value / 100.0) # 0 .. 127%
 
             elif control == MIDI_WPM:
-                self.set_wpm(6.0 + 42.0 * value / 127.0) # 0 .. 127% -> 6..48 wpm
+                wpm = round(6.0 + 42.0 * value / 127.0) # 0 .. 127% -> 6..48 wpm
+                self.set_wpm(wpm)
 
             elif control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): # medium A, bass A
                 if control == MIDI_BANDPASS_CENTER:
-                    self.filter_center = 100 + int(2800 * (value / 127.0))
+                    self.filter_center = 1500 + 20 * (value - 64)
+                    self.message_port_pub(pmt.intern("filter_center_out"),
+                        pmt.cons(pmt.intern('value'), pmt.from_double(self.filter_center)))
                 if control == MIDI_BANDPASS_WIDTH:
-                    self.filter_bw = 100 + int(2900 * (value / 127.0))
+                    if value < 127 - 36: # first 36 steps are 30Hz, the rest 20Hz
+                        self.filter_bw = 3000 - 360 - 20 * (127 - value)
+                    else:
+                        self.filter_bw = 3000 - 30 * (127 - value)
+                    self.message_port_pub(pmt.intern("filter_bw_out"),
+                        pmt.cons(pmt.intern('value'), pmt.from_double(self.filter_bw)))
 
                 low_cutoff = max(self.filter_center - self.filter_bw // 2, 0)
                 high_cutoff = min(self.filter_center + self.filter_bw // 2, 3000)

@@ -90,10 +90,11 @@ class qo100_local(gr.top_block, Qt.QWidget):
 
 
 
+
+
         self.mag = mag = 0.9
 
 
-        self.af_gain = af_gain = 20
 
         ##################################################
         # Blocks
@@ -114,10 +115,10 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self._tx_vfo_msgdigctl_win.setReadOnly(False)
         self.tx_vfo = self._tx_vfo_msgdigctl_win
 
-        self.top_grid_layout.addWidget(self._tx_vfo_msgdigctl_win, 39, 1, 1, 1)
-        for r in range(39, 40):
+        self.top_grid_layout.addWidget(self._tx_vfo_msgdigctl_win, 40, 0, 2, 1)
+        for r in range(40, 42):
             self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(1, 2):
+        for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.zeromq_push_sink_0 = zeromq.push_sink(gr.sizeof_gr_complex, 1, 'tcp://0.0.0.0:10024', 100, False, zmq_watermark, True)
         self.zeromq_pull_source_0 = zeromq.pull_source(gr.sizeof_gr_complex, 1, 'tcp://192.168.0.11:10010', 100, False, zmq_watermark, False)
@@ -139,12 +140,12 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.vfo0_waterfall_add = blocks.add_vcc(1)
         self.vfo0_to_float = blocks.complex_to_float(1)
         self.vfo0_spectrum = qtgui.freq_sink_c(
-            1024, #size
+            2048, #size
             window.WIN_HAMMING, #wintype
             40e3, #fc
             24e3, #bw
             '', #name
-            1,
+            2,
             None # parent
         )
         self.vfo0_spectrum.set_update_time(0.01)
@@ -155,7 +156,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.vfo0_spectrum.enable_grid(True)
         self.vfo0_spectrum.set_fft_average(0.2)
         self.vfo0_spectrum.enable_axis_labels(True)
-        self.vfo0_spectrum.enable_control_panel(True)
+        self.vfo0_spectrum.enable_control_panel(False)
         self.vfo0_spectrum.set_fft_window_normalized(True)
 
         self.vfo0_spectrum.disable_legend()
@@ -170,7 +171,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
         alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0]
 
-        for i in range(1):
+        for i in range(2):
             if len(labels[i]) == 0:
                 self.vfo0_spectrum.set_line_label(i, "Data {0}".format(i))
             else:
@@ -180,10 +181,10 @@ class qo100_local(gr.top_block, Qt.QWidget):
             self.vfo0_spectrum.set_line_alpha(i, alphas[i])
 
         self._vfo0_spectrum_win = sip.wrapinstance(self.vfo0_spectrum.qwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._vfo0_spectrum_win, 15, 0, 14, 5)
+        self.top_grid_layout.addWidget(self._vfo0_spectrum_win, 15, 0, 14, 6)
         for r in range(15, 29):
             self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(0, 5):
+        for c in range(0, 6):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.vfo0_signal_source = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, (250e3-vfo), mag, 0, 0)
         self.vfo0_scope_bandpass = filter.fir_filter_ccc(
@@ -200,7 +201,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.vfo0_bandpass = filter.fir_filter_ccc(
             decim,
             firdes.complex_band_pass(
-                af_gain,
+                20,
                 samp_rate,
                 rx0_low_cutoff,
                 rx0_high_cutoff,
@@ -257,10 +258,10 @@ class qo100_local(gr.top_block, Qt.QWidget):
 
         self._rx_waterfall_win = sip.wrapinstance(self.rx_waterfall.qwidget(), Qt.QWidget)
 
-        self.top_grid_layout.addWidget(self._rx_waterfall_win, 0, 0, 14, 5)
+        self.top_grid_layout.addWidget(self._rx_waterfall_win, 0, 0, 14, 6)
         for r in range(0, 14):
             self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(0, 5):
+        for c in range(0, 6):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.rx_resampler = filter.rational_resampler_ccc(
                 interpolation=decim,
@@ -279,42 +280,70 @@ class qo100_local(gr.top_block, Qt.QWidget):
         else:
         	isFloat = True
 
-        _qtgui_dialgauge_2_lg_win = qtgui.GrDialGauge('',"blue","white","black",0,200, 100, 1,isFloat,True,True,self)
-        _qtgui_dialgauge_2_lg_win.setValue(20)
-        self.qtgui_dialgauge_2 = _qtgui_dialgauge_2_lg_win
+        _qtgui_dialgauge_4_lg_win = qtgui.GrDialGauge('Filter BW',"blue","white","black",0,3000, 80, 1,isFloat,True,True,self)
+        _qtgui_dialgauge_4_lg_win.setValue(3000)
+        self.qtgui_dialgauge_4 = _qtgui_dialgauge_4_lg_win
 
-        self.top_grid_layout.addWidget(_qtgui_dialgauge_2_lg_win, 39, 2, 1, 1)
+        self.top_grid_layout.addWidget(_qtgui_dialgauge_4_lg_win, 39, 2, 1, 1)
         for r in range(39, 40):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(2, 3):
-            self.top_grid_layout.setColumnStretch(c, 1)
-        if "real" == "int":
-        	isFloat = False
-        else:
-        	isFloat = True
-
-        _qtgui_dialgauge_1_lg_win = qtgui.GrDialGauge('',"blue","white","black",0.0,1.0, 100, 1,isFloat,True,True,self)
-        _qtgui_dialgauge_1_lg_win.setValue(0.1)
-        self.qtgui_dialgauge_1 = _qtgui_dialgauge_1_lg_win
-
-        self.top_grid_layout.addWidget(_qtgui_dialgauge_1_lg_win, 39, 3, 1, 1)
-        for r in range(39, 40):
-            self.top_grid_layout.setRowStretch(r, 1)
-        for c in range(3, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
         if "int" == "int":
         	isFloat = False
         else:
         	isFloat = True
 
-        _qtgui_dialgauge_0_lg_win = qtgui.GrDialGauge('',"blue","white","black",0,56, 100, 1,isFloat,True,True,self)
-        _qtgui_dialgauge_0_lg_win.setValue(24)
-        self.qtgui_dialgauge_0 = _qtgui_dialgauge_0_lg_win
+        _qtgui_dialgauge_3_lg_win = qtgui.GrDialGauge('Filter Center',"blue","white","black",0,3000, 80, 1,isFloat,True,True,self)
+        _qtgui_dialgauge_3_lg_win.setValue(1500)
+        self.qtgui_dialgauge_3 = _qtgui_dialgauge_3_lg_win
 
-        self.top_grid_layout.addWidget(_qtgui_dialgauge_0_lg_win, 39, 4, 1, 1)
+        self.top_grid_layout.addWidget(_qtgui_dialgauge_3_lg_win, 39, 1, 1, 1)
+        for r in range(39, 40):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        if "real" == "int":
+        	isFloat = False
+        else:
+        	isFloat = True
+
+        _qtgui_dialgauge_2_lg_win = qtgui.GrDialGauge('AF Gain',"blue","white","black",0.0,1.5, 80, 1,isFloat,True,True,self)
+        _qtgui_dialgauge_2_lg_win.setValue(1.0)
+        self.qtgui_dialgauge_2 = _qtgui_dialgauge_2_lg_win
+
+        self.top_grid_layout.addWidget(_qtgui_dialgauge_2_lg_win, 39, 3, 1, 1)
+        for r in range(39, 40):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(3, 4):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        if "real" == "int":
+        	isFloat = False
+        else:
+        	isFloat = True
+
+        _qtgui_dialgauge_1_lg_win = qtgui.GrDialGauge('TX Power',"blue","white","black",0.0,1.0, 80, 1,isFloat,True,True,self)
+        _qtgui_dialgauge_1_lg_win.setValue(0.1)
+        self.qtgui_dialgauge_1 = _qtgui_dialgauge_1_lg_win
+
+        self.top_grid_layout.addWidget(_qtgui_dialgauge_1_lg_win, 39, 4, 1, 1)
         for r in range(39, 40):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(4, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        if "int" == "int":
+        	isFloat = False
+        else:
+        	isFloat = True
+
+        _qtgui_dialgauge_0_lg_win = qtgui.GrDialGauge('WPM',"blue","white","black",0,56, 80, 1,isFloat,True,True,self)
+        _qtgui_dialgauge_0_lg_win.setValue(24)
+        self.qtgui_dialgauge_0 = _qtgui_dialgauge_0_lg_win
+
+        self.top_grid_layout.addWidget(_qtgui_dialgauge_0_lg_win, 39, 5, 1, 1)
+        for r in range(39, 40):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(5, 6):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.midi_block = midi_block.blk(midi_port='DJControl Compact:DJControl Compact DJControl Com')
         if "int" == "int":
@@ -328,7 +357,11 @@ class qo100_local(gr.top_block, Qt.QWidget):
         _low_cutoff_gauge_lg_win.setValue(0)
         self.low_cutoff_gauge = _low_cutoff_gauge_lg_win
 
-        self.top_layout.addWidget(_low_cutoff_gauge_lg_win)
+        self.top_grid_layout.addWidget(_low_cutoff_gauge_lg_win, 40, 1, 1, 5)
+        for r in range(40, 41):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 6):
+            self.top_grid_layout.setColumnStretch(c, 1)
         if "int" == "int":
         	isFloat = False
         	scaleFactor = 1
@@ -340,7 +373,11 @@ class qo100_local(gr.top_block, Qt.QWidget):
         _high_cutoff_gauge_lg_win.setValue(3000)
         self.high_cutoff_gauge = _high_cutoff_gauge_lg_win
 
-        self.top_layout.addWidget(_high_cutoff_gauge_lg_win)
+        self.top_grid_layout.addWidget(_high_cutoff_gauge_lg_win, 41, 1, 1, 5)
+        for r in range(41, 42):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 6):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.ft8_sink = blocks.wavfile_sink(
             '/dev/null',
             1,
@@ -360,20 +397,25 @@ class qo100_local(gr.top_block, Qt.QWidget):
             False
             )
         self.control = control.blk()
-        self.blocks_var_to_msg_0 = blocks.var_to_msg_pair('value')
+        self.blocks_throttle2_0 = blocks.throttle( gr.sizeof_gr_complex*1, 24e3, True, 0 if "auto" == "auto" else max( int(float(0.1) * 24e3) if "auto" == "time" else int(0.1), 1) )
         self.blocks_swapiq_0 = blocks.swap_iq(1, gr.sizeof_gr_complex)
+        self.blocks_add_xx_0 = blocks.add_vcc(1)
+        self.analog_sig_source_x_0_0 = analog.sig_source_c(24e3, analog.GR_COS_WAVE, rx0_high_cutoff, (1e-3), 0, 0)
+        self.analog_sig_source_x_0 = analog.sig_source_c(24e3, analog.GR_COS_WAVE, rx0_low_cutoff, (1e-3), 0, 0)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_var_to_msg_0, 'msgout'), (self.qtgui_dialgauge_2, 'value'))
         self.msg_connect((self.control, 'midi_out'), (self.midi_block, 'midi_in'))
         self.msg_connect((self.control, 'wpm_out'), (self.qtgui_dialgauge_0, 'value'))
+        self.msg_connect((self.control, 'af_gain_out'), (self.qtgui_dialgauge_2, 'value'))
+        self.msg_connect((self.control, 'filter_center_out'), (self.qtgui_dialgauge_3, 'value'))
+        self.msg_connect((self.control, 'filter_bw_out'), (self.qtgui_dialgauge_4, 'value'))
         self.msg_connect((self.control, 'tx_freq_out'), (self.tx_vfo, 'valuein'))
         self.msg_connect((self.control, 'rx_freq_out'), (self.vfo, 'valuein'))
-        self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
         self.msg_connect((self.ft84_cron, 'cron_ft8'), (self.ft84_rotate, 'rotate_ft8'))
+        self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
         self.msg_connect((self.midi_block, 'midi_out'), (self.control, 'midi_in'))
         self.msg_connect((self.rx0_high_cutoff_to_msg, 'msgout'), (self.high_cutoff_gauge, 'value'))
         self.msg_connect((self.rx0_low_cutoff_to_msg, 'msgout'), (self.low_cutoff_gauge, 'value'))
@@ -384,7 +426,11 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.msg_connect((self.vfo, 'valueout'), (self.vfo0_spectrum, 'freq'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo, 'valuein'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo0_spectrum, 'freq'))
+        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_add_xx_0, 0))
+        self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_add_xx_0, 1))
+        self.connect((self.blocks_add_xx_0, 0), (self.blocks_throttle2_0, 0))
         self.connect((self.blocks_swapiq_0, 0), (self.vfo0_waterfall_atten, 0))
+        self.connect((self.blocks_throttle2_0, 0), (self.vfo0_spectrum, 1))
         self.connect((self.rational_resampler_4, 0), (self.ft4_sink, 0))
         self.connect((self.rational_resampler_4, 0), (self.ft8_sink, 0))
         self.connect((self.rx_resampler, 0), (self.tx_mixer, 0))
@@ -462,7 +508,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.rx_waterfall.set_frequency_range(250e3, self.samp_rate)
         self.tx_vfo_signal_source.set_sampling_freq(self.samp_rate)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(20, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
         self.vfo0_scope_bandpass.set_taps(firdes.complex_band_pass(1, self.samp_rate, (-12e3), 12e3, 1000, window.WIN_HAMMING, 6.76))
         self.vfo0_signal_source.set_sampling_freq(self.samp_rate)
         self.vfo2_bandpass.set_taps(firdes.complex_band_pass(10, self.samp_rate, 0, 5000, 1000, window.WIN_HAMMING, 6.76))
@@ -473,23 +519,39 @@ class qo100_local(gr.top_block, Qt.QWidget):
 
     def set_rx0_low_cutoff(self, rx0_low_cutoff):
         self.rx0_low_cutoff = rx0_low_cutoff
+        self.analog_sig_source_x_0.set_frequency(self.rx0_low_cutoff)
         self.rx0_low_cutoff_to_msg.variable_changed(self.rx0_low_cutoff)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(20, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
 
     def get_rx0_high_cutoff(self):
         return self.rx0_high_cutoff
 
     def set_rx0_high_cutoff(self, rx0_high_cutoff):
         self.rx0_high_cutoff = rx0_high_cutoff
+        self.analog_sig_source_x_0_0.set_frequency(self.rx0_high_cutoff)
         self.rx0_high_cutoff_to_msg.variable_changed(self.rx0_high_cutoff)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
+        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(20, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
+
+    def get_qtgui_dialgauge_4(self):
+        return self.qtgui_dialgauge_4
+
+    def set_qtgui_dialgauge_4(self, qtgui_dialgauge_4):
+        self.qtgui_dialgauge_4 = qtgui_dialgauge_4
+        self.qtgui_dialgauge_4.setValue(3000)
+
+    def get_qtgui_dialgauge_3(self):
+        return self.qtgui_dialgauge_3
+
+    def set_qtgui_dialgauge_3(self, qtgui_dialgauge_3):
+        self.qtgui_dialgauge_3 = qtgui_dialgauge_3
+        self.qtgui_dialgauge_3.setValue(1500)
 
     def get_qtgui_dialgauge_2(self):
         return self.qtgui_dialgauge_2
 
     def set_qtgui_dialgauge_2(self, qtgui_dialgauge_2):
         self.qtgui_dialgauge_2 = qtgui_dialgauge_2
-        self.qtgui_dialgauge_2.setValue(20)
+        self.qtgui_dialgauge_2.setValue(1.0)
 
     def get_qtgui_dialgauge_1(self):
         return self.qtgui_dialgauge_1
@@ -527,14 +589,6 @@ class qo100_local(gr.top_block, Qt.QWidget):
     def set_high_cutoff_gauge(self, high_cutoff_gauge):
         self.high_cutoff_gauge = high_cutoff_gauge
         self.high_cutoff_gauge.setValue(3000)
-
-    def get_af_gain(self):
-        return self.af_gain
-
-    def set_af_gain(self, af_gain):
-        self.af_gain = af_gain
-        self.blocks_var_to_msg_0.variable_changed(self.af_gain)
-        self.vfo0_bandpass.set_taps(firdes.complex_band_pass(self.af_gain, self.samp_rate, self.rx0_low_cutoff, self.rx0_high_cutoff, 100, window.WIN_HAMMING, 6.76))
 
 
 

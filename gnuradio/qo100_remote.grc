@@ -142,7 +142,7 @@ blocks:
 - name: zeromq_pull_source_0
   id: zeromq_pull_source
   parameters:
-    address: tcp://192.168.0.191:10024
+    address: tcp://192.168.0.12:10024
     affinity: ''
     alias: ''
     bind: 'False'
