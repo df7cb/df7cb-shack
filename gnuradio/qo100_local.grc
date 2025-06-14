@@ -785,8 +785,8 @@ blocks:
     minoutbuf: '0'
     tmp_path: '''/run/user/1000/gnuradio'''
   states:
-    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft8',
-      'message', 1), ('rotate_ft4', 'message', 1)], [], 'Rotate wav files and feed
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft4',
+      'message', 1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed
       them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
     bus_sink: false
     bus_source: false
@@ -1128,7 +1128,7 @@ blocks:
     nconnections: '1'
     showports: 'True'
     type: complex
-    update_time: '0.05'
+    update_time: '0.15'
     wintype: window.WIN_BLACKMAN_hARRIS
   states:
     bus_sink: false
@@ -1260,7 +1260,9 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: Main audio output
+    comment: 'Main audio output
+
+      (Device name empty)'
     device_name: ''
     num_inputs: '1'
     ok_to_block: 'False'
@@ -1501,7 +1503,8 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: FT8/FT4 audio output
+    comment: "FT8/FT4 audio output\n(Device name \"pipewire\" \nso we can tell it\
+      \ apart \nfrom the main output)"
     device_name: pipewire
     num_inputs: '1'
     ok_to_block: 'False'

@@ -233,7 +233,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
             1, #number of inputs
             None # parent
         )
-        self.rx_waterfall.set_update_time(0.05)
+        self.rx_waterfall.set_update_time(0.15)
         self.rx_waterfall.enable_grid(False)
         self.rx_waterfall.enable_axis_labels(True)
 
@@ -414,8 +414,8 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.msg_connect((self.control, 'filter_bw_out'), (self.qtgui_dialgauge_4, 'value'))
         self.msg_connect((self.control, 'tx_freq_out'), (self.tx_vfo, 'valuein'))
         self.msg_connect((self.control, 'rx_freq_out'), (self.vfo, 'valuein'))
-        self.msg_connect((self.ft84_cron, 'cron_ft8'), (self.ft84_rotate, 'rotate_ft8'))
         self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
+        self.msg_connect((self.ft84_cron, 'cron_ft8'), (self.ft84_rotate, 'rotate_ft8'))
         self.msg_connect((self.midi_block, 'midi_out'), (self.control, 'midi_in'))
         self.msg_connect((self.rx0_high_cutoff_to_msg, 'msgout'), (self.high_cutoff_gauge, 'value'))
         self.msg_connect((self.rx0_low_cutoff_to_msg, 'msgout'), (self.low_cutoff_gauge, 'value'))
