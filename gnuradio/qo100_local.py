@@ -29,6 +29,7 @@ import qo100_local_control as control  # embedded python block
 import qo100_local_ft84_cron as ft84_cron  # embedded python block
 import qo100_local_ft84_rotate as ft84_rotate  # embedded python block
 import qo100_local_midi_block as midi_block  # embedded python block
+import qo100_local_rigctld as rigctld  # embedded python block
 import sip
 import threading
 
@@ -270,6 +271,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
                 fractional_bw=0)
         self.rx0_low_cutoff_to_msg = blocks.var_to_msg_pair('value')
         self.rx0_high_cutoff_to_msg = blocks.var_to_msg_pair('value')
+        self.rigctld = rigctld.blk(port=4555)
         self.rational_resampler_4 = filter.rational_resampler_fff(
                 interpolation=1,
                 decimation=4,
@@ -412,17 +414,20 @@ class qo100_local(gr.top_block, Qt.QWidget):
         self.msg_connect((self.control, 'af_gain_out'), (self.qtgui_dialgauge_2, 'value'))
         self.msg_connect((self.control, 'filter_center_out'), (self.qtgui_dialgauge_3, 'value'))
         self.msg_connect((self.control, 'filter_bw_out'), (self.qtgui_dialgauge_4, 'value'))
+        self.msg_connect((self.control, 'wpm_out'), (self.rigctld, 'wpm_in'))
         self.msg_connect((self.control, 'tx_freq_out'), (self.tx_vfo, 'valuein'))
         self.msg_connect((self.control, 'rx_freq_out'), (self.vfo, 'valuein'))
         self.msg_connect((self.ft84_cron, 'cron_ft4'), (self.ft84_rotate, 'rotate_ft4'))
         self.msg_connect((self.ft84_cron, 'cron_ft8'), (self.ft84_rotate, 'rotate_ft8'))
         self.msg_connect((self.midi_block, 'midi_out'), (self.control, 'midi_in'))
+        self.msg_connect((self.rigctld, 'freq_out'), (self.vfo, 'valuein'))
         self.msg_connect((self.rx0_high_cutoff_to_msg, 'msgout'), (self.high_cutoff_gauge, 'value'))
         self.msg_connect((self.rx0_low_cutoff_to_msg, 'msgout'), (self.low_cutoff_gauge, 'value'))
         self.msg_connect((self.rx_waterfall, 'freq'), (self.vfo, 'valuein'))
         self.msg_connect((self.tx_power_to_msg, 'msgout'), (self.qtgui_dialgauge_1, 'value'))
         self.msg_connect((self.tx_vfo, 'valueout'), (self.control, 'tx_freq_in'))
         self.msg_connect((self.vfo, 'valueout'), (self.control, 'rx_freq_in'))
+        self.msg_connect((self.vfo, 'valueout'), (self.rigctld, 'freq_in'))
         self.msg_connect((self.vfo, 'valueout'), (self.vfo0_spectrum, 'freq'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo, 'valuein'))
         self.msg_connect((self.vfo0_spectrum, 'freq'), (self.vfo0_spectrum, 'freq'))
