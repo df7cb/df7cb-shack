@@ -347,7 +347,7 @@ class qo100_local(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(5, 6):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.midi_block = midi_block.blk(midi_port='DJControl Compact:DJControl Compact DJControl Com')
+        self.midi_block = midi_block.blk(midi_port='DJControl Compact')
         if "int" == "int":
         	isFloat = False
         	scaleFactor = 1

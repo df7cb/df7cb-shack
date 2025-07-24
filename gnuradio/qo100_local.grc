@@ -648,96 +648,6 @@ blocks:
     coordinate: [1344, 560.0]
     rotation: 0
     state: true
-- name: rigctld
-  id: epy_block
-  parameters:
-    _source_code: "from gnuradio import gr\nimport pmt\n\nimport socket\nimport threading\n\
-      import re\n\nclass Client(threading.Thread):\n    def __init__(self, sock, address,\
-      \ block):\n        threading.Thread.__init__(self)\n        self.socket = sock\n\
-      \        self.address = address\n        self.block = block\n\n        self.band\
-      \ = 2_400_000_000 # remember the band the client wants to be on\n        self.mode\
-      \ = \"USB\"\n\n    def reply(self, msg):\n        self.socket.sendall((msg +\
-      \ \"\\r\\n\").encode(\"UTF-8\"))\n\n    def run(self):\n        try:\n     \
-      \       while True:\n                data = self.socket.recv(128)\n        \
-      \        if len(data) == 0: break\n\n                cmd = str(data.decode(\"\
-      utf-8\")).strip()\n                #print(\"rigctld:\", cmd)\n\n           \
-      \     if cmd == \"\":\n                    pass\n                elif m := re.match(r\"\
-      f\\b\", cmd):\n                    freq = self.band + self.block.freq\n    \
-      \                if self.mode == \"CW\":\n                        freq += 850\n\
-      \                    self.reply(str(freq))\n                elif m := re.match(r\"\
-      F\\s*(\\d+)\\b\", cmd):\n                    freq = int(m.group(1))\n      \
-      \              if self.mode == \"CW\":\n                        freq -= 850\n\
-      \                    base_freq = freq % 500_000\n                    self.band\
-      \ = freq - base_freq\n                    self.block.message_port_pub(pmt.intern(\"\
-      freq_out\"),\n                                                pmt.cons(pmt.intern('control_change'),\
-      \ pmt.from_long(base_freq)))\n                    self.reply(\"RPRT 0\")\n \
-      \               elif m := re.match(r\"l\\s*KEYSPD\\b\", cmd):\n            \
-      \        self.reply(str(self.block.wpm))\n                elif m := re.match(r\"\
-      m\\b\", cmd):\n                    self.reply(self.mode)\n                 \
-      \   self.reply(\"3000\")\n                elif m := re.match(r\"M\\s*(\\S+)\\\
-      s+.+\\b\", cmd):\n                    self.mode = m.group(1)\n             \
-      \       self.reply(\"RPRT 0\")\n                elif m := re.match(r\"s\\b\"\
-      , cmd): # split mode\n                    self.reply(\"0\")\n              \
-      \      self.reply(\"None\")\n                elif m := re.match(r\"v\\b\", cmd):\n\
-      \                    self.reply(\"VFOA\")\n                elif m := re.match(r\"\
-      V\\s*.+\\b\", cmd):\n                    self.reply(\"RPRT 0\")\n          \
-      \      elif m := re.match(r\"\\\\chk_vfo\\b\", cmd):\n                    self.reply(\"\
-      0\")\n                elif m := re.match(r\"\\\\get_lock_mode\\b\", cmd):\n\
-      \                    self.reply(\"0\")\n                    self.reply(\"RPRT\
-      \ 0\")\n                elif m := re.match(r\"\\\\get_powerstat\\b\", cmd):\n\
-      \                    self.reply(\"1\")\n                elif m := re.match(r\"\
-      \\\\dump_state\\b\", cmd):\n                    self.reply(\"\"\"\\\n1\n1\n\
-      0\n150000.000000 1500000000.000000 0x1ff -1 -1 0x17e00007 0xf\n0 0 0 0 0 0 0\n\
-      150000.000000 1500000000.000000 0x1ff 5000 100000 0x17e00007 0xf\n0 0 0 0 0\
-      \ 0 0\n0x1ff 1\n0x1ff 0\n0 0\n0xc 2400\n0xc 1800\n0xc 3000\n0xc 0\n0x2 500\n\
-      0x2 2400\n0x2 50\n0x2 0\n0x10 300\n0x10 2400\n0x10 50\n0x10 0\n0x1 8000\n0x1\
-      \ 2400\n0x1 10000\n0x20 15000\n0x20 8000\n0x40 230000\n0 0\n9990\n9990\n10000\n\
-      0\n10 \n10 20 30 \n0xffffffffffffffff\n0xffffffffffffffff\n0xfffffffff7ffffff\n\
-      0xfffeff7083ffffff\n0xffffffffffffffff\n0xffffffffffffffbf\"\"\")\n        \
-      \            self.reply(\"done\")\n                else:\n                 \
-      \   print(\"Unknown rigctld command:\", cmd)\n                    self.reply(\"\
-      RPRT -1\")\n        except Exception as inst:\n            print(inst)\n   \
-      \         pass\n\n        print(\"rigctld: client \" + str(self.address) + \"\
-      \ has disconnected\")\n\ndef newConnections(socket, block):\n    #connections\
-      \ = []\n    #total_connections = 0\n\n    while True:\n        sock, address\
-      \ = socket.accept()\n        print(\"rigctld: new connection from\", address)\n\
-      \        Client(sock, address, block).start()\n\nclass blk(gr.sync_block):\n\
-      \    \"\"\"Hamlib rigctld interface block\"\"\"\n\n    def __init__(self, port=4536):\n\
-      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
-      \n        gr.sync_block.__init__(\n            self,\n            name='Hamlib\
-      \ rigctld interface',\n            in_sig=None,\n            out_sig=None,\n\
-      \        )\n\n        self.port = port\n\n        self.freq = 0\n        self.wpm\
-      \ = 0\n\n        self.message_port_register_in(pmt.intern(\"freq_in\"))\n  \
-      \      self.set_msg_handler(pmt.intern(\"freq_in\"), self.freq_in)\n       \
-      \ self.message_port_register_in(pmt.intern(\"wpm_in\"))\n        self.set_msg_handler(pmt.intern(\"\
-      wpm_in\"), self.wpm_in)\n\n        self.message_port_register_out(pmt.intern(\"\
-      freq_out\"))\n\n        self.tcpthread = threading.Thread(target=self.tcp, daemon=True)\n\
-      \        self.tcpthread.start()\n\n    #def start(self):\n\n    def freq_in(self,\
-      \ msg):\n        if msg.is_pair() and pmt.car(msg) == pmt.intern('freq'):\n\
-      \            self.freq = int(pmt.to_double(pmt.cdr(msg)))\n\n    def wpm_in(self,\
-      \ msg):\n        if msg.is_pair() and pmt.car(msg) == pmt.intern('value'):\n\
-      \            self.wpm = int(pmt.to_double(pmt.cdr(msg)))\n\n    def tcp(self):\n\
-      \        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        sock.setsockopt(socket.SOL_SOCKET,\
-      \ socket.SO_REUSEADDR, 1)\n        sock.bind((\"localhost\", self.port))\n \
-      \       sock.listen(5)\n\n        newConnectionsThread = threading.Thread(target\
-      \ = newConnections, args = (sock, self))\n        newConnectionsThread.start()\n\
-      \nif __name__ == '__main__':\n    blk()\n"
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    port: '4555'
-  states:
-    _io_cache: ('Hamlib rigctld interface', 'blk', [('port', '4536')], [('wpm_in',
-      'message', 1), ('freq_in', 'message', 1)], [('freq_out', 'message', 1)], 'Hamlib
-      rigctld interface block', ['port'])
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1296, 1008.0]
-    rotation: 0
-    state: enabled
 - name: fosphor_glfw_sink_c_0
   id: fosphor_glfw_sink_c
   parameters:
@@ -875,8 +785,8 @@ blocks:
     minoutbuf: '0'
     tmp_path: '''/run/user/1000/gnuradio'''
   states:
-    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft8',
-      'message', 1), ('rotate_ft4', 'message', 1)], [], 'Rotate wav files and feed
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft4',
+      'message', 1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed
       them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
     bus_sink: false
     bus_source: false
@@ -999,7 +909,7 @@ blocks:
     alias: ''
     comment: MIDI interface
     maxoutbuf: '0'
-    midi_port: '''DJControl Compact:DJControl Compact DJControl Com'''
+    midi_port: '''DJControl Compact'''
     minoutbuf: '0'
   states:
     _io_cache: ('MIDI Source', 'blk', [('midi_port', "'DJControl Compact:DJControl
@@ -1031,6 +941,96 @@ blocks:
     coordinate: [936, 1140.0]
     rotation: 0
     state: true
+- name: rigctld
+  id: epy_block
+  parameters:
+    _source_code: "from gnuradio import gr\nimport pmt\n\nimport socket\nimport threading\n\
+      import re\n\nclass Client(threading.Thread):\n    def __init__(self, sock, address,\
+      \ block):\n        threading.Thread.__init__(self)\n        self.socket = sock\n\
+      \        self.address = address\n        self.block = block\n\n        self.band\
+      \ = 2_400_000_000 # remember the band the client wants to be on\n        self.mode\
+      \ = \"USB\"\n\n    def reply(self, msg):\n        self.socket.sendall((msg +\
+      \ \"\\r\\n\").encode(\"UTF-8\"))\n\n    def run(self):\n        try:\n     \
+      \       while True:\n                data = self.socket.recv(128)\n        \
+      \        if len(data) == 0: break\n\n                cmd = str(data.decode(\"\
+      utf-8\")).strip()\n                #print(\"rigctld:\", cmd)\n\n           \
+      \     if cmd == \"\":\n                    pass\n                elif m := re.match(r\"\
+      f\\b\", cmd):\n                    freq = self.band + self.block.freq\n    \
+      \                if self.mode == \"CW\":\n                        freq += 850\n\
+      \                    self.reply(str(freq))\n                elif m := re.match(r\"\
+      F\\s*(\\d+)\\b\", cmd):\n                    freq = int(m.group(1))\n      \
+      \              if self.mode == \"CW\":\n                        freq -= 850\n\
+      \                    base_freq = freq % 500_000\n                    self.band\
+      \ = freq - base_freq\n                    self.block.message_port_pub(pmt.intern(\"\
+      freq_out\"),\n                                                pmt.cons(pmt.intern('control_change'),\
+      \ pmt.from_long(base_freq)))\n                    self.reply(\"RPRT 0\")\n \
+      \               elif m := re.match(r\"l\\s*KEYSPD\\b\", cmd):\n            \
+      \        self.reply(str(self.block.wpm))\n                elif m := re.match(r\"\
+      m\\b\", cmd):\n                    self.reply(self.mode)\n                 \
+      \   self.reply(\"3000\")\n                elif m := re.match(r\"M\\s*(\\S+)\\\
+      s+.+\\b\", cmd):\n                    self.mode = m.group(1)\n             \
+      \       self.reply(\"RPRT 0\")\n                elif m := re.match(r\"s\\b\"\
+      , cmd): # split mode\n                    self.reply(\"0\")\n              \
+      \      self.reply(\"None\")\n                elif m := re.match(r\"v\\b\", cmd):\n\
+      \                    self.reply(\"VFOA\")\n                elif m := re.match(r\"\
+      V\\s*.+\\b\", cmd):\n                    self.reply(\"RPRT 0\")\n          \
+      \      elif m := re.match(r\"\\\\chk_vfo\\b\", cmd):\n                    self.reply(\"\
+      0\")\n                elif m := re.match(r\"\\\\get_lock_mode\\b\", cmd):\n\
+      \                    self.reply(\"0\")\n                    self.reply(\"RPRT\
+      \ 0\")\n                elif m := re.match(r\"\\\\get_powerstat\\b\", cmd):\n\
+      \                    self.reply(\"1\")\n                elif m := re.match(r\"\
+      \\\\dump_state\\b\", cmd):\n                    self.reply(\"\"\"\\\n1\n1\n\
+      0\n150000.000000 1500000000.000000 0x1ff -1 -1 0x17e00007 0xf\n0 0 0 0 0 0 0\n\
+      150000.000000 1500000000.000000 0x1ff 5000 100000 0x17e00007 0xf\n0 0 0 0 0\
+      \ 0 0\n0x1ff 1\n0x1ff 0\n0 0\n0xc 2400\n0xc 1800\n0xc 3000\n0xc 0\n0x2 500\n\
+      0x2 2400\n0x2 50\n0x2 0\n0x10 300\n0x10 2400\n0x10 50\n0x10 0\n0x1 8000\n0x1\
+      \ 2400\n0x1 10000\n0x20 15000\n0x20 8000\n0x40 230000\n0 0\n9990\n9990\n10000\n\
+      0\n10 \n10 20 30 \n0xffffffffffffffff\n0xffffffffffffffff\n0xfffffffff7ffffff\n\
+      0xfffeff7083ffffff\n0xffffffffffffffff\n0xffffffffffffffbf\"\"\")\n        \
+      \            self.reply(\"done\")\n                else:\n                 \
+      \   print(\"Unknown rigctld command:\", cmd)\n                    self.reply(\"\
+      RPRT -1\")\n        except Exception as inst:\n            print(inst)\n   \
+      \         pass\n\n        print(\"rigctld: client \" + str(self.address) + \"\
+      \ has disconnected\")\n\ndef newConnections(socket, block):\n    #connections\
+      \ = []\n    #total_connections = 0\n\n    while True:\n        sock, address\
+      \ = socket.accept()\n        print(\"rigctld: new connection from\", address)\n\
+      \        Client(sock, address, block).start()\n\nclass blk(gr.sync_block):\n\
+      \    \"\"\"Hamlib rigctld interface block\"\"\"\n\n    def __init__(self, port=4536):\n\
+      \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
+      \n        gr.sync_block.__init__(\n            self,\n            name='Hamlib\
+      \ rigctld interface',\n            in_sig=None,\n            out_sig=None,\n\
+      \        )\n\n        self.port = port\n\n        self.freq = 0\n        self.wpm\
+      \ = 0\n\n        self.message_port_register_in(pmt.intern(\"freq_in\"))\n  \
+      \      self.set_msg_handler(pmt.intern(\"freq_in\"), self.freq_in)\n       \
+      \ self.message_port_register_in(pmt.intern(\"wpm_in\"))\n        self.set_msg_handler(pmt.intern(\"\
+      wpm_in\"), self.wpm_in)\n\n        self.message_port_register_out(pmt.intern(\"\
+      freq_out\"))\n\n        self.tcpthread = threading.Thread(target=self.tcp, daemon=True)\n\
+      \        self.tcpthread.start()\n\n    #def start(self):\n\n    def freq_in(self,\
+      \ msg):\n        if msg.is_pair() and pmt.car(msg) == pmt.intern('freq'):\n\
+      \            self.freq = int(pmt.to_double(pmt.cdr(msg)))\n\n    def wpm_in(self,\
+      \ msg):\n        if msg.is_pair() and pmt.car(msg) == pmt.intern('value'):\n\
+      \            self.wpm = int(pmt.to_double(pmt.cdr(msg)))\n\n    def tcp(self):\n\
+      \        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n        sock.setsockopt(socket.SOL_SOCKET,\
+      \ socket.SO_REUSEADDR, 1)\n        sock.bind((\"localhost\", self.port))\n \
+      \       sock.listen(5)\n\n        newConnectionsThread = threading.Thread(target\
+      \ = newConnections, args = (sock, self))\n        newConnectionsThread.start()\n\
+      \nif __name__ == '__main__':\n    blk()\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    port: '4555'
+  states:
+    _io_cache: ('Hamlib rigctld interface', 'blk', [('port', '4536')], [('wpm_in',
+      'message', 1), ('freq_in', 'message', 1)], [('freq_out', 'message', 1)], 'Hamlib
+      rigctld interface block', ['port'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 1008.0]
+    rotation: 0
+    state: enabled
 - name: rx0_high_cutoff_to_msg
   id: blocks_var_to_msg
   parameters:
@@ -1743,9 +1743,8 @@ connections:
 - [control, midi_out, midi_block, midi_in]
 - [control, rx_freq_out, vfo, valuein]
 - [control, tx_freq_out, tx_vfo, valuein]
-- [control, wpm_out, rigctld, wpm_in]
 - [control, wpm_out, qtgui_dialgauge_0, value]
-- [rigctld, freq_out, vfo, valuein]
+- [control, wpm_out, rigctld, wpm_in]
 - [ft84_cron, cron_ft4, ft84_rotate, rotate_ft4]
 - [ft84_cron, cron_ft8, ft84_rotate, rotate_ft8]
 - [limesdr_source, '0', rx_freq_sink, '0']
@@ -1756,6 +1755,7 @@ connections:
 - [midi_block, midi_out, control, midi_in]
 - [rational_resampler_4, '0', ft4_sink, '0']
 - [rational_resampler_4, '0', ft8_sink, '0']
+- [rigctld, freq_out, vfo, valuein]
 - [rx0_high_cutoff_to_msg, msgout, high_cutoff_gauge, value]
 - [rx0_low_cutoff_to_msg, msgout, low_cutoff_gauge, value]
 - [rx_resampler, '0', tx_mixer, '0']
