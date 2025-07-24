@@ -1,0 +1,24 @@
+https://web.archive.org/web/20250424171505/https://www.ph4x.com/ic-9700-mod-enable-af-out-on-mic/
+
+ IC-9700 mod: enable AF out on mic
+
+    By PH4X in hardware
+
+To enable the AF output on Pin 8 of the MIC socket (AFO line), solder a bridge across test point CP421 on the DISPLAY board.
+
+Schematic: Service manual, p. 10-17.
+Board layout: Service manual, p. 7-10, to left of R421
+
+    IC-9700, modification
+
+1 comments
+
+        Guil on 09/10/2021 at 11:58 # Reply
+
+    Hi,
+
+    Many thanks for this info, I have just do it this morning and it’s working very well !
+    I don’t understand why this function isn’t active when we bought this rig….
+
+    Bes 73′
+    F4CPS Guillaume
