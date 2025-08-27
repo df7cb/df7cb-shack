@@ -952,15 +952,16 @@ blocks:
       \ = \"USB\"\n\n    def reply(self, msg):\n        self.socket.sendall((msg +\
       \ \"\\r\\n\").encode(\"UTF-8\"))\n\n    def run(self):\n        try:\n     \
       \       while True:\n                data = self.socket.recv(128)\n        \
-      \        if len(data) == 0: break\n\n                cmd = str(data.decode(\"\
-      utf-8\")).strip()\n                #print(\"rigctld:\", cmd)\n\n           \
-      \     if cmd == \"\":\n                    pass\n                elif m := re.match(r\"\
-      f\\b\", cmd):\n                    freq = self.band + self.block.freq\n    \
-      \                if self.mode == \"CW\":\n                        freq += 850\n\
-      \                    self.reply(str(freq))\n                elif m := re.match(r\"\
-      F\\s*(\\d+)\\b\", cmd):\n                    freq = int(m.group(1))\n      \
-      \              if self.mode == \"CW\":\n                        freq -= 850\n\
-      \                    base_freq = freq % 500_000\n                    self.band\
+      \        if len(data) == 0:\n                    self.socket.close()\n     \
+      \               break\n\n                cmd = str(data.decode(\"utf-8\")).strip()\n\
+      \                #print(\"rigctld:\", cmd)\n\n                if cmd == \"\"\
+      :\n                    pass\n                elif m := re.match(r\"f\\b\", cmd):\n\
+      \                    freq = self.band + self.block.freq\n                  \
+      \  if self.mode == \"CW\":\n                        freq += 850\n          \
+      \          self.reply(str(freq))\n                elif m := re.match(r\"F\\\
+      s*(\\d+)\\b\", cmd):\n                    freq = int(m.group(1))\n         \
+      \           if self.mode == \"CW\":\n                        freq -= 850\n \
+      \                   base_freq = freq % 500_000\n                    self.band\
       \ = freq - base_freq\n                    self.block.message_port_pub(pmt.intern(\"\
       freq_out\"),\n                                                pmt.cons(pmt.intern('control_change'),\
       \ pmt.from_long(base_freq)))\n                    self.reply(\"RPRT 0\")\n \
@@ -969,12 +970,14 @@ blocks:
       m\\b\", cmd):\n                    self.reply(self.mode)\n                 \
       \   self.reply(\"3000\")\n                elif m := re.match(r\"M\\s*(\\S+)\\\
       s+.+\\b\", cmd):\n                    self.mode = m.group(1)\n             \
-      \       self.reply(\"RPRT 0\")\n                elif m := re.match(r\"s\\b\"\
-      , cmd): # split mode\n                    self.reply(\"0\")\n              \
-      \      self.reply(\"None\")\n                elif m := re.match(r\"v\\b\", cmd):\n\
-      \                    self.reply(\"VFOA\")\n                elif m := re.match(r\"\
-      V\\s*.+\\b\", cmd):\n                    self.reply(\"RPRT 0\")\n          \
-      \      elif m := re.match(r\"\\\\chk_vfo\\b\", cmd):\n                    self.reply(\"\
+      \       self.reply(\"RPRT 0\")\n                elif m := re.match(r\"q\\b\"\
+      , cmd):\n                    self.reply(\"RPRT 0\")\n                    self.socket.close()\n\
+      \                    break\n                elif m := re.match(r\"s\\b\", cmd):\
+      \ # split mode\n                    self.reply(\"0\")\n                    self.reply(\"\
+      None\")\n                elif m := re.match(r\"v\\b\", cmd):\n             \
+      \       self.reply(\"VFOA\")\n                elif m := re.match(r\"V\\s*.+\\\
+      b\", cmd):\n                    self.reply(\"RPRT 0\")\n                elif\
+      \ m := re.match(r\"\\\\chk_vfo\\b\", cmd):\n                    self.reply(\"\
       0\")\n                elif m := re.match(r\"\\\\get_lock_mode\\b\", cmd):\n\
       \                    self.reply(\"0\")\n                    self.reply(\"RPRT\
       \ 0\")\n                elif m := re.match(r\"\\\\get_powerstat\\b\", cmd):\n\

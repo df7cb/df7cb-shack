@@ -22,7 +22,9 @@ class Client(threading.Thread):
         try:
             while True:
                 data = self.socket.recv(128)
-                if len(data) == 0: break
+                if len(data) == 0:
+                    self.socket.close()
+                    break
 
                 cmd = str(data.decode("utf-8")).strip()
                 #print("rigctld:", cmd)
@@ -51,6 +53,10 @@ class Client(threading.Thread):
                 elif m := re.match(r"M\s*(\S+)\s+.+\b", cmd):
                     self.mode = m.group(1)
                     self.reply("RPRT 0")
+                elif m := re.match(r"q\b", cmd):
+                    self.reply("RPRT 0")
+                    self.socket.close()
+                    break
                 elif m := re.match(r"s\b", cmd): # split mode
                     self.reply("0")
                     self.reply("None")
