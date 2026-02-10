@@ -33,7 +33,8 @@ import os
 
 argparser = argparse.ArgumentParser(description="CW keyer with MIDI input, pyaudio output")
 argparser.add_argument("-m", "--midiport", default="MidiStomp MIDI 1", help="CW keyer MIDI device")
-argparser.add_argument("-c", "--controlport", default="DJControl Compact", help="Auxiliary MIDI device for speed control")
+argparser.add_argument("-c", "--controlport", action=argparse.BooleanOptionalAction, help="Use an Auxiliary MIDI device for speed control")
+argparser.add_argument("-n", "--controlport-name", default="DJControl Compact", help="Device name to use as Auxiliary MIDI")
 argparser.add_argument("-w", "--wpm", type=int, default=24, help="CW speed in words per minute (PARIS, default 24)")
 argparser.add_argument("-p", "--pitch", type=int, default=850, help="CW pitch in Hz (default 850)")
 argparser.add_argument("-s", "--txserial", help="serial device to key RTS line on (default none)")
@@ -302,7 +303,7 @@ def main():
 
     controlport = None
     if args.controlport:
-        controlport = mido.open_input('DJControl Compact')
+        controlport = mido.open_input(args.controlport_name)
 
     with pulsectl.Pulse("midicwkeyer-control") as pulse:
 
