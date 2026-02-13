@@ -45,6 +45,7 @@ args = argparser.parse_args()
 sample_rate = 48000.0
 ramp = 0.012 # at least 6ms ramp up/down (CWops recommendation)
 volume = 100
+word_spacing = 7 # after this many dot_durations of silence a new word begins
 
 # global variables
 dah_sample = None
@@ -259,7 +260,7 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
                     sign_len = len(sign)
                 # otherwise, start a new character or a new word
                 else:
-                    if delay >= 5 * dot_duration:
+                    if delay >= word_spacing * dot_duration:
                         print(' ', end='', flush=True)
                     sign = ''
                     sign_len = 0
