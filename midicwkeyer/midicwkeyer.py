@@ -43,14 +43,14 @@ args = argparser.parse_args()
 
 # constants
 sample_rate = 48000.0
+frames_per_buffer = 200
 ramp = 0.012 # at least 6ms ramp up/down (CWops recommendation)
 volume = 100.0
 word_spacing = 7 # after this many dot_durations of silence a new word begins
 
 # global variables
-dah_sample = None
-dit_sample = None
-dot_duration = None
+samples = {}
+zero_sample = [0 for x in range(frames_per_buffer)]
 audiobuffer = []
 
 morse = {
@@ -132,25 +132,35 @@ def generate_sample(duration):
                 * 0.5 * (1 + math.cos(math.pi * x / ramp_samples)) # cosine ramp down
                 * math.sin(2 * math.pi * args.pitch * ((ramp_samples+num_samples+x) / sample_rate))) % 256)
 
-    return audio
+    audio_length = len(audio)
+
+    for x in range(frames_per_buffer): # append some zeros so we can take slices that extend past the end of audio
+        audio.append(0)
+
+    return audio, audio_length
 
 def generate_samples(speed):
-    global dot_duration, dit_sample, dah_sample
-    dot_duration = 1.2 / speed # 1200ms/speed
+    samples['dot_duration'] = 1.2 / speed # 1200ms/speed
 
-    dit_sample = generate_sample(dot_duration)
-    dah_sample = generate_sample(3*dot_duration)
+    samples['dit'], samples['dit_len'] = generate_sample(samples['dot_duration'])
+    samples['dah'], samples['dah_len'] = generate_sample(3 * samples['dot_duration'])
 
-def play_samples(audiobuffer, sample):
+def play_sample(audiobuffer, sample, sample_len):
     for buffer in audiobuffer:
-        buffer += sample
+        buffer['sample'] = sample
+        buffer['index'] = 0
+        buffer['end'] = sample_len
 
 def audio_callback(buffer, in_data, frame_count, time_info, status_flags):
-    samples = buffer[:frame_count]
-    buffer[:] = buffer[frame_count:]
-    if len(samples) < frame_count:
-        samples += [0 for x in range(frame_count - len(samples))]
-    return bytes(samples), pyaudio.paContinue
+    audio = bytes(buffer['sample'][buffer['index']:buffer['index']+frame_count])
+
+    buffer['index'] += frame_count
+    if buffer['index'] >= buffer['end']:
+        buffer['sample'] = zero_sample
+        buffer['index'] = 0
+        buffer['end'] = len(zero_sample)
+
+    return audio, pyaudio.paContinue
 
 def audio_callback0(in_data, frame_count, time_info, status_flags):
     return audio_callback(audiobuffer[0], in_data, frame_count, time_info, status_flags)
@@ -209,10 +219,10 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
 
             now = time.time()
             if txserial: txserial.rts = 1
-            play_samples(audiobuffer, dit_sample)
-            time.sleep(time.time() - now + dot_duration)
+            play_sample(audiobuffer, samples['dit'], samples['dit_len'])
+            time.sleep(time.time() - now + samples['dot_duration'])
             if txserial: txserial.rts = 0
-            time.sleep(dot_duration)
+            time.sleep(samples['dot_duration'])
 
         elif state == 'dah':
             print('-', end='', flush=True)
@@ -221,10 +231,10 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
 
             now = time.time()
             if txserial: txserial.rts = 1
-            play_samples(audiobuffer, dah_sample)
-            time.sleep(time.time() - now + 3 * dot_duration)
+            play_sample(audiobuffer, samples['dah'], samples['dah_len'])
+            time.sleep(time.time() - now + 3 * samples['dot_duration'])
             if txserial: txserial.rts = 0
-            time.sleep(dot_duration)
+            time.sleep(samples['dot_duration'])
 
         # read paddle input
         dit, dah = poll(midiport, controlport, paddles, False)
@@ -253,14 +263,14 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
                 delay = time.time() - ts
 
                 # if the delay was short enough, the last character was continued
-                if delay <= dot_duration and (dit or dah):
+                if delay <= samples['dot_duration'] and (dit or dah):
                     # last character is continued
                     erase_chars(sign_len)
                     print(sign, end='', flush=True)
                     sign_len = len(sign)
                 # otherwise, start a new character or a new word
                 else:
-                    if delay >= word_spacing * dot_duration:
+                    if delay >= word_spacing * samples['dot_duration']:
                         print(' ', end='', flush=True)
                     sign = ''
                     sign_len = 0
@@ -299,6 +309,8 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
             raise Exception("Bad state")
 
 def main():
+    generate_samples(args.wpm)
+
     midiport = mido.open_input(args.midiport)
     midiport.iter_pending() # drain pending notes
 
@@ -309,11 +321,10 @@ def main():
     with pulsectl.Pulse("midicwkeyer-control") as pulse:
 
         # side tone channel (default device)
-        # allocate audiobuffer for this stream
-        audiobuffer.append([])
+        audiobuffer.append({'sample': zero_sample, 'index': 0, 'end': len(zero_sample)})
         sink_inputs = {x.index for x in pulse.sink_input_list()}
         # open device with pyaudio
-        pyaudio.PyAudio().open(format=pyaudio.paInt8, channels=1, rate=int(sample_rate), output=True, stream_callback=audio_callback0),
+        pyaudio.PyAudio().open(format=pyaudio.paInt8, channels=1, rate=int(sample_rate), frames_per_buffer=frames_per_buffer, output=True, stream_callback=audio_callback0),
         # find my sink_input index using pulsectl
         my_sink_input = {x.index for x in pulse.sink_input_list()} - sink_inputs
         my_sink_input = my_sink_input.pop() # get (hopefully only) element from set
@@ -322,9 +333,9 @@ def main():
 
         if args.txaudio:
             # TX tone channel (tx0)
-            audiobuffer.append([])
+            audiobuffer.append({'sample': zero_sample, 'index': 0, 'end': len(zero_sample)})
             sink_inputs = {x.index for x in pulse.sink_input_list()}
-            pyaudio.PyAudio().open(format=pyaudio.paInt8, channels=1, rate=int(sample_rate), output=True, stream_callback=audio_callback1),
+            pyaudio.PyAudio().open(format=pyaudio.paInt8, channels=1, rate=int(sample_rate), frames_per_buffer=frames_per_buffer, output=True, stream_callback=audio_callback1),
             tx_sink_input = {x.index for x in pulse.sink_input_list()} - sink_inputs
             tx_sink_input = tx_sink_input.pop()
             sinks = {x.name: x.index for x in pulse.sink_list()}
@@ -332,8 +343,6 @@ def main():
             pulse.sink_input_move(tx_sink_input, sinks[args.txaudio])
 
     paddles = { 1: False, 2: False }
-
-    generate_samples(args.wpm)
 
     txserial = None
     if args.txserial:
