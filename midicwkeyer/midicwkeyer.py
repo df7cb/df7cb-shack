@@ -44,7 +44,7 @@ args = argparser.parse_args()
 # constants
 sample_rate = 48000.0
 ramp = 0.012 # at least 6ms ramp up/down (CWops recommendation)
-volume = 100
+volume = 100.0
 word_spacing = 7 # after this many dot_durations of silence a new word begins
 
 # global variables
@@ -120,17 +120,17 @@ def generate_sample(duration):
 
     audio = []
     for x in range(ramp_samples):
-        audio.append(128+int(volume
+        audio.append(int(volume
                 * 0.5 * (1 - math.cos(math.pi * x / ramp_samples)) # cosine ramp up
-                * math.sin(2 * math.pi * args.pitch * ( x / sample_rate ))))
+                * math.sin(2 * math.pi * args.pitch * ( x / sample_rate ))) % 256)
 
     for x in range(ramp_samples, ramp_samples+num_samples):
-        audio.append(128+int(volume * math.sin(2 * math.pi * args.pitch * ( x / sample_rate ))))
+        audio.append(int(volume * math.sin(2 * math.pi * args.pitch * ( x / sample_rate ))) % 256)
 
     for x in range(ramp_samples):
-        audio.append(128+int(volume
+        audio.append(int(volume
                 * 0.5 * (1 + math.cos(math.pi * x / ramp_samples)) # cosine ramp down
-                * math.sin(2 * math.pi * args.pitch * ((ramp_samples+num_samples+x) / sample_rate))))
+                * math.sin(2 * math.pi * args.pitch * ((ramp_samples+num_samples+x) / sample_rate))) % 256)
 
     return audio
 
@@ -149,7 +149,7 @@ def audio_callback(buffer, in_data, frame_count, time_info, status_flags):
     samples = buffer[:frame_count]
     buffer[:] = buffer[frame_count:]
     if len(samples) < frame_count:
-        samples += [128 for x in range(frame_count - len(samples))]
+        samples += [0 for x in range(frame_count - len(samples))]
     return bytes(samples), pyaudio.paContinue
 
 def audio_callback0(in_data, frame_count, time_info, status_flags):
