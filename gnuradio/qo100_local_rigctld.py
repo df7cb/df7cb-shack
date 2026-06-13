@@ -14,6 +14,7 @@ class Client(threading.Thread):
 
         self.band = 2_400_000_000 # remember the band the client wants to be on
         self.mode = "USB"
+        self.passband = "3000"
 
     def reply(self, msg):
         self.socket.sendall((msg + "\r\n").encode("UTF-8"))
@@ -31,28 +32,42 @@ class Client(threading.Thread):
 
                 if cmd == "":
                     pass
-                elif m := re.match(r"f\b", cmd):
+                elif m := re.match(r"(\|?)f\b", cmd):
                     freq = self.band + self.block.freq
                     if self.mode == "CW":
                         freq += 850
-                    self.reply(str(freq))
-                elif m := re.match(r"F\s*(\d+)\b", cmd):
-                    freq = int(m.group(1))
+                    if m.group(1):
+                        self.reply(f"get_freq:|Frequency: {freq}|RPRT 0")
+                    else:
+                        self.reply(str(freq))
+                elif m := re.match(r"(\|?)F\s*(\d+)\b", cmd):
+                    freq = int(m.group(2))
                     if self.mode == "CW":
                         freq -= 850
                     base_freq = freq % 500_000
                     self.band = freq - base_freq
                     self.block.message_port_pub(pmt.intern("freq_out"),
                                                 pmt.cons(pmt.intern('control_change'), pmt.from_long(base_freq)))
-                    self.reply("RPRT 0")
+                    if m.group(1):
+                        self.reply(f"set_freq: {freq}|RPRT 0")
+                    else:
+                        self.reply("RPRT 0")
                 elif m := re.match(r"l\s*KEYSPD\b", cmd):
                     self.reply(str(self.block.wpm))
-                elif m := re.match(r"m\b", cmd):
+                elif m := re.match(r"(\|?)m\b", cmd):
                     self.reply(self.mode)
-                    self.reply("3000")
-                elif m := re.match(r"M\s*(\S+)\s+.+\b", cmd):
-                    self.mode = m.group(1)
-                    self.reply("RPRT 0")
+                    self.reply(self.passband)
+                    if m.group(1):
+                        self.reply(f"get_mode:|Mode: {self.mode}|Passband: {self.passband}|RPRT 0")
+                    else:
+                        self.reply("RPRT 0")
+                elif m := re.match(r"(\|?)M\s*(\S+)\s+(\S+)\b", cmd):
+                    self.mode = m.group(2)
+                    self.passband = m.group(3)
+                    if m.group(1):
+                        self.reply(f"set_mode: {self.mode} {self.passband}|RPRT 0")
+                    else:
+                        self.reply("RPRT 0")
                 elif m := re.match(r"q\b", cmd):
                     self.reply("RPRT 0")
                     self.socket.close()

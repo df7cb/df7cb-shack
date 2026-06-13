@@ -1,29 +1,25 @@
 options:
   parameters:
+    alias: ''
     author: DM6AS, DF7CB
     catch_exceptions: 'True'
-    category: '[GRC Hier Blocks]'
-    cmake_opt: ''
     comment: ''
     copyright: ''
     description: ''
-    gen_cmake: 'On'
     gen_linking: dynamic
     generate_options: qt_gui
+    generator_class_name: PythonQtGuiGenerator
+    generator_module: gnuradio.grc.workflows.python_qt_gui
     hier_block_src_path: '.:'
     id: qo100_local
     max_nouts: '0'
     output_language: python
-    placement: (0,0)
     qt_qss_theme: ''
     realtime_scheduling: ''
     run: 'True'
     run_command: '{python} -u {filename}'
-    run_options: prompt
-    sizing_mode: fixed
     thread_safe_setters: ''
     title: qo100
-    window_size: ''
   states:
     bus_sink: false
     bus_source: false
@@ -949,55 +945,65 @@ blocks:
       \ block):\n        threading.Thread.__init__(self)\n        self.socket = sock\n\
       \        self.address = address\n        self.block = block\n\n        self.band\
       \ = 2_400_000_000 # remember the band the client wants to be on\n        self.mode\
-      \ = \"USB\"\n\n    def reply(self, msg):\n        self.socket.sendall((msg +\
-      \ \"\\r\\n\").encode(\"UTF-8\"))\n\n    def run(self):\n        try:\n     \
-      \       while True:\n                data = self.socket.recv(128)\n        \
-      \        if len(data) == 0:\n                    self.socket.close()\n     \
-      \               break\n\n                cmd = str(data.decode(\"utf-8\")).strip()\n\
-      \                #print(\"rigctld:\", cmd)\n\n                if cmd == \"\"\
-      :\n                    pass\n                elif m := re.match(r\"f\\b\", cmd):\n\
-      \                    freq = self.band + self.block.freq\n                  \
-      \  if self.mode == \"CW\":\n                        freq += 850\n          \
-      \          self.reply(str(freq))\n                elif m := re.match(r\"F\\\
-      s*(\\d+)\\b\", cmd):\n                    freq = int(m.group(1))\n         \
-      \           if self.mode == \"CW\":\n                        freq -= 850\n \
-      \                   base_freq = freq % 500_000\n                    self.band\
-      \ = freq - base_freq\n                    self.block.message_port_pub(pmt.intern(\"\
-      freq_out\"),\n                                                pmt.cons(pmt.intern('control_change'),\
-      \ pmt.from_long(base_freq)))\n                    self.reply(\"RPRT 0\")\n \
-      \               elif m := re.match(r\"l\\s*KEYSPD\\b\", cmd):\n            \
-      \        self.reply(str(self.block.wpm))\n                elif m := re.match(r\"\
-      m\\b\", cmd):\n                    self.reply(self.mode)\n                 \
-      \   self.reply(\"3000\")\n                elif m := re.match(r\"M\\s*(\\S+)\\\
-      s+.+\\b\", cmd):\n                    self.mode = m.group(1)\n             \
-      \       self.reply(\"RPRT 0\")\n                elif m := re.match(r\"q\\b\"\
-      , cmd):\n                    self.reply(\"RPRT 0\")\n                    self.socket.close()\n\
-      \                    break\n                elif m := re.match(r\"s\\b\", cmd):\
-      \ # split mode\n                    self.reply(\"0\")\n                    self.reply(\"\
-      None\")\n                elif m := re.match(r\"v\\b\", cmd):\n             \
-      \       self.reply(\"VFOA\")\n                elif m := re.match(r\"V\\s*.+\\\
-      b\", cmd):\n                    self.reply(\"RPRT 0\")\n                elif\
-      \ m := re.match(r\"\\\\chk_vfo\\b\", cmd):\n                    self.reply(\"\
-      0\")\n                elif m := re.match(r\"\\\\get_lock_mode\\b\", cmd):\n\
-      \                    self.reply(\"0\")\n                    self.reply(\"RPRT\
-      \ 0\")\n                elif m := re.match(r\"\\\\get_powerstat\\b\", cmd):\n\
-      \                    self.reply(\"1\")\n                elif m := re.match(r\"\
-      \\\\dump_state\\b\", cmd):\n                    self.reply(\"\"\"\\\n1\n1\n\
-      0\n150000.000000 1500000000.000000 0x1ff -1 -1 0x17e00007 0xf\n0 0 0 0 0 0 0\n\
-      150000.000000 1500000000.000000 0x1ff 5000 100000 0x17e00007 0xf\n0 0 0 0 0\
-      \ 0 0\n0x1ff 1\n0x1ff 0\n0 0\n0xc 2400\n0xc 1800\n0xc 3000\n0xc 0\n0x2 500\n\
-      0x2 2400\n0x2 50\n0x2 0\n0x10 300\n0x10 2400\n0x10 50\n0x10 0\n0x1 8000\n0x1\
-      \ 2400\n0x1 10000\n0x20 15000\n0x20 8000\n0x40 230000\n0 0\n9990\n9990\n10000\n\
-      0\n10 \n10 20 30 \n0xffffffffffffffff\n0xffffffffffffffff\n0xfffffffff7ffffff\n\
-      0xfffeff7083ffffff\n0xffffffffffffffff\n0xffffffffffffffbf\"\"\")\n        \
-      \            self.reply(\"done\")\n                else:\n                 \
-      \   print(\"Unknown rigctld command:\", cmd)\n                    self.reply(\"\
-      RPRT -1\")\n        except Exception as inst:\n            print(inst)\n   \
-      \         pass\n\n        print(\"rigctld: client \" + str(self.address) + \"\
-      \ has disconnected\")\n\ndef newConnections(socket, block):\n    #connections\
-      \ = []\n    #total_connections = 0\n\n    while True:\n        sock, address\
-      \ = socket.accept()\n        print(\"rigctld: new connection from\", address)\n\
-      \        Client(sock, address, block).start()\n\nclass blk(gr.sync_block):\n\
+      \ = \"USB\"\n        self.passband = \"3000\"\n\n    def reply(self, msg):\n\
+      \        self.socket.sendall((msg + \"\\r\\n\").encode(\"UTF-8\"))\n\n    def\
+      \ run(self):\n        try:\n            while True:\n                data =\
+      \ self.socket.recv(128)\n                if len(data) == 0:\n              \
+      \      self.socket.close()\n                    break\n\n                cmd\
+      \ = str(data.decode(\"utf-8\")).strip()\n                #print(\"rigctld:\"\
+      , cmd)\n\n                if cmd == \"\":\n                    pass\n      \
+      \          elif m := re.match(r\"(\\|?)f\\b\", cmd):\n                    freq\
+      \ = self.band + self.block.freq\n                    if self.mode == \"CW\"\
+      :\n                        freq += 850\n                    if m.group(1):\n\
+      \                        self.reply(f\"get_freq:|Frequency: {freq}|RPRT 0\"\
+      )\n                    else:\n                        self.reply(str(freq))\n\
+      \                elif m := re.match(r\"(\\|?)F\\s*(\\d+)\\b\", cmd):\n     \
+      \               freq = int(m.group(2))\n                    if self.mode ==\
+      \ \"CW\":\n                        freq -= 850\n                    base_freq\
+      \ = freq % 500_000\n                    self.band = freq - base_freq\n     \
+      \               self.block.message_port_pub(pmt.intern(\"freq_out\"),\n    \
+      \                                            pmt.cons(pmt.intern('control_change'),\
+      \ pmt.from_long(base_freq)))\n                    if m.group(1):\n         \
+      \               self.reply(f\"set_freq: {freq}|RPRT 0\")\n                 \
+      \   else:\n                        self.reply(\"RPRT 0\")\n                elif\
+      \ m := re.match(r\"l\\s*KEYSPD\\b\", cmd):\n                    self.reply(str(self.block.wpm))\n\
+      \                elif m := re.match(r\"(\\|?)m\\b\", cmd):\n               \
+      \     self.reply(self.mode)\n                    self.reply(self.passband)\n\
+      \                    if m.group(1):\n                        self.reply(f\"\
+      get_mode:|Mode: {self.mode}|Passband: {self.passband}|RPRT 0\")\n          \
+      \          else:\n                        self.reply(\"RPRT 0\")\n         \
+      \       elif m := re.match(r\"(\\|?)M\\s*(\\S+)\\s+(\\S+)\\b\", cmd):\n    \
+      \                self.mode = m.group(2)\n                    self.passband =\
+      \ m.group(3)\n                    if m.group(1):\n                        self.reply(f\"\
+      set_mode: {self.mode} {self.passband}|RPRT 0\")\n                    else:\n\
+      \                        self.reply(\"RPRT 0\")\n                elif m := re.match(r\"\
+      q\\b\", cmd):\n                    self.reply(\"RPRT 0\")\n                \
+      \    self.socket.close()\n                    break\n                elif m\
+      \ := re.match(r\"s\\b\", cmd): # split mode\n                    self.reply(\"\
+      0\")\n                    self.reply(\"None\")\n                elif m := re.match(r\"\
+      v\\b\", cmd):\n                    self.reply(\"VFOA\")\n                elif\
+      \ m := re.match(r\"V\\s*.+\\b\", cmd):\n                    self.reply(\"RPRT\
+      \ 0\")\n                elif m := re.match(r\"\\\\chk_vfo\\b\", cmd):\n    \
+      \                self.reply(\"0\")\n                elif m := re.match(r\"\\\
+      \\get_lock_mode\\b\", cmd):\n                    self.reply(\"0\")\n       \
+      \             self.reply(\"RPRT 0\")\n                elif m := re.match(r\"\
+      \\\\get_powerstat\\b\", cmd):\n                    self.reply(\"1\")\n     \
+      \           elif m := re.match(r\"\\\\dump_state\\b\", cmd):\n             \
+      \       self.reply(\"\"\"\\\n1\n1\n0\n150000.000000 1500000000.000000 0x1ff\
+      \ -1 -1 0x17e00007 0xf\n0 0 0 0 0 0 0\n150000.000000 1500000000.000000 0x1ff\
+      \ 5000 100000 0x17e00007 0xf\n0 0 0 0 0 0 0\n0x1ff 1\n0x1ff 0\n0 0\n0xc 2400\n\
+      0xc 1800\n0xc 3000\n0xc 0\n0x2 500\n0x2 2400\n0x2 50\n0x2 0\n0x10 300\n0x10\
+      \ 2400\n0x10 50\n0x10 0\n0x1 8000\n0x1 2400\n0x1 10000\n0x20 15000\n0x20 8000\n\
+      0x40 230000\n0 0\n9990\n9990\n10000\n0\n10 \n10 20 30 \n0xffffffffffffffff\n\
+      0xffffffffffffffff\n0xfffffffff7ffffff\n0xfffeff7083ffffff\n0xffffffffffffffff\n\
+      0xffffffffffffffbf\"\"\")\n                    self.reply(\"done\")\n      \
+      \          else:\n                    print(\"Unknown rigctld command:\", cmd)\n\
+      \                    self.reply(\"RPRT -1\")\n        except Exception as inst:\n\
+      \            print(inst)\n            pass\n\n        print(\"rigctld: client\
+      \ \" + str(self.address) + \" has disconnected\")\n\ndef newConnections(socket,\
+      \ block):\n    #connections = []\n    #total_connections = 0\n\n    while True:\n\
+      \        sock, address = socket.accept()\n        print(\"rigctld: new connection\
+      \ from\", address)\n        Client(sock, address, block).start()\n\nclass blk(gr.sync_block):\n\
       \    \"\"\"Hamlib rigctld interface block\"\"\"\n\n    def __init__(self, port=4536):\n\
       \        \"\"\"arguments to this function show up as parameters in GRC\"\"\"\
       \n        gr.sync_block.__init__(\n            self,\n            name='Hamlib\
@@ -1025,8 +1031,8 @@ blocks:
     minoutbuf: '0'
     port: '4555'
   states:
-    _io_cache: ('Hamlib rigctld interface', 'blk', [('port', '4536')], [('wpm_in',
-      'message', 1), ('freq_in', 'message', 1)], [('freq_out', 'message', 1)], 'Hamlib
+    _io_cache: ('Hamlib rigctld interface', 'blk', [('port', '4536')], [('freq_in',
+      'message', 1), ('wpm_in', 'message', 1)], [('freq_out', 'message', 1)], 'Hamlib
       rigctld interface block', ['port'])
     bus_sink: false
     bus_source: false

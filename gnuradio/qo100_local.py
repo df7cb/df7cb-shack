@@ -16,14 +16,6 @@ from gnuradio import audio
 from gnuradio import blocks
 from gnuradio import filter
 from gnuradio.filter import firdes
-from gnuradio import gr
-from gnuradio.fft import window
-import sys
-import signal
-from PyQt5 import Qt
-from argparse import ArgumentParser
-from gnuradio.eng_arg import eng_float, intx
-from gnuradio import eng_notation
 from gnuradio import zeromq
 import qo100_local_control as control  # embedded python block
 import qo100_local_ft84_cron as ft84_cron  # embedded python block
@@ -32,6 +24,15 @@ import qo100_local_midi_block as midi_block  # embedded python block
 import qo100_local_rigctld as rigctld  # embedded python block
 import sip
 import threading
+from gnuradio import gr
+from gnuradio.filter import firdes
+from gnuradio.fft import window
+import sys
+import signal
+from argparse import ArgumentParser
+from gnuradio.eng_arg import eng_float, intx
+from gnuradio import eng_notation
+
 
 
 def snipfcn_inject_tb(self):
