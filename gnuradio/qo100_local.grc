@@ -41,6 +41,18 @@ blocks:
     coordinate: [40, 124.0]
     rotation: 0
     state: enabled
+- name: freq_offset
+  id: variable
+  parameters:
+    comment: ''
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 676.0]
+    rotation: 0
+    state: enabled
 - name: high_cutoff_gauge
   id: qtgui_levelgauge
   parameters:
@@ -50,7 +62,7 @@ blocks:
     barColor: default
     comment: ''
     fontColor: default
-    gui_hint: 41,1,1,5
+    gui_hint: 41,1,1,6
     isVertical: 'False'
     label: ''
     maximum: '3000'
@@ -77,7 +89,7 @@ blocks:
     barColor: default
     comment: ''
     fontColor: default
-    gui_hint: 40,1,1,5
+    gui_hint: 40,1,1,6
     isVertical: 'False'
     label: ''
     maximum: '3000'
@@ -107,6 +119,30 @@ blocks:
     coordinate: [376, 36.0]
     rotation: 0
     state: true
+- name: mode_freq_offset
+  id: variable_qtgui_toggle_switch
+  parameters:
+    cellalignment: '1'
+    comment: ''
+    gui_hint: 39,6,1,1
+    initPressed: 'False'
+    label: CW
+    outputmsgname: freq_offset
+    position: '3'
+    pressed: '850'
+    released: '0'
+    switchOffBackground: gray
+    switchOnBackground: green
+    type: int
+    value: '0'
+    verticalalignment: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 708.0]
+    rotation: 0
+    state: enabled
 - name: qtgui_dialgauge_0
   id: qtgui_dialgauge
   parameters:
@@ -291,7 +327,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: TX VFO frequency display
-    gui_hint: 40,0,2,1
+    gui_hint: 41,0,2,1
     lbl: TX
     maxFreqHz: 510e3
     maxoutbuf: '0'
@@ -309,7 +345,7 @@ blocks:
     coordinate: [1272, 428.0]
     rotation: 180
     state: true
-- name: vfo
+- name: vfo_a
   id: qtgui_msgdigitalnumbercontrol
   parameters:
     ThousandsSeparator: .
@@ -317,7 +353,7 @@ blocks:
     alias: ''
     comment: RX VFO frequency display
     gui_hint: 39,0,1,1
-    lbl: RX
+    lbl: 'VFO A: SSB, CW with filter'
     maxFreqHz: 510e3
     maxoutbuf: '0'
     minFreqHz: -10e3
@@ -332,6 +368,31 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1280, 876.0]
+    rotation: 180
+    state: true
+- name: vfo_b
+  id: qtgui_msgdigitalnumbercontrol
+  parameters:
+    ThousandsSeparator: .
+    affinity: ''
+    alias: ''
+    comment: RX VFO frequency display
+    gui_hint: 40,0,1,1
+    lbl: 'VFO B: Digital'
+    maxFreqHz: 510e3
+    maxoutbuf: '0'
+    minFreqHz: -10e3
+    minoutbuf: '0'
+    outputmsgname: freq
+    readOnly: 'False'
+    relBackgroundColor: black
+    relFontColor: white
+    value: 40e3
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 1100.0]
     rotation: 180
     state: true
 - name: zmq_watermark
@@ -353,7 +414,7 @@ blocks:
     alias: ''
     amp: 1e-3
     comment: ''
-    freq: rx0_low_cutoff
+    freq: rx0_low_cutoff - freq_offset
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -366,7 +427,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1280, 1340.0]
+    coordinate: [1296, 1484.0]
     rotation: 0
     state: enabled
 - name: analog_sig_source_x_0_0
@@ -376,7 +437,7 @@ blocks:
     alias: ''
     amp: 1e-3
     comment: ''
-    freq: rx0_high_cutoff
+    freq: rx0_high_cutoff - freq_offset
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -389,7 +450,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1280, 1476.0]
+    coordinate: [1296, 1620.0]
     rotation: 0
     state: enabled
 - name: blocks_add_xx_0
@@ -407,7 +468,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1592.0, 1328]
+    coordinate: [1608.0, 1472]
     rotation: 90
     state: enabled
 - name: blocks_message_debug_0
@@ -425,6 +486,20 @@ blocks:
     coordinate: [1656, 1016.0]
     rotation: 0
     state: disabled
+- name: blocks_msgpair_to_var_0
+  id: blocks_msgpair_to_var
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    target: freq_offset
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 748.0]
+    rotation: 0
+    state: enabled
 - name: blocks_swapiq_0
   id: blocks_swapiq
   parameters:
@@ -459,7 +534,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1280, 1260.0]
+    coordinate: [1296, 1404.0]
     rotation: 180
     state: enabled
 - name: control
@@ -467,52 +542,58 @@ blocks:
   parameters:
     _source_code: "import numpy as np\nfrom gnuradio import gr\nimport pmt\n\nimport\
       \ os\nimport pulsectl\n\n# buttons (notes)\nMIDI_FT8_QRG = 2 # KP 2 A\nMIDI_SHIFT_FT8_QRG\
-      \ = 6 # Shift-KP 2 A\nMIDI_SYNC_A = 35\nMIDI_SHIFT_SYNC_A = 38\nMIDI_RECORD\
-      \ = 43\n\nMIDI_AUDIO_HEADPHONES = 49 # KP 1 B\nMIDI_AUDIO_SPEAKER = 51 # KP\
-      \ 3 B\nMIDI_AUDIO_STEREO = 52 # KP 4 B\nMIDI_AUDIOS = [MIDI_AUDIO_HEADPHONES,\
-      \ MIDI_AUDIO_STEREO, MIDI_AUDIO_SPEAKER]\n\n# controls\nMIDI_VFO_A = 48 # Jog\
-      \ A\nMIDI_SHIFT_VFO_A = 55 # Shift-Jog A\nMIDI_POWER = 54 # Sync A\nMIDI_VOLUME\
-      \ = 57 # Volume A\nMIDI_BANDPASS_CENTER = 59 # Medium A\nMIDI_BANDPASS_WIDTH\
-      \ = 60 # Bass A\nMIDI_WPM = 0x3D\nMIDI_REPORT_ALL_CONTROLS = 0x7f\n\ndef sign(i):\n\
-      \    if i < 0:\n        return -1\n    elif i > 0:\n        return 1\n    else:\n\
-      \        return 0\n\nclass blk(gr.sync_block):\n    \"\"\"TRX Control block\"\
-      \"\"\n\n    def __init__(self):  # only default arguments here\n        \"\"\
-      \"arguments to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
-      \            self,\n            name='Control',\n            in_sig=None,\n\
-      \            out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
+      \ = 6 # Shift-KP 2 A\nMIDI_SYNC_A = 35\nMIDI_SHIFT_SYNC_A = 38\nMIDI_SYNC_B\
+      \ = 83\nMIDI_SHIFT_SYNC_B = 86\nMIDI_RECORD = 43\n\nMIDI_AUDIO_HEADPHONES =\
+      \ 49 # KP 1 B\nMIDI_AUDIO_SPEAKER = 51 # KP 3 B\nMIDI_AUDIO_STEREO = 52 # KP\
+      \ 4 B\nMIDI_AUDIOS = [MIDI_AUDIO_HEADPHONES, MIDI_AUDIO_STEREO, MIDI_AUDIO_SPEAKER]\n\
+      \n# controls\nMIDI_SHIFT = 47\nMIDI_VFO_A = 48 # Jog A\nMIDI_SHIFT_VFO_A = 55\
+      \ # Shift-Jog A\nMIDI_VFO_B = 49 # Jog B\nMIDI_SHIFT_VFO_B = 56 # Shift-Jog\
+      \ B\nMIDI_POWER = 54 # Slider\nMIDI_VOLUME = 57 # Volume A\nMIDI_BANDPASS_CENTER\
+      \ = 59 # Medium A\nMIDI_BANDPASS_WIDTH = 60 # Bass A\nMIDI_WPM = 0x3D # Volume\
+      \ B\nMIDI_REPORT_ALL_CONTROLS = 0x7f\n\ndef sign(i):\n    if i < 0:\n      \
+      \  return -1\n    elif i > 0:\n        return 1\n    else:\n        return 0\n\
+      \nclass blk(gr.sync_block):\n    \"\"\"TRX Control block\"\"\"\n\n    def __init__(self):\
+      \  # only default arguments here\n        \"\"\"arguments to this function show\
+      \ up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n         \
+      \   self,\n            name='Control',\n            in_sig=None,\n         \
+      \   out_sig=None,\n        )\n\n        self.message_port_register_in(pmt.intern(\"\
       midi_in\"))\n        self.set_msg_handler(pmt.intern(\"midi_in\"), self.midi_in)\n\
-      \        self.message_port_register_in(pmt.intern(\"rx_freq_in\"))\n       \
-      \ self.set_msg_handler(pmt.intern(\"rx_freq_in\"), self.rx_freq_in)\n      \
-      \  self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n        self.set_msg_handler(pmt.intern(\"\
-      tx_freq_in\"), self.tx_freq_in)\n\n        self.message_port_register_out(pmt.intern(\"\
-      midi_out\"))\n        self.message_port_register_out(pmt.intern(\"rx_freq_out\"\
+      \        self.message_port_register_in(pmt.intern(\"vfo_a_freq_in\"))\n    \
+      \    self.set_msg_handler(pmt.intern(\"vfo_a_freq_in\"), self.vfo_a_freq_in)\n\
+      \        self.message_port_register_in(pmt.intern(\"vfo_b_freq_in\"))\n    \
+      \    self.set_msg_handler(pmt.intern(\"vfo_b_freq_in\"), self.vfo_b_freq_in)\n\
+      \        self.message_port_register_in(pmt.intern(\"tx_freq_in\"))\n       \
+      \ self.set_msg_handler(pmt.intern(\"tx_freq_in\"), self.tx_freq_in)\n\n    \
+      \    self.message_port_register_out(pmt.intern(\"midi_out\"))\n        self.message_port_register_out(pmt.intern(\"\
+      vfo_a_freq_out\"))\n        self.message_port_register_out(pmt.intern(\"vfo_b_freq_out\"\
       ))\n        self.message_port_register_out(pmt.intern(\"tx_freq_out\"))\n  \
       \      self.message_port_register_out(pmt.intern(\"wpm_out\"))\n        self.message_port_register_out(pmt.intern(\"\
       filter_center_out\"))\n        self.message_port_register_out(pmt.intern(\"\
       filter_bw_out\"))\n        self.message_port_register_out(pmt.intern(\"af_gain_out\"\
-      ))\n\n        self.rx0_freq = 40000.0\n        self.tx_freq = 40000.0\n    \
-      \    self.filter_center = 850\n        self.filter_bw = 3000\n        self.record\
-      \ = False\n        self.sync_a = False # start false so set_sync_a sets the\
-      \ LEDs\n        self.vfo_a_dir = 0 # last tuning direction\n\n        self.pulse\
-      \ = None\n        self.tx_audio_port = None\n        self.rx_audio_port = None\n\
-      \        self.ft8_audio_port = None\n\n    def note_on(self, note, velocity):\n\
-      \        self.message_port_pub(pmt.intern(\"midi_out\"),\n                pmt.cons(pmt.intern('note_on'),\n\
-      \                    pmt.cons(pmt.from_long(note), pmt.from_long(velocity))))\n\
-      \n    def start(self):\n\n        # Audio\n        self.pulse = pulsectl.Pulse('qo100')\n\
-      \n        for port in self.pulse.source_output_list():\n            # device.description:\
-      \ ALSA Capture [python3.13]\n            desc = port.proplist.get('device.description')\n\
-      \            if desc and desc.startswith(\"ALSA Capture [python\"):\n      \
-      \          self.tx_audio_port = port\n                print(\"TX port:\", self.tx_audio_port)\n\
-      \                self.set_audio_input('tx0')\n                break\n\n    \
-      \    for port in self.pulse.sink_input_list():\n            # device.description:\
-      \ ALSA Playback [python3.13]\n            desc = port.proplist.get('device.description')\n\
-      \            if desc and desc.startswith(\"ALSA Playback [python\"):\n     \
-      \           if \"remote.name\" in port.proplist: # \"pipewire-0\" on the FT8\
-      \ sink\n                    self.ft8_audio_port = port\n                   \
-      \ print(\"FT8 port:\", self.ft8_audio_port)\n                    # need to restore\
-      \ volume since pipewire can't tell the ports apart and randomly remembers the\
-      \ last setting from either\n                    self.ft8_audio_port.volume.value_flat\
-      \ = 1.0\n                    self.pulse.sink_input_volume_set(self.ft8_audio_port.index,\
+      ))\n\n        self.vfo_a_freq = 40000.0\n        self.vfo_b_freq = 40000.0\n\
+      \        self.tx_freq = 40000.0\n        self.filter_center = 850\n        self.filter_bw\
+      \ = 3000\n        self.record = False\n        self.sync_a = None # start false\
+      \ so set_sync_a sets the LEDs\n        self.sync_b = None\n        self.vfo_a_dir\
+      \ = 0 # last tuning direction\n        self.vfo_b_dir = 0 # last tuning direction\n\
+      \n        self.pulse = None\n        self.tx_audio_port = None\n        self.rx_audio_port\
+      \ = None\n        self.ft8_audio_port = None\n\n    def note_on(self, note,\
+      \ velocity):\n        self.message_port_pub(pmt.intern(\"midi_out\"),\n    \
+      \            pmt.cons(pmt.intern('note_on'),\n                    pmt.cons(pmt.from_long(note),\
+      \ pmt.from_long(velocity))))\n\n    def start(self):\n\n        # Audio\n  \
+      \      self.pulse = pulsectl.Pulse('qo100')\n\n        for port in self.pulse.source_output_list():\n\
+      \            # device.description: ALSA Capture [python3.13]\n            desc\
+      \ = port.proplist.get('device.description')\n            if desc and desc.startswith(\"\
+      ALSA Capture [python\"):\n                self.tx_audio_port = port\n      \
+      \          print(\"TX port:\", self.tx_audio_port)\n                self.set_audio_input('tx0')\n\
+      \                break\n\n        for port in self.pulse.sink_input_list():\n\
+      \            # device.description: ALSA Playback [python3.13]\n            desc\
+      \ = port.proplist.get('device.description')\n            if desc and desc.startswith(\"\
+      ALSA Playback [python\"):\n                if \"remote.name\" in port.proplist:\
+      \ # \"pipewire-0\" on the FT8 sink\n                    self.ft8_audio_port\
+      \ = port\n                    print(\"FT8 port:\", self.ft8_audio_port)\n  \
+      \                  # need to restore volume since pipewire can't tell the ports\
+      \ apart and randomly remembers the last setting from either\n              \
+      \      self.ft8_audio_port.volume.value_flat = 1.0\n                    self.pulse.sink_input_volume_set(self.ft8_audio_port.index,\
       \ self.ft8_audio_port.volume)\n                    # connect to rx2\n      \
       \              rx2_sink = self.pulse.get_sink_by_name(\"rx2\")\n           \
       \         self.pulse.sink_input_move(self.ft8_audio_port.index, rx2_sink.index)\n\
@@ -520,8 +601,9 @@ blocks:
       \ = port\n                    print(\"RX port:\", self.rx_audio_port)\n    \
       \                # volume will be set by polling the current console settings\n\
       \                    # connect to sink\n                    self.set_audio_output(MIDI_AUDIO_SPEAKER,\
-      \ 'Internes Audio')\n\n        # MIDI\n        self.set_sync_a(True)\n     \
-      \   self.set_rx_freq(40000.0)\n        self.set_tx_freq(40000.0)\n        self.set_record(False)\n\
+      \ 'Internes Audio')\n\n        # MIDI\n        self.set_vfo_a_freq(40000.0)\n\
+      \        self.set_vfo_b_freq(40000.0)\n        self.set_tx_freq(40000.0)\n \
+      \       self.set_sync_a(True) # disables Sync B\n        self.set_record(False)\n\
       \n        # read out knobs and slider on startup\n        self.message_port_pub(pmt.intern(\"\
       midi_out\"),\n                pmt.cons(pmt.intern('control_change'),\n     \
       \               pmt.cons(pmt.from_long(MIDI_REPORT_ALL_CONTROLS), pmt.from_long(127))))\n\
@@ -550,26 +632,37 @@ blocks:
       \    def set_record(self, record):\n        self.record = record\n        self.note_on(MIDI_RECORD,\
       \ 127 if self.record else 0)\n        if self.record:\n            self.set_audio_input(self.pulse.source_default_get().description)\n\
       \        else:\n            self.set_audio_input('Monitor of tx0')\n\n    def\
-      \ set_rx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"rx_freq_out\"\
+      \ set_vfo_a_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"vfo_a_freq_out\"\
       ),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\n\
-      \    def set_tx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"\
+      \    def set_vfo_b_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"\
+      vfo_b_freq_out\"),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\
+      \n    def set_tx_freq(self, freq):\n        self.message_port_pub(pmt.intern(\"\
       tx_freq_out\"),\n                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));\n\
       \n    def set_wpm(self, wpm):\n        self.message_port_pub(pmt.intern(\"wpm_out\"\
       ),\n                pmt.cons(pmt.intern('value'), pmt.from_double(wpm)));\n\n\
       \    def set_sync_a(self, sync_a):\n        if self.sync_a != sync_a:\n    \
       \        self.sync_a = sync_a\n            self.note_on(MIDI_SYNC_A, 127 if\
       \ sync_a else 0)\n            self.note_on(MIDI_SHIFT_SYNC_A, 127 if sync_a\
-      \ else 0)\n            if sync_a:\n                self.set_tx_freq(self.rx0_freq)\n\
-      \n    def rx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
-      \ == pmt.intern('freq'):\n            self.rx0_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
-      \            if self.sync_a:\n                self.set_tx_freq(self.rx0_freq)\n\
+      \ else 0)\n            if sync_a:\n                self.set_sync_b(False)\n\
+      \                self.set_tx_freq(self.vfo_a_freq)\n\n    def set_sync_b(self,\
+      \ sync_b):\n        if self.sync_b != sync_b:\n            self.sync_b = sync_b\n\
+      \            self.note_on(MIDI_SYNC_B, 127 if sync_b else 0)\n            self.note_on(MIDI_SHIFT_SYNC_B,\
+      \ 127 if sync_b else 0)\n            if sync_b:\n                self.set_sync_a(False)\n\
+      \                self.set_tx_freq(self.vfo_b_freq)\n\n    def vfo_a_freq_in(self,\
+      \ msg):\n        if msg.is_pair() and pmt.car(msg) == pmt.intern('freq'):\n\
+      \            self.vfo_a_freq = int(pmt.to_double(pmt.cdr(msg)))\n          \
+      \  if self.sync_a:\n                self.set_tx_freq(self.vfo_a_freq)\n\n  \
+      \  def vfo_b_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
+      \ == pmt.intern('freq'):\n            self.vfo_b_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
+      \            if self.sync_b:\n                self.set_tx_freq(self.vfo_b_freq)\n\
       \n    def tx_freq_in(self, msg):\n        if msg.is_pair() and pmt.car(msg)\
       \ == pmt.intern('freq'):\n            tx_freq = int(pmt.to_double(pmt.cdr(msg)))\n\
       \n            if (tx_freq == 40000) != (self.tx_freq == 40000):\n          \
       \      # FT8 frequency indicator LED\n                self.note_on(MIDI_FT8_QRG,\
       \ 127 if tx_freq == 40000 else 0)\n                self.note_on(MIDI_SHIFT_FT8_QRG,\
       \ 127 if tx_freq == 40000 else 0)\n\n            self.tx_freq = tx_freq\n\n\
-      \            if self.tx_freq != self.rx0_freq:\n                self.set_sync_a(False)\n\
+      \            if self.tx_freq != self.vfo_a_freq:\n                self.set_sync_a(False)\n\
+      \            if self.tx_freq != self.vfo_b_freq:\n                self.set_sync_b(False)\n\
       \n            freqfile = open(\"/run/user/1000/gnuradio/qo100.qrg\", \"w\")\n\
       \            freqfile.write(str(tx_freq + 2400000000) + \"\\n\")\n         \
       \   # fake frequency on 10m so tlf can deal with it\n            #freqfile.write(str(tx_freq\
@@ -581,27 +674,40 @@ blocks:
       \ if value < 64 else value - 128\n                if sign(delta) != self.vfo_a_dir:\
       \ # compensate for 2 (or 126) output on direction change\n                 \
       \   delta += self.vfo_a_dir\n                    self.vfo_a_dir = sign(delta)\n\
-      \                self.set_rx_freq(self.rx0_freq + delta * 10)\n\n          \
-      \  elif control == MIDI_SHIFT_VFO_A and value != 64: # shift-jog a (64 reported\
+      \                self.set_vfo_a_freq(self.vfo_a_freq + delta * 10)\n\n     \
+      \       elif control == MIDI_VFO_B: # jog B\n                delta = value if\
+      \ value < 64 else value - 128\n                if sign(delta) != self.vfo_b_dir:\
+      \ # compensate for 2 (or 126) output on direction change\n                 \
+      \   delta += self.vfo_b_dir\n                    self.vfo_b_dir = sign(delta)\n\
+      \                self.set_vfo_b_freq(self.vfo_b_freq + delta * 10)\n\n     \
+      \       elif control == MIDI_SHIFT_VFO_A and value != 64: # shift-jog a (64\
+      \ reported on all-buttons-readout, ignore that)\n                delta = value\
+      \ if value < 64 else value - 128\n                if sign(delta) != self.vfo_a_dir:\
+      \ # compensate for 2 (or 126) output on direction change\n                 \
+      \   delta += self.vfo_a_dir\n                    self.vfo_a_dir = sign(delta)\n\
+      \                self.set_sync_a(False)\n                self.set_sync_b(False)\n\
+      \                self.set_tx_freq(self.tx_freq + delta * 10)\n\n           \
+      \ elif control == MIDI_SHIFT_VFO_B and value != 64: # shift-jog a (64 reported\
       \ on all-buttons-readout, ignore that)\n                delta = value if value\
-      \ < 64 else value - 128\n                if sign(delta) != self.vfo_a_dir: #\
+      \ < 64 else value - 128\n                if sign(delta) != self.vfo_b_dir: #\
       \ compensate for 2 (or 126) output on direction change\n                   \
-      \ delta += self.vfo_a_dir\n                    self.vfo_a_dir = sign(delta)\n\
-      \                self.set_sync_a(False)\n                self.set_tx_freq(self.tx_freq\
-      \ + delta * 10)\n\n            elif control == MIDI_VOLUME:\n              \
-      \  self.set_audio_volume(value / 100.0) # 0 .. 127%\n\n            elif control\
-      \ == MIDI_WPM:\n                wpm = round(6.0 + 42.0 * value / 127.0) # 0\
-      \ .. 127% -> 6..48 wpm\n                self.set_wpm(wpm)\n\n            elif\
-      \ control in (MIDI_BANDPASS_CENTER, MIDI_BANDPASS_WIDTH): # medium A, bass A\n\
-      \                if control == MIDI_BANDPASS_CENTER:\n                    self.filter_center\
-      \ = 1500 + 20 * (value - 64)\n                    self.message_port_pub(pmt.intern(\"\
-      filter_center_out\"),\n                        pmt.cons(pmt.intern('value'),\
-      \ pmt.from_double(self.filter_center)))\n                if control == MIDI_BANDPASS_WIDTH:\n\
-      \                    if value < 127 - 36: # first 36 steps are 30Hz, the rest\
-      \ 20Hz\n                        self.filter_bw = 3000 - 360 - 20 * (127 - value)\n\
-      \                    else:\n                        self.filter_bw = 3000 -\
-      \ 30 * (127 - value)\n                    self.message_port_pub(pmt.intern(\"\
-      filter_bw_out\"),\n                        pmt.cons(pmt.intern('value'), pmt.from_double(self.filter_bw)))\n\
+      \ delta += self.vfo_b_dir\n                    self.vfo_b_dir = sign(delta)\n\
+      \                self.set_sync_a(False)\n                self.set_sync_b(False)\n\
+      \                self.set_tx_freq(self.tx_freq + delta * 10)\n\n           \
+      \ elif control == MIDI_VOLUME:\n                self.set_audio_volume(value\
+      \ / 100.0) # 0 .. 127%\n\n            elif control == MIDI_WPM:\n          \
+      \      wpm = round(6.0 + 42.0 * value / 127.0) # 0 .. 127% -> 6..48 wpm\n  \
+      \              self.set_wpm(wpm)\n\n            elif control in (MIDI_BANDPASS_CENTER,\
+      \ MIDI_BANDPASS_WIDTH): # medium A, bass A\n                if control == MIDI_BANDPASS_CENTER:\n\
+      \                    self.filter_center = 1500 + 20 * (value - 64)\n       \
+      \             self.message_port_pub(pmt.intern(\"filter_center_out\"),\n   \
+      \                     pmt.cons(pmt.intern('value'), pmt.from_double(self.filter_center)))\n\
+      \                if control == MIDI_BANDPASS_WIDTH:\n                    if\
+      \ value < 127 - 36: # first 36 steps are 30Hz, the rest 20Hz\n             \
+      \           self.filter_bw = 3000 - 360 - 20 * (127 - value)\n             \
+      \       else:\n                        self.filter_bw = 3000 - 30 * (127 - value)\n\
+      \                    self.message_port_pub(pmt.intern(\"filter_bw_out\"),\n\
+      \                        pmt.cons(pmt.intern('value'), pmt.from_double(self.filter_bw)))\n\
       \n                low_cutoff = max(self.filter_center - self.filter_bw // 2,\
       \ 0)\n                high_cutoff = min(self.filter_center + self.filter_bw\
       \ // 2, 3000)\n                self.tb.set_rx0_low_cutoff(low_cutoff)\n    \
@@ -613,35 +719,40 @@ blocks:
       \            velocity = pmt.to_long(pmt.cdr(payload))\n\n            if velocity\
       \ != 127: # ignore key releases\n                return\n\n            if note\
       \ == MIDI_SYNC_A: # Sync A\n                self.set_sync_a(not self.sync_a)\n\
-      \n            elif note == MIDI_SHIFT_SYNC_A: # Shift-Sync A\n             \
-      \   if not self.sync_a:\n                    # set RX from TX\n            \
-      \        self.set_rx_freq(self.tx_freq)\n                self.set_sync_a(not\
-      \ self.sync_a)\n\n            elif note == MIDI_FT8_QRG: # KP 2 A\n        \
-      \        self.set_rx_freq(40000)\n                self.set_sync_a(True)\n  \
-      \              self.set_record(False)\n\n            elif note == MIDI_AUDIO_HEADPHONES:\
-      \ # KP 1 A\n                self.set_audio_output(MIDI_AUDIO_HEADPHONES, 'Plantronics')\n\
-      \n            elif note == MIDI_AUDIO_STEREO: # KP 3 A\n                self.set_audio_output(MIDI_AUDIO_STEREO,\
-      \ 'Internes Audio Analog Stereo')\n\n            elif note == MIDI_AUDIO_SPEAKER:\
-      \ # KP 4 A\n                self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek\
-      \ Y')\n\n            elif note == MIDI_RECORD: # REC\n                self.set_record(not\
-      \ self.record)\n\n            else:\n                print(\"Unknown MIDI note_on:\"\
-      , note, velocity)\n\n        else:\n            print(\"Unknown MIDI message\
-      \ type:\", msgtype)\n\nif __name__ == '__main__':\n    blk()\n"
+      \n            elif note == MIDI_SYNC_B: # Sync B\n                self.set_sync_b(not\
+      \ self.sync_b)\n\n            elif note == MIDI_SHIFT_SYNC_A: # Shift-Sync A\n\
+      \                self.set_vfo_a_freq(self.tx_freq) # set RX from TX\n      \
+      \          self.set_sync_a(True)\n\n            elif note == MIDI_SHIFT_SYNC_B:\
+      \ # Shift-Sync A\n                self.set_vfo_b_freq(self.tx_freq) # set RX\
+      \ from TX\n                self.set_sync_b(True)\n\n            elif note ==\
+      \ MIDI_FT8_QRG: # KP 2 A\n                self.set_vfo_b_freq(40000)\n     \
+      \           self.set_sync_b(True)\n                self.set_record(False)\n\n\
+      \            elif note == MIDI_AUDIO_HEADPHONES: # KP 1 A\n                self.set_audio_output(MIDI_AUDIO_HEADPHONES,\
+      \ 'Plantronics')\n\n            elif note == MIDI_AUDIO_STEREO: # KP 3 A\n \
+      \               self.set_audio_output(MIDI_AUDIO_STEREO, 'Internes Audio Analog\
+      \ Stereo')\n\n            elif note == MIDI_AUDIO_SPEAKER: # KP 4 A\n      \
+      \          self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Unitek Y')\n\n       \
+      \     elif note == MIDI_RECORD: # REC\n                self.set_record(not self.record)\n\
+      \n            elif note == MIDI_SHIFT: # ignore\n                pass\n\n  \
+      \          else:\n                print(\"Unknown MIDI note_on:\", note, velocity)\n\
+      \n        else:\n            print(\"Unknown MIDI message type:\", msgtype)\n\
+      \nif __name__ == '__main__':\n    blk()\n"
     affinity: ''
     alias: ''
     comment: Control logic
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('rx_freq_in',
-      'message', 1), ('midi_in', 'message', 1)], [('af_gain_out', 'message', 1), ('filter_bw_out',
-      'message', 1), ('filter_center_out', 'message', 1), ('wpm_out', 'message', 1),
-      ('tx_freq_out', 'message', 1), ('rx_freq_out', 'message', 1), ('midi_out', 'message',
-      1)], 'TRX Control block', [])
+    _io_cache: ('Control', 'blk', [], [('tx_freq_in', 'message', 1), ('vfo_b_freq_in',
+      'message', 1), ('vfo_a_freq_in', 'message', 1), ('midi_in', 'message', 1)],
+      [('af_gain_out', 'message', 1), ('filter_bw_out', 'message', 1), ('filter_center_out',
+      'message', 1), ('wpm_out', 'message', 1), ('tx_freq_out', 'message', 1), ('vfo_b_freq_out',
+      'message', 1), ('vfo_a_freq_out', 'message', 1), ('midi_out', 'message', 1)],
+      'TRX Control block', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1344, 560.0]
+    coordinate: [1344, 552.0]
     rotation: 0
     state: true
 - name: fosphor_glfw_sink_c_0
@@ -714,7 +825,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 1232.0]
+    coordinate: [280, 1232.0]
     rotation: 0
     state: true
 - name: ft84_rotate
@@ -781,8 +892,8 @@ blocks:
     minoutbuf: '0'
     tmp_path: '''/run/user/1000/gnuradio'''
   states:
-    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft4',
-      'message', 1), ('rotate_ft8', 'message', 1)], [], 'Rotate wav files and feed
+    _io_cache: ('Rotate and Decode Wav File', 'blk', [('tmp_path', "'.'")], [('rotate_ft8',
+      'message', 1), ('rotate_ft4', 'message', 1)], [], 'Rotate wav files and feed
       them to jt9 for FT8 and FT4 decoding', ['tmp_path'])
     bus_sink: false
     bus_source: false
@@ -1037,7 +1148,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1296, 1008.0]
+    coordinate: [1304, 1016.0]
     rotation: 0
     state: enabled
 - name: rx0_high_cutoff_to_msg
@@ -1207,7 +1318,7 @@ blocks:
     fftsize: '2048'
     freqhalf: 'True'
     grid: 'False'
-    gui_hint: 0,0,14,6
+    gui_hint: 0,0,14,7
     int_max: '-50'
     int_min: '-80'
     label1: ''
@@ -1338,7 +1449,7 @@ blocks:
     alias: ''
     amp: mag
     comment: TX VFO
-    freq: tx_vfo - 250e3
+    freq: tx_vfo - freq_offset - 250e3
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -1413,7 +1524,25 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 872.0]
+    coordinate: [352, 680.0]
+    rotation: 0
+    state: enabled
+- name: vfo0_mixer_0
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 872.0]
     rotation: 0
     state: enabled
 - name: vfo0_scope_bandpass
@@ -1447,8 +1576,8 @@ blocks:
     affinity: ''
     alias: ''
     amp: mag
-    comment: 'VFO 0: main receiver'
-    freq: 250e3-vfo
+    comment: 'VFO A: waterfall'
+    freq: 250e3 - vfo_a
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -1462,6 +1591,29 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [40, 724.0]
+    rotation: 0
+    state: enabled
+- name: vfo0_signal_source_0
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: mag
+    comment: 'VFO A: receiver BFO'
+    freq: 250e3 - (vfo_a - freq_offset)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    showports: 'False'
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 876.0]
     rotation: 0
     state: enabled
 - name: vfo0_spectrum
@@ -1499,7 +1651,7 @@ blocks:
     fftsize: '2048'
     freqhalf: 'True'
     grid: 'True'
-    gui_hint: 15,0,14,6
+    gui_hint: 15,0,15,7
     label: Relative Gain
     label1: ''
     label10: ''''''
@@ -1542,7 +1694,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1280, 1096.0]
+    coordinate: [1296, 1240.0]
     rotation: 0
     state: enabled
 - name: vfo0_to_float
@@ -1655,7 +1807,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 1048.0]
+    coordinate: [352, 1048.0]
     rotation: 0
     state: enabled
 - name: vfo2_signal_source
@@ -1664,8 +1816,8 @@ blocks:
     affinity: ''
     alias: ''
     amp: mag
-    comment: 'VFO 2: FT8/FT4 receiver'
-    freq: 250e3-40e3
+    comment: 'VFO B: FT8/FT4 receiver'
+    freq: 250e3 - vfo_b
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -1678,7 +1830,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 1028.0]
+    coordinate: [40, 1036.0]
     rotation: 0
     state: enabled
 - name: vfo2_to_float
@@ -1704,7 +1856,7 @@ blocks:
     affinity: ''
     alias: ''
     bind: 'False'
-    comment: ''
+    comment: Network input
     hwm: zmq_watermark
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -1716,7 +1868,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 620.0]
+    coordinate: [40, 588.0]
     rotation: 0
     state: enabled
 - name: zeromq_push_sink_0
@@ -1750,8 +1902,9 @@ connections:
 - [control, filter_bw_out, qtgui_dialgauge_4, value]
 - [control, filter_center_out, qtgui_dialgauge_3, value]
 - [control, midi_out, midi_block, midi_in]
-- [control, rx_freq_out, vfo, valuein]
 - [control, tx_freq_out, tx_vfo, valuein]
+- [control, vfo_a_freq_out, vfo_a, valuein]
+- [control, vfo_b_freq_out, vfo_b, valuein]
 - [control, wpm_out, qtgui_dialgauge_0, value]
 - [control, wpm_out, rigctld, wpm_in]
 - [ft84_cron, cron_ft4, ft84_rotate, rotate_ft4]
@@ -1762,13 +1915,14 @@ connections:
 - [limesdr_source, '0', vfo2_mixer, '0']
 - [midi_block, midi_out, blocks_message_debug_0, print]
 - [midi_block, midi_out, control, midi_in]
+- [mode_freq_offset, state, blocks_msgpair_to_var_0, inpair]
 - [rational_resampler_4, '0', ft4_sink, '0']
 - [rational_resampler_4, '0', ft8_sink, '0']
-- [rigctld, freq_out, vfo, valuein]
+- [rigctld, freq_out, vfo_a, valuein]
 - [rx0_high_cutoff_to_msg, msgout, high_cutoff_gauge, value]
 - [rx0_low_cutoff_to_msg, msgout, low_cutoff_gauge, value]
 - [rx_resampler, '0', tx_mixer, '0']
-- [rx_waterfall, freq, vfo, valuein]
+- [rx_waterfall, freq, vfo_a, valuein]
 - [tx_audio_source, '0', tx_to_complex, '0']
 - [tx_bandpass, '0', rx_resampler, '0']
 - [tx_mixer, '0', zeromq_push_sink_0, '0']
@@ -1776,17 +1930,15 @@ connections:
 - [tx_to_complex, '0', tx_bandpass, '0']
 - [tx_vfo, valueout, control, tx_freq_in]
 - [tx_vfo_signal_source, '0', tx_mixer, '1']
-- [vfo, valueout, control, rx_freq_in]
-- [vfo, valueout, rigctld, freq_in]
-- [vfo, valueout, vfo0_spectrum, freq]
 - [vfo0_bandpass, '0', vfo0_to_float, '0']
-- [vfo0_mixer, '0', vfo0_bandpass, '0']
 - [vfo0_mixer, '0', vfo0_scope_bandpass, '0']
+- [vfo0_mixer_0, '0', vfo0_bandpass, '0']
 - [vfo0_scope_bandpass, '0', vfo0_spectrum, '0']
 - [vfo0_signal_source, '0', blocks_swapiq_0, '0']
 - [vfo0_signal_source, '0', vfo0_mixer, '1']
-- [vfo0_spectrum, freq, vfo, valuein]
+- [vfo0_signal_source_0, '0', vfo0_mixer_0, '1']
 - [vfo0_spectrum, freq, vfo0_spectrum, freq]
+- [vfo0_spectrum, freq, vfo_a, valuein]
 - [vfo0_to_float, '0', vfo0_audio_sink, '0']
 - [vfo0_waterfall_add, '0', rx_waterfall, '0']
 - [vfo0_waterfall_atten, '0', vfo0_waterfall_add, '1']
@@ -1795,8 +1947,13 @@ connections:
 - [vfo2_signal_source, '0', vfo2_mixer, '1']
 - [vfo2_to_float, '0', rational_resampler_4, '0']
 - [vfo2_to_float, '0', vfo2_audio_sink, '0']
+- [vfo_a, valueout, control, vfo_a_freq_in]
+- [vfo_a, valueout, rigctld, freq_in]
+- [vfo_a, valueout, vfo0_spectrum, freq]
+- [vfo_b, valueout, control, vfo_b_freq_in]
 - [zeromq_pull_source_0, '0', fosphor_glfw_sink_c_0, '0']
 - [zeromq_pull_source_0, '0', vfo0_mixer, '0']
+- [zeromq_pull_source_0, '0', vfo0_mixer_0, '0']
 - [zeromq_pull_source_0, '0', vfo0_waterfall_add, '0']
 - [zeromq_pull_source_0, '0', vfo2_mixer, '0']
 

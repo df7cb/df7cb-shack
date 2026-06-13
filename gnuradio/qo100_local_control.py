@@ -10,6 +10,8 @@ MIDI_FT8_QRG = 2 # KP 2 A
 MIDI_SHIFT_FT8_QRG = 6 # Shift-KP 2 A
 MIDI_SYNC_A = 35
 MIDI_SHIFT_SYNC_A = 38
+MIDI_SYNC_B = 83
+MIDI_SHIFT_SYNC_B = 86
 MIDI_RECORD = 43
 
 MIDI_AUDIO_HEADPHONES = 49 # KP 1 B
@@ -18,13 +20,16 @@ MIDI_AUDIO_STEREO = 52 # KP 4 B
 MIDI_AUDIOS = [MIDI_AUDIO_HEADPHONES, MIDI_AUDIO_STEREO, MIDI_AUDIO_SPEAKER]
 
 # controls
+MIDI_SHIFT = 47
 MIDI_VFO_A = 48 # Jog A
 MIDI_SHIFT_VFO_A = 55 # Shift-Jog A
-MIDI_POWER = 54 # Sync A
+MIDI_VFO_B = 49 # Jog B
+MIDI_SHIFT_VFO_B = 56 # Shift-Jog B
+MIDI_POWER = 54 # Slider
 MIDI_VOLUME = 57 # Volume A
 MIDI_BANDPASS_CENTER = 59 # Medium A
 MIDI_BANDPASS_WIDTH = 60 # Bass A
-MIDI_WPM = 0x3D
+MIDI_WPM = 0x3D # Volume B
 MIDI_REPORT_ALL_CONTROLS = 0x7f
 
 def sign(i):
@@ -49,26 +54,32 @@ class blk(gr.sync_block):
 
         self.message_port_register_in(pmt.intern("midi_in"))
         self.set_msg_handler(pmt.intern("midi_in"), self.midi_in)
-        self.message_port_register_in(pmt.intern("rx_freq_in"))
-        self.set_msg_handler(pmt.intern("rx_freq_in"), self.rx_freq_in)
+        self.message_port_register_in(pmt.intern("vfo_a_freq_in"))
+        self.set_msg_handler(pmt.intern("vfo_a_freq_in"), self.vfo_a_freq_in)
+        self.message_port_register_in(pmt.intern("vfo_b_freq_in"))
+        self.set_msg_handler(pmt.intern("vfo_b_freq_in"), self.vfo_b_freq_in)
         self.message_port_register_in(pmt.intern("tx_freq_in"))
         self.set_msg_handler(pmt.intern("tx_freq_in"), self.tx_freq_in)
 
         self.message_port_register_out(pmt.intern("midi_out"))
-        self.message_port_register_out(pmt.intern("rx_freq_out"))
+        self.message_port_register_out(pmt.intern("vfo_a_freq_out"))
+        self.message_port_register_out(pmt.intern("vfo_b_freq_out"))
         self.message_port_register_out(pmt.intern("tx_freq_out"))
         self.message_port_register_out(pmt.intern("wpm_out"))
         self.message_port_register_out(pmt.intern("filter_center_out"))
         self.message_port_register_out(pmt.intern("filter_bw_out"))
         self.message_port_register_out(pmt.intern("af_gain_out"))
 
-        self.rx0_freq = 40000.0
+        self.vfo_a_freq = 40000.0
+        self.vfo_b_freq = 40000.0
         self.tx_freq = 40000.0
         self.filter_center = 850
         self.filter_bw = 3000
         self.record = False
-        self.sync_a = False # start false so set_sync_a sets the LEDs
+        self.sync_a = None # start false so set_sync_a sets the LEDs
+        self.sync_b = None
         self.vfo_a_dir = 0 # last tuning direction
+        self.vfo_b_dir = 0 # last tuning direction
 
         self.pulse = None
         self.tx_audio_port = None
@@ -115,9 +126,10 @@ class blk(gr.sync_block):
                     self.set_audio_output(MIDI_AUDIO_SPEAKER, 'Internes Audio')
 
         # MIDI
-        self.set_sync_a(True)
-        self.set_rx_freq(40000.0)
+        self.set_vfo_a_freq(40000.0)
+        self.set_vfo_b_freq(40000.0)
         self.set_tx_freq(40000.0)
+        self.set_sync_a(True) # disables Sync B
         self.set_record(False)
 
         # read out knobs and slider on startup
@@ -176,8 +188,12 @@ class blk(gr.sync_block):
         else:
             self.set_audio_input('Monitor of tx0')
 
-    def set_rx_freq(self, freq):
-        self.message_port_pub(pmt.intern("rx_freq_out"),
+    def set_vfo_a_freq(self, freq):
+        self.message_port_pub(pmt.intern("vfo_a_freq_out"),
+                pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));
+
+    def set_vfo_b_freq(self, freq):
+        self.message_port_pub(pmt.intern("vfo_b_freq_out"),
                 pmt.cons(pmt.intern('freq'), pmt.from_double(freq)));
 
     def set_tx_freq(self, freq):
@@ -194,13 +210,29 @@ class blk(gr.sync_block):
             self.note_on(MIDI_SYNC_A, 127 if sync_a else 0)
             self.note_on(MIDI_SHIFT_SYNC_A, 127 if sync_a else 0)
             if sync_a:
-                self.set_tx_freq(self.rx0_freq)
+                self.set_sync_b(False)
+                self.set_tx_freq(self.vfo_a_freq)
 
-    def rx_freq_in(self, msg):
+    def set_sync_b(self, sync_b):
+        if self.sync_b != sync_b:
+            self.sync_b = sync_b
+            self.note_on(MIDI_SYNC_B, 127 if sync_b else 0)
+            self.note_on(MIDI_SHIFT_SYNC_B, 127 if sync_b else 0)
+            if sync_b:
+                self.set_sync_a(False)
+                self.set_tx_freq(self.vfo_b_freq)
+
+    def vfo_a_freq_in(self, msg):
         if msg.is_pair() and pmt.car(msg) == pmt.intern('freq'):
-            self.rx0_freq = int(pmt.to_double(pmt.cdr(msg)))
+            self.vfo_a_freq = int(pmt.to_double(pmt.cdr(msg)))
             if self.sync_a:
-                self.set_tx_freq(self.rx0_freq)
+                self.set_tx_freq(self.vfo_a_freq)
+
+    def vfo_b_freq_in(self, msg):
+        if msg.is_pair() and pmt.car(msg) == pmt.intern('freq'):
+            self.vfo_b_freq = int(pmt.to_double(pmt.cdr(msg)))
+            if self.sync_b:
+                self.set_tx_freq(self.vfo_b_freq)
 
     def tx_freq_in(self, msg):
         if msg.is_pair() and pmt.car(msg) == pmt.intern('freq'):
@@ -213,8 +245,10 @@ class blk(gr.sync_block):
 
             self.tx_freq = tx_freq
 
-            if self.tx_freq != self.rx0_freq:
+            if self.tx_freq != self.vfo_a_freq:
                 self.set_sync_a(False)
+            if self.tx_freq != self.vfo_b_freq:
+                self.set_sync_b(False)
 
             freqfile = open("/run/user/1000/gnuradio/qo100.qrg", "w")
             freqfile.write(str(tx_freq + 2400000000) + "\n")
@@ -236,7 +270,14 @@ class blk(gr.sync_block):
                 if sign(delta) != self.vfo_a_dir: # compensate for 2 (or 126) output on direction change
                     delta += self.vfo_a_dir
                     self.vfo_a_dir = sign(delta)
-                self.set_rx_freq(self.rx0_freq + delta * 10)
+                self.set_vfo_a_freq(self.vfo_a_freq + delta * 10)
+
+            elif control == MIDI_VFO_B: # jog B
+                delta = value if value < 64 else value - 128
+                if sign(delta) != self.vfo_b_dir: # compensate for 2 (or 126) output on direction change
+                    delta += self.vfo_b_dir
+                    self.vfo_b_dir = sign(delta)
+                self.set_vfo_b_freq(self.vfo_b_freq + delta * 10)
 
             elif control == MIDI_SHIFT_VFO_A and value != 64: # shift-jog a (64 reported on all-buttons-readout, ignore that)
                 delta = value if value < 64 else value - 128
@@ -244,6 +285,16 @@ class blk(gr.sync_block):
                     delta += self.vfo_a_dir
                     self.vfo_a_dir = sign(delta)
                 self.set_sync_a(False)
+                self.set_sync_b(False)
+                self.set_tx_freq(self.tx_freq + delta * 10)
+
+            elif control == MIDI_SHIFT_VFO_B and value != 64: # shift-jog a (64 reported on all-buttons-readout, ignore that)
+                delta = value if value < 64 else value - 128
+                if sign(delta) != self.vfo_b_dir: # compensate for 2 (or 126) output on direction change
+                    delta += self.vfo_b_dir
+                    self.vfo_b_dir = sign(delta)
+                self.set_sync_a(False)
+                self.set_sync_b(False)
                 self.set_tx_freq(self.tx_freq + delta * 10)
 
             elif control == MIDI_VOLUME:
@@ -289,15 +340,20 @@ class blk(gr.sync_block):
             if note == MIDI_SYNC_A: # Sync A
                 self.set_sync_a(not self.sync_a)
 
+            elif note == MIDI_SYNC_B: # Sync B
+                self.set_sync_b(not self.sync_b)
+
             elif note == MIDI_SHIFT_SYNC_A: # Shift-Sync A
-                if not self.sync_a:
-                    # set RX from TX
-                    self.set_rx_freq(self.tx_freq)
-                self.set_sync_a(not self.sync_a)
+                self.set_vfo_a_freq(self.tx_freq) # set RX from TX
+                self.set_sync_a(True)
+
+            elif note == MIDI_SHIFT_SYNC_B: # Shift-Sync A
+                self.set_vfo_b_freq(self.tx_freq) # set RX from TX
+                self.set_sync_b(True)
 
             elif note == MIDI_FT8_QRG: # KP 2 A
-                self.set_rx_freq(40000)
-                self.set_sync_a(True)
+                self.set_vfo_b_freq(40000)
+                self.set_sync_b(True)
                 self.set_record(False)
 
             elif note == MIDI_AUDIO_HEADPHONES: # KP 1 A
@@ -311,6 +367,9 @@ class blk(gr.sync_block):
 
             elif note == MIDI_RECORD: # REC
                 self.set_record(not self.record)
+
+            elif note == MIDI_SHIFT: # ignore
+                pass
 
             else:
                 print("Unknown MIDI note_on:", note, velocity)
