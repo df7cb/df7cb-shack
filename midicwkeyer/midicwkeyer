@@ -27,6 +27,7 @@ import mido
 import time
 import pyaudio
 import pulsectl
+import subprocess
 from itertools import chain
 import math
 import os
@@ -39,6 +40,8 @@ argparser.add_argument("-w", "--wpm", type=int, default=24, help="CW speed in wo
 argparser.add_argument("-p", "--pitch", type=int, default=850, help="CW pitch in Hz (default 850)")
 argparser.add_argument("-s", "--txserial", help="serial device to key RTS line on (default none)")
 argparser.add_argument("-t", "--txaudio", help="2nd audio output device (e.g. 'tx0, default none')")
+argparser.add_argument("-S", "--ssh", help="ssh to host to key rig (user@host)")
+argparser.add_argument("--ssh-serial", help="serial device on remote host for serialkeyer to toggle (e.g. /dev/ic7610b)", default="/dev/ic7610b")
 args = argparser.parse_args()
 
 # constants
@@ -168,7 +171,7 @@ def audio_callback0(in_data, frame_count, time_info, status_flags):
 def audio_callback1(in_data, frame_count, time_info, status_flags):
     return audio_callback(audiobuffer[1], in_data, frame_count, time_info, status_flags)
 
-def poll(midiport, controlport, paddles, blocking=False):
+def poll(midiport, controlport, paddles, ssh, blocking=False):
     dit, dah = paddles[1], paddles[2]
 
     if blocking:
@@ -200,11 +203,12 @@ def poll(midiport, controlport, paddles, blocking=False):
         args.wpm = wpm2
         print(f"<{args.wpm}>", end='', flush=True)
         generate_samples(args.wpm)
+        if ssh: ssh.stdin.write(f"<{args.wpm}>\n".encode())
 
     # return True if paddle was pressed or held during this polling period
     return dit, dah
 
-def loop(midiport, controlport, audiobuffer, paddles, txserial):
+def loop(midiport, controlport, audiobuffer, paddles, txserial, ssh):
     state = 'idle'
     sign = '' # character keyed
     sign_len = 0 # size of partial character printed so far
@@ -219,6 +223,7 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
 
             now = time.time()
             if txserial: txserial.rts = 1
+            if ssh: ssh.stdin.write(b'.\n')
             play_sample(audiobuffer, samples['dit'], samples['dit_len'])
             time.sleep(time.time() - now + samples['dot_duration'])
             if txserial: txserial.rts = 0
@@ -231,13 +236,14 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
 
             now = time.time()
             if txserial: txserial.rts = 1
+            if ssh: ssh.stdin.write(b'-\n')
             play_sample(audiobuffer, samples['dah'], samples['dah_len'])
             time.sleep(time.time() - now + 3 * samples['dot_duration'])
             if txserial: txserial.rts = 0
             time.sleep(samples['dot_duration'])
 
         # read paddle input
-        dit, dah = poll(midiport, controlport, paddles, False)
+        dit, dah = poll(midiport, controlport, paddles, ssh, False)
 
         # compute next state
         if state == 'idle':
@@ -259,7 +265,7 @@ def loop(midiport, controlport, audiobuffer, paddles, txserial):
 
                 # poll again for paddle input
                 ts = time.time()
-                dit, dah = poll(midiport, controlport, paddles, True)
+                dit, dah = poll(midiport, controlport, paddles, ssh, True)
                 delay = time.time() - ts
 
                 # if the delay was short enough, the last character was continued
@@ -352,10 +358,25 @@ def main():
         txserial.rts = 0
         txserial.open()
 
+    if args.ssh:
+        ssh = subprocess.Popen(
+            ["ssh", args.ssh, "serialkeyer", args.ssh_serial],
+            stdin=subprocess.PIPE,
+            bufsize=0,
+        )
+        ssh.stdin.write(f"<{args.wpm}>\n".encode())
+    else:
+        ssh = None
+
     try:
-        loop(midiport, controlport, audiobuffer, paddles, txserial)
+        loop(midiport, controlport, audiobuffer, paddles, txserial, ssh)
     except KeyboardInterrupt:
         pass
+    finally:
+        if ssh:
+            ssh.stdin.close()
+            ssh.terminate()
+            ssh.wait()
 
 if __name__ == '__main__':
     main()

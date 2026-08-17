@@ -121,7 +121,7 @@ Source  Event                  Ch  Data
 
 ## Python and PulseAudio software
 
-On the Linux host side, a [Python program](midicwkeyer.py) is listening for
+On the Linux host side, a [Python program](midicwkeyer) is listening for
 MIDI events and acts as a iambic CW keyer that converts the stream of note
 on/off into CW signals.
 
@@ -146,7 +146,7 @@ ExecStartPost=/usr/bin/pacmd load-module module-null-sink sink_name=tx0 sink_pro
 The CW text sent is printed on stdout:
 
 ```
-$ ./midicwkeyer.py
+$ ./midicwkeyer
 TX port is tx0 (3)
 Sidetone port is Plantronics Blackwire 3225 Series Analog Stereo (7)
  CQ CQ DF7CB

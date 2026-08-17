@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+
+# CW keyer driven over SSH stdin by midicwkeyer.
+# Reads lines:
+#   .     -> one dit  (key down 1 dot, up 1 dot)
+#   -     -> one dah  (key down 3 dot, up 1 dot)
+#   <N>   -> set speed to N wpm
+# Exits on EOF.
+
+import sys
+import time
+import serial
+
+if len(sys.argv) != 2:
+    sys.exit("usage: serialkeyer <serial-device>")
+
+ser = serial.Serial()
+ser.port = sys.argv[1]
+ser.rts = 0
+ser.open()
+
+wpm = 24
+
+for line in sys.stdin:
+    line = line.strip()
+    if not line:
+        continue
+    if line.startswith('<') and line.endswith('>'):
+        try:
+            wpm = int(line[1:-1])
+        except ValueError:
+            continue
+        continue
+    dot = 1.2 / wpm
+    if line == '.':
+        ser.rts = 1
+        time.sleep(dot)
+        ser.rts = 0
+        time.sleep(dot)
+    elif line == '-':
+        ser.rts = 1
+        time.sleep(3 * dot)
+        ser.rts = 0
+        time.sleep(dot)
