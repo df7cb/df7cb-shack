@@ -1,0 +1,9 @@
+[Unit]
+Description=TCP radio control daemon (IC-7300)
+StopWhenUnneeded=true
+
+[Service]
+ExecStart=/usr/bin/rigctld -m 3073 -r /dev/ic7300 --port=4573
+
+[Install]
+WantedBy=default.target

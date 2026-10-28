@@ -1,0 +1,11 @@
+[Unit]
+Description=WSJTX UDP callsign colorizer
+
+[Service]
+ExecStart=/usr/bin/python3 samples/color_wsjtx_packets.py
+WorkingDirectory=/home/myon/shack/wsjtx/py-wsjtx
+Restart=Always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

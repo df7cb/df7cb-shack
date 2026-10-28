@@ -3,7 +3,7 @@ Description=TCP radio control daemon (IC-9700)
 StopWhenUnneeded=true
 
 [Service]
-ExecStart=/usr/bin/rigctld -m 3081 -r /dev/ic9700 --port 4597 --vfo
+ExecStart=/usr/bin/rigctld -m 3081 -r /dev/ic9700 --port=4597 --serial-speed=19200
 
 [Install]
 WantedBy=default.target

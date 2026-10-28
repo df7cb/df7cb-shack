@@ -5,15 +5,20 @@
 # 1a86:7523 QinHeng Electronics CH340 serial converter (K3NG rotator, az-delivery arduino clone)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Ser!", SYMLINK+="rotor-old"
 
-# 1a86:7523 QinHeng Electronics CH340 serial converter (K3NG rotator, Arduino Nano clone)
+# 1a86:7523 QinHeng Electronics CH340 serial converter (K3NG rotator, Arduino Nano clone and Mega)
 # 1a86:7523 QinHeng Electronics CH340 serial converter ("USB Serial", AntRunner)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="rotor", ENV{SYSTEMD_USER_WANTS}+="rotctld.service"
-
+#SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="rotor", ENV{SYSTEMD_USER_WANTS}+="rotctld.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="rotor"
+# also: SO2RMiniPlus
+#SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB Serial", SYMLINK+="so2r"
 
 # 1a86:7523 QinHeng Electronics CH340 serial converter (ICOM CAT interface)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ic706", ENV{SYSTEMD_USER_WANTS}+="ic706.service"
+#SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ic706", ENV{SYSTEMD_USER_WANTS}+="ic706.service"
 # 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ptt706", ENV{SYSTEMD_USER_WANTS}+="ic706.service"
+#SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ptt706", ENV{SYSTEMD_USER_WANTS}+="ic706.service"
+
+# USB Relay
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", ATTRS{product}=="USB2.0-Serial", SYMLINK+="relay"
 
 # 0c26:0036 Prolific Technology Inc. IC-705
 # https://www.florian-wolters.de/posts/ic705-serial-device-symlinks/
@@ -21,14 +26,16 @@ KERNEL=="ttyACM[0-9]*", SUBSYSTEM=="tty", ATTRS{product}=="IC-705", ENV{PROD}="I
 ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="00", SYMLINK+="ic705", ENV{SYSTEMD_USER_WANTS}+="ic705.service"
 ENV{PROD}=="IC-705", SUBSYSTEMS=="usb", ATTRS{bInterfaceNumber}=="02", SYMLINK+="ic705b"
 
-# Bus 001 Device 095: ID 10c4:ea60 Silicon Labs CP210x UART Bridge (IC7300)
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{product}=="USB2.0-Serial", SYMLINK+="ic7300", ENV{SYSTEMD_USER_WANTS}+="ic7300.service"
 
 # 10c4:ea60 Silicon Labs CP210x UART Bridge (IC-7610, IC-9700)
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * A", SYMLINK+="ic7610", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7610 * B", SYMLINK+="ic7610b", ENV{SYSTEMD_USER_WANTS}+="ic7610.service"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-9700 * A", SYMLINK+="ic9700", ENV{SYSTEMD_USER_WANTS}+="ic9700.service"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-9700 * B", SYMLINK+="ic9700b", ENV{SYSTEMD_USER_WANTS}+="ic9700.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-9700 * A", SYMLINK+="ic9700"
+#, ENV{SYSTEMD_USER_WANTS}+="ic9700.service"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-9700 * B", SYMLINK+="ic9700b"
+#, ENV{SYSTEMD_USER_WANTS}+="ic9700.service"
+# Bus 001 Device 095: ID 10c4:ea60 Silicon Labs CP210x UART Bridge (IC7300)
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="IC-7300 *", SYMLINK+="ic7300", ENV{SYSTEMD_USER_WANTS}+="ic7300.service"
 
 # 0c26:001e Prolific Technology Inc. Icom RC-28 REMOTE ENCODER
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0c26", ATTRS{idProduct}=="001e", TAG+="uaccess", MODE="0660", GROUP="plugdev"
